@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FORMA is an AI-native systems programming language with memory safety, concise syntax, and tooling for constrained code generation.">
+  <title>FORMA Language | forma-lang.dev</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-glow page-glow-a"></div>
+  <div class="page-glow page-glow-b"></div>
+
+  <header class="site-header">
+    <a class="logo" href="#hero" aria-label="FORMA home">
+      <span class="logo-mark">F</span>
+      <span class="logo-text">FORMA</span>
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="siteNav">Menu</button>
+    <nav class="site-nav" id="siteNav">
+      <a href="#playground">Playground</a>
+      <a href="#examples">Examples</a>
+      <a href="#commands">CLI</a>
+      <a href="#roadmap">Roadmap</a>
+    </nav>
+    <nav class="site-view-switcher" aria-label="Switch site view">
+      <a href="index.html" aria-current="page">Interactive</a>
+      <a href="technical.html">Architecture</a>
+      <a href="reference.html">Reference</a>
+    </nav>
+    <a class="button ghost header-github github-button" href="https://github.com/sfw/forma" target="_blank" rel="noreferrer">
+      <svg class="github-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52 0-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.57 7.57 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path>
+      </svg>
+      GitHub
+    </a>
+  </header>
+
+  <main>
+    <section class="section hero reveal" id="hero">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">AI-native systems programming</p>
+          <h1>Code that writes itself correctly.</h1>
+          <p class="lede">
+            FORMA is built for AI-assisted development: memory-safe by design, grammar-constrained for reliable generation,
+            and concise enough to reduce token costs.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#playground">Try Live Playground</a>
+            <a class="button" href="https://github.com/sfw/forma" target="_blank" rel="noreferrer">Read Compiler Source</a>
+            <a class="button" href="technical.html">Open Architecture Brief</a>
+            <a class="button" href="reference.html">Read Language Reference</a>
+          </div>
+          <div class="stats-grid">
+            <article class="stat-card">
+              <p class="stat-value">94.8%</p>
+              <p class="stat-label">Rust AI failures linked to lifetime errors</p>
+            </article>
+            <article class="stat-card">
+              <p class="stat-value">38%</p>
+              <p class="stat-label">Fewer tokens than equivalent Rust code</p>
+            </article>
+            <article class="stat-card">
+              <p class="stat-value">320+</p>
+              <p class="stat-label">Built-in standard library functions</p>
+            </article>
+            <article class="stat-card">
+              <p class="stat-value">16</p>
+              <p class="stat-label">Showcase programs in current repository</p>
+            </article>
+          </div>
+        </div>
+
+        <aside class="hero-terminal">
+          <div class="terminal-head">
+            <span></span>
+            <span></span>
+            <span></span>
+            <p>FORMA CLI</p>
+          </div>
+          <pre class="terminal-content"><code><span class="prompt">$</span> <span id="heroCommand">forma grammar --format json &gt; forma.json</span>
+<span class="terminal-line" id="heroOutputLine1">Grammar exported successfully.</span>
+<span class="terminal-line" id="heroOutputLine2">Output ready for constrained decoding pipelines.</span>
+<span class="terminal-line" id="heroOutputLine3">Wrote 214 rules to ./forma.json</span></code></pre>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section reveal" id="playground">
+      <div class="section-header">
+        <p class="eyebrow">Interactive</p>
+        <h2>Live FORMA Playground</h2>
+        <p>Load working examples from the local repository, inspect syntax metrics, and generate diagnostic JSON hints.</p>
+      </div>
+
+      <div class="playground">
+        <article class="editor-panel">
+          <div class="editor-toolbar">
+            <label for="exampleSelect">Example</label>
+            <select id="exampleSelect" aria-label="Select FORMA example"></select>
+            <button class="button tiny" id="loadExampleBtn">Load</button>
+            <button class="button tiny" id="copyCodeBtn">Copy Code</button>
+          </div>
+          <textarea id="codeEditor" spellcheck="false" aria-label="FORMA code editor"></textarea>
+          <div class="editor-actions">
+            <button class="button primary" id="analyzeBtn">Analyze Code</button>
+            <button class="button" id="simulateBtn">Simulate Run</button>
+          </div>
+        </article>
+
+        <article class="insights-panel">
+          <div class="metric-grid">
+            <div class="metric-card">
+              <p class="metric-label">Estimated Tokens</p>
+              <p class="metric-value" id="metricTokens">0</p>
+            </div>
+            <div class="metric-card">
+              <p class="metric-label">Shorthand Hits</p>
+              <p class="metric-value" id="metricShorthand">0</p>
+            </div>
+            <div class="metric-card">
+              <p class="metric-label">Syntax Warnings</p>
+              <p class="metric-value" id="metricWarnings">0</p>
+            </div>
+            <div class="metric-card">
+              <p class="metric-label">Rust-Equivalent Tokens</p>
+              <p class="metric-value" id="metricRust">0</p>
+            </div>
+          </div>
+
+          <div class="panel-block">
+            <h3>Heuristic Diagnostics</h3>
+            <ul id="diagnosticList" class="diagnostic-list"></ul>
+          </div>
+
+          <div class="panel-block">
+            <h3>Structured JSON Diagnostic</h3>
+            <pre id="jsonDiagnostic" class="json-output"></pre>
+          </div>
+
+          <div class="panel-block">
+            <h3>Expected Output</h3>
+            <pre id="simulatedOutput" class="json-output">Load or write a program, then click "Simulate Run".</pre>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section reveal" id="examples">
+      <div class="section-header">
+        <p class="eyebrow">Showcase</p>
+        <h2>Example Explorer</h2>
+        <p>Search through runnable examples and send any one directly into the playground editor.</p>
+      </div>
+
+      <div class="example-tools">
+        <input id="exampleSearch" type="search" placeholder="Search by name, concept, or keyword..." aria-label="Search examples">
+      </div>
+      <div class="example-grid" id="exampleGrid"></div>
+    </section>
+
+    <section class="section reveal" id="commands">
+      <div class="section-header">
+        <p class="eyebrow">Developer Tooling</p>
+        <h2>CLI Command Builder</h2>
+        <p>Compose practical FORMA commands for run, check, grammar export, type queries, and formatting.</p>
+      </div>
+
+      <div class="command-builder">
+        <div class="builder-grid">
+          <label>
+            Goal
+            <select id="goalSelect"></select>
+          </label>
+          <label>
+            Error Format
+            <select id="errorFormatSelect">
+              <option value="human">human</option>
+              <option value="json">json</option>
+            </select>
+          </label>
+          <label>
+            File
+            <input id="fileInput" type="text" value="main.forma">
+          </label>
+        </div>
+        <pre class="command-preview" id="commandPreview"></pre>
+        <div class="builder-actions">
+          <button class="button tiny" id="copyCommandBtn">Copy Command</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal" id="roadmap">
+      <div class="section-header">
+        <p class="eyebrow">Project Status</p>
+        <h2>Language Progress</h2>
+        <p>Track shipped compiler capabilities and active development targets.</p>
+      </div>
+
+      <div class="roadmap-filter" id="roadmapFilter">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="shipped">Shipped</button>
+        <button class="filter-btn" data-filter="building">Building</button>
+      </div>
+      <div class="roadmap-list" id="roadmapList"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>FORMA</p>
+    <div class="footer-controls">
+      <a class="button tiny" href="#hero">Back to top</a>
+      <nav class="site-view-switcher" aria-label="Switch site view">
+        <a href="index.html" aria-current="page">Interactive</a>
+        <a href="technical.html">Architecture</a>
+        <a href="reference.html">Reference</a>
+      </nav>
+      <a class="button ghost github-button footer-github" href="https://github.com/sfw/forma" target="_blank" rel="noreferrer">
+        <svg class="github-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52 0-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.57 7.57 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path>
+        </svg>
+        GitHub
+      </a>
+    </div>
+  </footer>
+
+  <script src="showcase-examples.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

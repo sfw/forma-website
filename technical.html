@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FORMA architectural brief: design decisions, feature depth, delivery timeline, and engineering rationale.">
+  <title>FORMA Architecture Brief | forma-lang.dev</title>
+  <link rel="stylesheet" href="technical.css">
+</head>
+<body class="tech-page">
+  <div class="tech-orb tech-orb-a"></div>
+  <div class="tech-orb tech-orb-b"></div>
+
+  <header class="tech-header">
+    <a class="tech-logo" href="#top" aria-label="FORMA architecture brief">
+      <span class="tech-logo-mark">F</span>
+      <span class="tech-logo-text">FORMA</span>
+    </a>
+    <button class="tech-menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="siteNav">Menu</button>
+    <nav class="tech-nav" id="siteNav">
+      <a href="#why">Why</a>
+      <a href="#inspirations">Inspirations</a>
+      <a href="#decisions">Decisions</a>
+      <a href="#features">Features</a>
+      <a href="#timeline">Timeline</a>
+      <a href="#sources">Research</a>
+    </nav>
+    <nav class="tech-view-switcher" aria-label="Switch site view">
+      <a href="index.html">Interactive</a>
+      <a href="technical.html" aria-current="page">Architecture</a>
+      <a href="reference.html">Reference</a>
+    </nav>
+    <a class="tech-button ghost header-github github-button" href="https://github.com/sfw/forma" target="_blank" rel="noreferrer">
+      <svg class="github-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52 0-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.57 7.57 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path>
+      </svg>
+      GitHub
+    </a>
+  </header>
+
+  <main>
+    <section class="tech-hero reveal" id="top">
+      <p class="eyebrow">Architectural Brief</p>
+      <h1>FORMA is engineered for AI reliability without compromising systems-language power.</h1>
+      <p class="hero-lede">
+        This is the technical sales sheet for FORMA: what was built, why specific architectural choices were made, and how those choices
+        produced a production-ready language/toolchain with strong AI-generation ergonomics.
+      </p>
+      <div class="hero-actions">
+        <a class="tech-button primary" href="#decisions">See Core Decisions</a>
+        <a class="tech-button" href="#timeline">View Complete Timeline</a>
+      </div>
+      <div class="hero-metrics">
+        <article class="metric-card">
+          <p class="metric-value">320+</p>
+          <p class="metric-label">Built-in standard library functions</p>
+        </article>
+        <article class="metric-card">
+          <p class="metric-value">JSON + EBNF</p>
+          <p class="metric-label">Grammar export for constrained generation</p>
+        </article>
+        <article class="metric-card">
+          <p class="metric-value">JSON errors</p>
+          <p class="metric-label">Structured diagnostics for self-correction loops</p>
+        </article>
+        <article class="metric-card">
+          <p class="metric-value">v1.3</p>
+          <p class="metric-label">Stabilized production release line</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="tech-section reveal" id="why">
+      <div class="section-head">
+        <p class="eyebrow">Design Goals</p>
+        <h2>What FORMA optimized for from day one</h2>
+      </div>
+      <div class="goal-grid">
+        <article class="goal-card">
+          <h3>1. AI-first correctness</h3>
+          <p>Reduce generation failure modes by making valid code easier to produce and invalid states harder to express.</p>
+          <p class="goal-outcome">Outcome: grammar export + structured diagnostics + simpler ownership model.</p>
+        </article>
+        <article class="goal-card">
+          <h3>2. Memory safety without lifetime syntax</h3>
+          <p>Keep ownership guarantees while removing lifetime annotation burden that harms AI reliability.</p>
+          <p class="goal-outcome">Outcome: second-class references + compile-time borrow/ownership rules.</p>
+        </article>
+        <article class="goal-card">
+          <h3>3. Minimal friction developer tooling</h3>
+          <p>Make every stage of authoring, checking, formatting, and IDE integration straightforward and scriptable.</p>
+          <p class="goal-outcome">Outcome: `check`, `fmt`, `repl`, `lsp`, `typeof`, completion, JSON error mode.</p>
+        </article>
+        <article class="goal-card">
+          <h3>4. Systems feature completeness</h3>
+          <p>Cover async networking, HTTP, sockets, SQLite, compression, and FFI in one language/runtime story.</p>
+          <p class="goal-outcome">Outcome: batteries-included capabilities with interpreter + LLVM native build path.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="tech-section reveal" id="inspirations">
+      <div class="section-head">
+        <p class="eyebrow">Language Lineage</p>
+        <h2>Languages that informed FORMA</h2>
+        <p class="section-sub">FORMA combines ideas from established language ecosystems, tuned for AI-first authoring workflows.</p>
+      </div>
+      <div class="inspiration-grid">
+        <article class="inspiration-card">
+          <h3><a href="https://www.rust-lang.org/" target="_blank" rel="noreferrer">Rust</a></h3>
+          <p>Ownership/borrowing discipline, trait-oriented abstractions, and Result/Option-first error semantics.</p>
+        </article>
+        <article class="inspiration-card">
+          <h3><a href="https://go.dev/" target="_blank" rel="noreferrer">Go</a></h3>
+          <p>Toolchain pragmatism, batteries-included standard library shape, and practical concurrency ergonomics.</p>
+        </article>
+        <article class="inspiration-card">
+          <h3><a href="https://ziglang.org/" target="_blank" rel="noreferrer">Zig</a></h3>
+          <p>Explicit systems programming posture and straightforward native interop mindset.</p>
+        </article>
+        <article class="inspiration-card">
+          <h3><a href="https://www.swift.org/" target="_blank" rel="noreferrer">Swift</a></h3>
+          <p>Protocol-centric design influences and value-oriented API ergonomics.</p>
+        </article>
+        <article class="inspiration-card">
+          <h3><a href="https://www.haskell.org/" target="_blank" rel="noreferrer">Haskell</a> + <a href="https://ocaml.org/" target="_blank" rel="noreferrer">OCaml</a></h3>
+          <p>Algebraic data types, pattern matching, and expression-first semantics.</p>
+        </article>
+        <article class="inspiration-card">
+          <h3><a href="https://www.python.org/" target="_blank" rel="noreferrer">Python</a></h3>
+          <p>Indentation-significant readability and low-syntax-noise program flow.</p>
+        </article>
+        <article class="inspiration-card">
+          <h3><a href="https://www.typescriptlang.org/" target="_blank" rel="noreferrer">TypeScript</a></h3>
+          <p>Developer tooling expectations: fast feedback, editor integration, and machine-friendly diagnostics.</p>
+        </article>
+        <article class="inspiration-card">
+          <h3><a href="https://llvm.org/" target="_blank" rel="noreferrer">LLVM Ecosystem</a></h3>
+          <p>Native code generation strategy and long-term optimization path for systems workloads.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="tech-section reveal" id="decisions">
+      <div class="section-head">
+        <p class="eyebrow">Architectural Decisions</p>
+        <h2>The big choices and why they were the right calls</h2>
+      </div>
+
+      <article class="decision-panel">
+        <h3>Decision: Second-class references instead of explicit lifetimes</h3>
+        <p><strong>Why:</strong> Lifetime annotation complexity is a known high-error surface in AI-generated systems code.</p>
+        <p><strong>Implementation:</strong> References can be passed and used locally, but cannot be stored arbitrarily in data structures.</p>
+        <p><strong>Payoff:</strong> Preserved memory-safety reasoning with a dramatically simpler generation model for both AI and humans.</p>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Decision: MIR as central semantic layer</h3>
+        <p><strong>Why:</strong> One canonical intermediate representation keeps front-end semantics stable across execution backends.</p>
+        <p><strong>Implementation:</strong> Parse + type-check + borrow-check lowers to MIR, then feeds interpreter and LLVM paths.</p>
+        <p><strong>Payoff:</strong> Faster feature iteration, better debugging, and lower risk of backend drift.</p>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Decision: Interpreter-first with optional LLVM native compilation</h3>
+        <p><strong>Why:</strong> Language evolution speed required fast feedback while preserving a path to native performance.</p>
+        <p><strong>Implementation:</strong> `forma run` defaults to the interpreter; `forma build` targets LLVM/native builds.</p>
+        <p><strong>Payoff:</strong> High development velocity early, with production-oriented compilation when needed.</p>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Decision: AI tooling is first-class, not an afterthought</h3>
+        <p><strong>Why:</strong> AI code generation quality depends on machine-readable syntax and diagnostics, not just language elegance.</p>
+        <p><strong>Implementation:</strong> EBNF/JSON grammar export, JSON error mode, type queries, completion surfaces.</p>
+        <p><strong>Payoff:</strong> FORMA can be integrated directly into constrained decoding and auto-repair pipelines.</p>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Decision: Ship a broad standard library early</h3>
+        <p><strong>Why:</strong> AI systems generate better code when APIs are canonical, local, and predictable.</p>
+        <p><strong>Implementation:</strong> Consolidated stdlib coverage across core language, networking, data, storage, and ops workflows.</p>
+        <p><strong>Payoff:</strong> Real application prototypes can be built immediately, not after ecosystem bootstrap.</p>
+      </article>
+    </section>
+
+    <section class="tech-section reveal" id="features">
+      <div class="section-head">
+        <p class="eyebrow">Feature Depth</p>
+        <h2>Major features, in technical detail</h2>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <h3>Structured Error Messages (Shipped)</h3>
+          <p>Compiler checks emit machine-readable JSON diagnostics with error metadata and location fields. This supports deterministic self-correction loops in AI agents.</p>
+          <pre><code>forma check --error-format json app.forma</code></pre>
+        </article>
+
+        <article class="feature-card">
+          <h3>Grammar Export (Shipped)</h3>
+          <p>FORMA exports grammar in both EBNF and JSON formats for constrained generation and syntax-valid decoding in external LLM tooling.</p>
+          <pre><code>forma grammar --format ebnf
+forma grammar --format json</code></pre>
+        </article>
+
+        <article class="feature-card">
+          <h3>Formatter + Style Canonicalization (Shipped)</h3>
+          <p>`forma fmt` provides deterministic source formatting to keep generated code consistent, reviewable, and easier to diff in mixed human/AI workflows.</p>
+          <pre><code>forma fmt src/main.forma</code></pre>
+        </article>
+
+        <article class="feature-card">
+          <h3>Tooling Surface: LSP + REPL + Type Queries (Shipped)</h3>
+          <p>FORMA exposes interactive authoring and static introspection through LSP, REPL, and position-based type lookup.</p>
+          <pre><code>forma lsp
+forma repl
+forma typeof app.forma --line 12 --column 8</code></pre>
+        </article>
+
+        <article class="feature-card">
+          <h3>Systems Runtime Features (Shipped)</h3>
+          <p>Async/await, task spawning, HTTP client/server, TCP/UDP, TLS support, compression, and SQLite give FORMA practical systems coverage beyond toy language scope.</p>
+          <p class="feature-note">Design intent: usable for real workloads, not just language demos.</p>
+        </article>
+
+        <article class="feature-card">
+          <h3>Safety Hardening Path (Completed Program)</h3>
+          <p>Post-core sprints completed deeper memory and reference semantics work, including explicit reference parameter modeling and FFI safety-layer planning.</p>
+          <p class="feature-note">Design intent: maintain safety guarantees while scaling interop and performance paths.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="tech-section reveal" id="timeline">
+      <div class="section-head">
+        <p class="eyebrow">Execution Timeline</p>
+        <h2>Delivery timeline: complete end-to-end</h2>
+        <p class="section-sub">All major phases and sprint groups are marked complete.</p>
+      </div>
+
+      <div class="timeline-list">
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Phase 1</p>
+            <p class="status-chip complete">Complete</p>
+          </div>
+          <h3>Language Core Foundation</h3>
+          <p>Syntax, parser strategy, type system, memory model concepts, modules, grammar specification, and AI-comparison framing.</p>
+        </article>
+
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Phase 2</p>
+            <p class="status-chip complete">Complete</p>
+          </div>
+          <h3>Production Feature Wave (Sprints 1-8)</h3>
+          <p>Async/concurrency, HTTP, sockets, FFI, LSP server, polish passes, and large-scale test expansion.</p>
+        </article>
+
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Phase 3</p>
+            <p class="status-chip complete">Complete</p>
+          </div>
+          <h3>Stability and Correctness Wave (Sprints 9-23)</h3>
+          <p>Pattern matching fixes, import behavior hardening, formatter and REPL improvements, panic-path reduction, and verification runs.</p>
+        </article>
+
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Phase 4</p>
+            <p class="status-chip complete">Complete</p>
+          </div>
+          <h3>Backend and Toolchain Hardening (Sprints 24-31)</h3>
+          <p>Runtime foundation, MIR/lexer robustness, CLI ergonomics, stdlib edge-case cleanup, and LLVM pipeline maturation.</p>
+        </article>
+
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Phase 5</p>
+            <p class="status-chip complete">Complete</p>
+          </div>
+          <h3>Memory Safety Expansion Program (Sprints 32-35)</h3>
+          <p>FFI safety-layer implementation path, capability-oriented security model, and explicit reference parameter direction.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="tech-section reveal" id="sources">
+      <div class="section-head">
+        <p class="eyebrow">Research Brief</p>
+        <h2>Technical research behind FORMA's design</h2>
+        <p class="section-sub">
+          FORMA was designed through an applied research program: failure-mode analysis for AI-generated systems code,
+          syntax/token experiments, compiler architecture studies, runtime/FFI investigations, and iterative sprint validation.
+        </p>
+      </div>
+      <div class="evidence-grid">
+        <article class="evidence-card">
+          <h3>1) AI failure-mode research</h3>
+          <p class="evidence-lede">The first track focused on why LLMs fail in systems languages.</p>
+          <ul class="evidence-list">
+            <li>Borrow/lifetime reasoning was identified as the dominant compile-failure class in AI-generated systems code.</li>
+            <li>Type mismatch was the second major failure class, especially in generic and API-heavy code.</li>
+            <li>Design response: remove explicit lifetime syntax while preserving ownership and borrow constraints at compile time.</li>
+            <li>Resulting model: second-class references, explicit move/borrow semantics, and strict anti-escape constraints.</li>
+          </ul>
+          <p class="evidence-proof"><strong>Engineering outcome:</strong> memory safety reasoning is preserved while reducing the lifetime-surface AI must infer.</p>
+        </article>
+
+        <article class="evidence-card">
+          <h3>2) Token and syntax efficiency experiments</h3>
+          <p class="evidence-lede">A second track optimized language shape for inference-time cost and reliability.</p>
+          <ul class="evidence-list">
+            <li>Syntax compression experiments targeted lower prompt/completion token budgets for equivalent programs.</li>
+            <li>Shorthand keywords, type shortcuts, and punctuation minimization were benchmarked against baseline syntax.</li>
+            <li>Observed reduction target landed around 35-40% in representative code samples.</li>
+            <li>Research trade-off: aggressive compression improves throughput, but can increase lexical ambiguity if unmanaged.</li>
+          </ul>
+          <p class="evidence-proof"><strong>Engineering outcome:</strong> token efficiency became a first-class language constraint, not a post-hoc optimization.</p>
+        </article>
+
+        <article class="evidence-card">
+          <h3>3) Constrained decoding and recovery loop research</h3>
+          <p class="evidence-lede">This track treated tooling surfaces as part of language design.</p>
+          <ul class="evidence-list">
+            <li>Grammar export was modeled as a mechanism to prevent invalid syntax generation, not just document syntax.</li>
+            <li>Structured diagnostics were modeled for machine repair loops (error type, location, expected/found, suggestion).</li>
+            <li>Type-at-position querying was included to support constrained generation in active editing contexts.</li>
+            <li>Validation flow emphasized reproducible CLI checks and machine-readable output modes.</li>
+          </ul>
+          <p class="evidence-proof"><strong>Engineering outcome:</strong> language + tooling were co-designed for closed-loop AI generation and correction.</p>
+        </article>
+
+        <article class="evidence-card">
+          <h3>4) Runtime, async, and FFI architecture research</h3>
+          <p class="evidence-lede">The systems track studied implementation trade-offs across mature runtimes.</p>
+          <ul class="evidence-list">
+            <li>Runtime architecture compared interpreter-first velocity with native backend requirements and ABI constraints.</li>
+            <li>Async research evaluated single-thread simplicity vs work-stealing concurrency and settled on staged adoption.</li>
+            <li>FFI research compared C interop models and identified unavoidable unsafe boundaries around pointers and lifetimes.</li>
+            <li>Compiler architecture stabilized around a central MIR layer feeding both interpreter and LLVM paths.</li>
+          </ul>
+          <p class="evidence-proof"><strong>Engineering outcome:</strong> phased runtime growth without blocking language evolution or native-code trajectory.</p>
+        </article>
+      </div>
+
+      <div class="plan-delta">
+        <h3>Planning assumptions that changed during sprint execution</h3>
+        <p class="evidence-lede">
+          The table below summarizes where implementation data forced design updates.
+        </p>
+        <div class="delta-table-wrap">
+          <table class="delta-table">
+            <thead>
+              <tr>
+                <th>Initial assumption</th>
+                <th>Execution result</th>
+                <th>Design implication</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Single-letter keyword compression would remain unambiguous in practice.</td>
+                <td>Frequent collisions with natural variable names required contextual keyword parsing.</td>
+                <td>Compression must be constrained by parser ergonomics, not only token count.</td>
+              </tr>
+              <tr>
+                <td>Module/import behavior could tolerate soft failures while ecosystem stabilized.</td>
+                <td>Silent failures caused operational risk and were replaced with fail-fast import resolution.</td>
+                <td>Developer-facing reliability required explicit error surfaces over permissive fallback behavior.</td>
+              </tr>
+              <tr>
+                <td>Grammar export and machine-readable diagnostics could remain secondary.</td>
+                <td>They moved into core CLI surfaces to support constrained decoding and AI self-repair loops.</td>
+                <td>Tooling interfaces became part of the language contract, not auxiliary utilities.</td>
+              </tr>
+              <tr>
+                <td>Async runtime would likely stay minimal in early milestones.</td>
+                <td>Execution moved to true parallel spawn behavior with runtime-backed scheduling.</td>
+                <td>Concurrency became production-facing earlier than initially staged.</td>
+              </tr>
+              <tr>
+                <td>Broad FFI capability could ship quickly with minimal friction.</td>
+                <td>Pointer and lifetime boundaries required explicit caution and staged hardening.</td>
+                <td>Safety envelope for interop must be explicit, documented, and incrementally expanded.</td>
+              </tr>
+              <tr>
+                <td>Original goal tracking marked key AI-facing capabilities as partial/missing.</td>
+                <td>Subsequent sprint and verification cycles closed several of those gaps in the release line.</td>
+                <td>Roadmaps needed periodic re-baselining to prevent stale status narratives.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="evidence-note">
+        <p>
+          Net result: the language design was not static. Research hypotheses were repeatedly pressure-tested in implementation,
+          and sprint execution fed back into syntax, tooling, runtime, and safety decisions.
+        </p>
+      </div>
+    </section>
+
+    <section class="tech-section final-callout reveal">
+      <h2>Net result</h2>
+      <p>
+        FORMA combines the delivery pace of an interpreter-first language with the rigor of a systems compiler. The architecture is intentionally
+        biased toward AI-assisted development: constrained generation, structured feedback, predictable semantics, and practical runtime breadth.
+      </p>
+    </section>
+  </main>
+
+  <footer class="tech-footer">
+    <p>FORMA</p>
+    <div class="footer-controls">
+      <a class="tech-button" href="#top">Back to top</a>
+      <nav class="tech-view-switcher" aria-label="Switch site view">
+        <a href="index.html">Interactive</a>
+        <a href="technical.html" aria-current="page">Architecture</a>
+        <a href="reference.html">Reference</a>
+      </nav>
+      <a class="tech-button ghost github-button footer-github" href="https://github.com/sfw/forma" target="_blank" rel="noreferrer">
+        <svg class="github-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52 0-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.57 7.57 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path>
+        </svg>
+        GitHub
+      </a>
+    </div>
+  </footer>
+
+  <script src="technical.js"></script>
+</body>
+</html>
