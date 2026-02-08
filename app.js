@@ -300,7 +300,7 @@ function initHeroCommands() {
   setInterval(() => {
     idx = (idx + 1) % scenarios.length;
     renderScenario(scenarios[idx]);
-  }, 4800);
+  }, 7000);
 }
 
 function populateExamples() {
