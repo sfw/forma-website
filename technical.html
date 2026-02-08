@@ -234,7 +234,7 @@ forma typeof app.forma --line 12 --column 8</code></pre>
       <div class="section-head">
         <p class="eyebrow">Execution Timeline</p>
         <h2>Delivery timeline: complete end-to-end</h2>
-        <p class="section-sub">All major phases and sprint groups are marked complete.</p>
+        <p class="section-sub">All major phases and sprint groups are marked complete, including the Sprint 36-45 hardening and LSP wave.</p>
       </div>
 
       <div class="timeline-list">
@@ -281,6 +281,26 @@ forma typeof app.forma --line 12 --column 8</code></pre>
           </div>
           <h3>Memory Safety Expansion Program (Sprints 32-35)</h3>
           <p>FFI safety-layer implementation path, capability-oriented security model, and explicit reference parameter direction.</p>
+        </article>
+
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Phase 6</p>
+            <p class="status-chip complete">Complete</p>
+          </div>
+          <h3>Launch Hardening and Risk Closure (Sprints 36-41)</h3>
+          <p>Closed launch blockers with capability enforcement, HTTP/runtime panic hardening, transitive import fixes, LLVM readiness cleanup, and CI launch-gate coverage expansion.</p>
+          <p>Sprints 39-41 added broad negative-path testing, resolved remaining `forma-tests` failures, hardened size/allocation guardrails, fixed contract-flag semantics, and improved imported-module diagnostic accuracy.</p>
+        </article>
+
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Phase 7</p>
+            <p class="status-chip complete">Complete</p>
+          </div>
+          <h3>Confidence Closure and LSP Completion Wave (Sprints 42-45)</h3>
+          <p>Sprint 42 tightened CI and verification with `fmt` error-format forwarding, skip-list debt removal, coverage-audit tooling, and a large CLI/runtime test expansion.</p>
+          <p>Sprints 43-45 aligned CLI JSON error contracts (`run/check/build`), completed core LSP feature expansion (formatting, symbols, signature help, references, hover quality), and enforced coverage/CLI hardening for release confidence.</p>
         </article>
       </div>
     </section>
