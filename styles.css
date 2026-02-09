@@ -205,6 +205,14 @@ body {
   color: var(--ink-soft);
 }
 
+.hero-origin {
+  margin: 0.9rem 0 0;
+  max-width: 70ch;
+  color: #2b4a6f;
+  font-size: 0.96rem;
+  line-height: 1.52;
+}
+
 .hero-actions {
   margin-top: 1.2rem;
   display: flex;
