@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="FORMA language reference: syntax, types, control flow, data model, async, standard library, tooling, and AI-first workflows.">
+  <meta name="description" content="FORMA language reference: comprehensive guide with examples for syntax, types, contracts, verification, standard library, and AI-first tooling.">
   <title>FORMA Language Reference | forma-lang.dev</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="reference.css">
@@ -32,660 +32,1638 @@
 
   <main class="reference-main">
     <section class="section reference-hero reveal" id="overview">
-      <p class="eyebrow">Language Manual</p>
-      <h1>FORMA Reference</h1>
+      <p class="eyebrow">Language Reference</p>
+      <h1>FORMA Complete Guide</h1>
       <p class="reference-lede">
-        This page is the complete web reference for FORMA syntax, semantics, runtime-facing features, and AI-first tooling surfaces.
-        It combines a detailed human-readable guide with a compact pattern-oriented quick reference.
+        Everything you need to evaluate and learn FORMA: installation, syntax, type system, contracts,
+        verification workflow, standard library, and tooling. Each section includes working examples.
       </p>
       <div class="reference-chips">
-        <span>Indentation-based syntax</span>
-        <span>Second-class references</span>
-        <span>Result/Option-first errors</span>
-        <span>Async + spawn + await</span>
         <span>298+ builtins</span>
-        <span>Grammar + JSON diagnostics</span>
-      </div>
-      <div class="reference-actions">
-        <a class="button primary" href="#syntax">Start With Syntax</a>
-        <a class="button" href="#tooling">Jump To CLI</a>
+        <span>Contract verification</span>
+        <span>Memory safe</span>
+        <span>AI-optimized tooling</span>
       </div>
     </section>
 
     <section class="section reference-layout">
       <aside class="reference-toc">
-        <h2>On This Page</h2>
+        <h2>Contents</h2>
         <nav aria-label="Reference sections">
+          <a href="#getting-started">Getting Started</a>
+          <a href="#llm-onboarding">LLM Onboarding</a>
           <a href="#syntax">Syntax Basics</a>
-          <a href="#showcase">Showcase Examples</a>
           <a href="#types">Type System</a>
           <a href="#control">Control Flow</a>
           <a href="#functions">Functions</a>
-          <a href="#data-model">Structs, Enums, Match</a>
+          <a href="#data-model">Structs &amp; Enums</a>
           <a href="#errors">Error Handling</a>
-          <a href="#abstractions">Generics, Traits, Closures</a>
-          <a href="#references">References and Borrow Rules</a>
-          <a href="#modules">Modules and Contracts</a>
-          <a href="#concurrency">Async and Concurrency</a>
+          <a href="#contracts">Contracts</a>
+          <a href="#verification">Verification Workflow</a>
+          <a href="#references">References &amp; Borrowing</a>
+          <a href="#generics">Generics &amp; Traits</a>
+          <a href="#concurrency">Async &amp; Concurrency</a>
           <a href="#stdlib">Standard Library</a>
-          <a href="#tooling">Tooling and CLI</a>
-          <a href="#ai-workflows">AI Workflows</a>
-          <a href="#appendix">Keyword and Operator Appendix</a>
+          <a href="#tooling">CLI &amp; Tooling</a>
+          <a href="#patterns">Common Patterns</a>
+          <a href="#appendix">Quick Reference</a>
         </nav>
       </aside>
 
       <div class="reference-content">
-        <section class="reference-block reveal" id="syntax">
-          <h2>Syntax Basics</h2>
-          <p>
-            FORMA is indentation-significant, expression-oriented, and optimized for concise, unambiguous structure.
-            Comments use <code>#</code>, and the last expression in a function body is its return value.
-          </p>
-          <div class="reference-grid two">
-            <article>
-              <h3>Build and Run</h3>
-              <pre><code class="language-bash">git clone https://github.com/sfw/forma.git
+
+        <!-- GETTING STARTED -->
+        <section class="reference-block reveal" id="getting-started">
+          <h2>Getting Started</h2>
+          <p>Install FORMA and run your first program in under 5 minutes.</p>
+
+          <h3>Installation</h3>
+          <pre><code class="language-bash"># Clone and build
+git clone https://github.com/sfw/forma.git
 cd forma
-cargo build --release</code></pre>
-            </article>
-            <article>
-              <h3>Hello World</h3>
-              <pre><code class="language-forma">f main()
-    print("Hello, World!")</code></pre>
-            </article>
-          </div>
-          <p class="micro-note"><code>main</code> is the program entrypoint and should be declared as <code>f main()</code>.</p>
-          <h3>Core Syntax Rules</h3>
-          <ul>
-            <li>Variables are written as <code>x := value</code>; explicit type form is <code>x: Type = value</code>.</li>
-            <li>Single-expression function form uses <code>=</code>.</li>
-            <li>Generics use <code>[T]</code> (not angle brackets).</li>
-            <li>Keyword forms are short by design (<code>f</code>, <code>s</code>, <code>e</code>, <code>m</code>, <code>wh</code>, <code>lp</code>, <code>ret</code>).</li>
-          </ul>
+cargo build --release
+
+# Add to PATH (optional)
+export PATH="$PATH:$(pwd)/target/release"
+
+# Verify installation
+forma --version</code></pre>
+
+          <h3>Your First Program</h3>
+          <p>Create <code>hello.forma</code>:</p>
+          <pre><code class="language-forma"># hello.forma - Your first FORMA program
+f main()
+    print("Hello, FORMA!")
+
+    # Variables use := for assignment
+    name := "World"
+    print(f"Hello, {name}!")</code></pre>
+          <pre><code class="language-bash">forma run hello.forma
+# Output:
+# Hello, FORMA!
+# Hello, World!</code></pre>
+
+          <h3>A More Complete Example</h3>
+          <p>Here's a program that demonstrates contracts, functions, and error handling:</p>
+          <pre><code class="language-forma"># calculator.forma - Safe arithmetic with contracts
+
+# Precondition: divisor cannot be zero
+@pre(b != 0, "division by zero")
+f safe_divide(a: Int, b: Int) -> Int
+    a / b
+
+# Function with Option return for partial operations
+f find_first_even(numbers: [Int]) -> Int?
+    for n in numbers
+        if n % 2 == 0
+            ret Some(n)
+    None
+
+# Main entry point
+f main()
+    # Safe division with contract protection
+    result := safe_divide(10, 2)
+    print(f"10 / 2 = {result}")
+
+    # Finding values with Option handling
+    nums := [1, 3, 5, 6, 7, 8]
+    m find_first_even(nums)
+        Some(n) -> print(f"First even: {n}")
+        None -> print("No even numbers found")
+
+    # Using ?? for default values
+    first := find_first_even([1, 3, 5]) ?? 0
+    print(f"First even or default: {first}")</code></pre>
+          <pre><code class="language-bash">forma run calculator.forma
+# Output:
+# 10 / 2 = 5
+# First even: 6
+# First even or default: 0</code></pre>
+
+          <h3>Project Structure</h3>
+          <pre><code class="language-bash"># Create a new project
+forma new my_project
+cd my_project
+
+# Project layout
+my_project/
+├── src/
+│   └── main.forma    # Entry point
+├── tests/
+│   └── test_main.forma
+└── forma.toml        # Project configuration</code></pre>
         </section>
 
-        <section class="reference-block reveal" id="showcase">
-          <h2>Showcase Examples</h2>
-          <p>
-            These canonical programs are used to stress the language across control flow, algorithms,
-            data structures, and simulation tasks. Select any example to inspect the full source inline.
-          </p>
-          <div class="showcase-viewer" data-showcase-viewer>
-            <div class="showcase-toolbar">
-              <label for="showcaseSelect">Example</label>
-              <select id="showcaseSelect" aria-label="Select showcase example"></select>
-              <span class="showcase-tier" id="showcaseTier">Tier</span>
-              <span class="showcase-concepts" id="showcaseConcepts">Concepts</span>
-              <a
-                id="showcaseSource"
-                href="https://github.com/sfw/forma/tree/main/examples/showcase"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open source file
-              </a>
-            </div>
-            <pre class="showcase-code"><code id="showcaseCode" class="language-forma"></code></pre>
-          </div>
-        </section>
+        <!-- LLM ONBOARDING -->
+        <section class="reference-block reveal" id="llm-onboarding">
+          <h2>LLM Onboarding Guide</h2>
+          <p>FORMA is a new language without the training data history of Python or Rust. This section provides
+             everything you need to get an LLM or AI agent generating correct FORMA code.</p>
 
-        <section class="reference-block reveal" id="types">
-          <h2>Type System</h2>
-          <p>
-            FORMA supports primitive, sized integer, collection, and algebraic types with explicit Option/Result forms.
-            Inference covers most local variables and many return sites.
-          </p>
+          <h3>The Challenge</h3>
+          <p>LLMs are trained primarily on established languages. FORMA's syntax—short keywords like <code>f</code>,
+             <code>s</code>, <code>m</code>, indentation-based blocks, and the contract system—may not appear in training data.
+             This guide shows you how to provide the context an LLM needs to generate FORMA reliably.</p>
+
+          <h3>Step 1: System Prompt Context</h3>
+          <p>Include FORMA syntax basics in your system prompt. Here's a minimal reference:</p>
+          <pre><code class="language-text">You are writing code in FORMA, an AI-optimized systems language. Key syntax:
+
+KEYWORDS: f=function, s=struct, e=enum, t=trait, i=impl, m=match
+          wh=while, lp=loop, br=break, ct=continue, ret=return
+          as f=async function, aw=await, sp=spawn, us=use
+
+TYPES: Int, Float, Bool, Str, Char
+       [T]=list, {K:V}=map, T?=Option, T!E=Result, (A,B)=tuple
+
+VARIABLES: x := 42 (immutable), mut y := 0 (mutable)
+
+FUNCTIONS:
+  f add(a: Int, b: Int) -> Int
+      a + b
+
+CONTRACTS (preconditions/postconditions):
+  @pre(n >= 0)
+  @post(result >= 1)
+  f factorial(n: Int) -> Int
+      if n <= 1 then 1 else n * factorial(n - 1)
+
+PATTERN MATCHING:
+  m value
+      Some(x) -> process(x)
+      None -> default()
+
+STRUCTS AND METHODS:
+  s Point { x: Float, y: Float }
+  i Point
+      f distance(&self) -> Float
+          sqrt(self.x * self.x + self.y * self.y)
+
+ERROR HANDLING:
+  ? = propagate error, ?? = default value, ! = unwrap (panic)
+  result := risky_operation()?  # Returns early on Err
+  value := maybe_none ?? 0      # Default if None</code></pre>
+
+          <h3>Step 2: Grammar-Constrained Generation</h3>
+          <p>For guaranteed syntactic correctness, use constrained decoding with FORMA's grammar:</p>
+          <pre><code class="language-bash"># Export grammar for your LLM pipeline
+forma grammar --format json > forma-grammar.json
+
+# Use with llama.cpp, Outlines, or other constrained decoding tools
+# The grammar ensures only valid FORMA syntax is generated</code></pre>
+          <p>This eliminates syntax errors entirely—the LLM can only produce valid tokens.</p>
+
+          <h3>Step 3: Few-Shot Examples</h3>
+          <p>Include working examples in your prompt. Here are templates for common patterns:</p>
+          <pre><code class="language-forma"># Function with contracts
+@pre(items.len() > 0)
+@post(forall x in items: result >= x)
+f max_element(items: [Int]) -> Int
+    mut max := items[0]
+    for x in items
+        if x > max
+            max := x
+    max
+
+# Struct with methods
+s User
+    id: Int
+    name: Str
+    email: Str
+
+i User
+    f new(id: Int, name: Str, email: Str) -> User
+        User { id: id, name: name, email: email }
+
+    f display(&self) -> Str
+        f"User({self.id}, {self.name})"
+
+# Error handling with Result
+f parse_config(path: Str) -> Config!Str
+    content := file_read(path)?
+    data := json_parse(content)?
+    Ok(Config {
+        host: json_get(data, "host") ?? "localhost",
+        port: json_get(data, "port") ?? 8080
+    })
+
+# Async HTTP handler
+as f handle_request(req: Request) -> Response!Str
+    user_id := json_get(req.body, "user_id")?
+    user := aw fetch_user(user_id)?
+    Ok(Response { status: 200, body: json_stringify(user) })</code></pre>
+
+          <h3>Step 4: Verification Feedback Loop</h3>
+          <p>Use FORMA's toolchain to validate and correct AI-generated code:</p>
+          <pre><code class="language-bash"># 1. Check syntax and types (JSON for LLM parsing)
+forma check generated.forma --error-format json
+
+# If errors, feed the JSON back to the LLM:
+# {"errors":[{"line":5,"code":"type_mismatch","expected":"Int","found":"Str"}]}
+
+# 2. Verify contracts hold
+forma verify generated.forma --examples 100
+
+# 3. Explain contracts for human review
+forma explain generated.forma --format human</code></pre>
+
+          <h3>Step 5: Contract Specification Prompting</h3>
+          <p>The most effective approach: specify <em>what</em> the code should do with contracts, let the LLM implement <em>how</em>:</p>
+          <pre><code class="language-text">Write a FORMA function that sorts an array of integers.
+
+Requirements (express as contracts):
+- Input must not be empty
+- Output must be sorted in ascending order
+- Output must contain exactly the same elements as input
+
+The function should be named `verified_sort` and take `items: [Int]` as input.</code></pre>
+          <p>This produces:</p>
+          <pre><code class="language-forma">@nonempty(items)
+@sorted(result)
+@permutation(items, result)
+f verified_sort(items: [Int]) -> [Int]
+    # LLM implements sorting algorithm here
+    # Contracts ensure correctness regardless of implementation</code></pre>
+
+          <h3>Complete Onboarding Workflow</h3>
           <div class="table-wrap">
             <table class="reference-table">
               <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>Syntax</th>
-                  <th>Notes</th>
-                </tr>
+                <tr><th>Step</th><th>Action</th><th>Tool</th></tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Primitives</td>
-                  <td><code>Int</code> <code>Float</code> <code>Bool</code> <code>Char</code> <code>Str</code> <code>()</code></td>
-                  <td>Default integer/float plus unit value.</td>
-                </tr>
-                <tr>
-                  <td>Sized integers</td>
-                  <td><code>i8..i128</code> <code>u8..u128</code> <code>isize</code> <code>usize</code></td>
-                  <td>Use when storage and overflow behavior matter.</td>
-                </tr>
-                <tr>
-                  <td>Collections</td>
-                  <td><code>[T]</code> <code>[T; N]</code> <code>{K: V}</code> <code>(A, B)</code></td>
-                  <td>List, fixed array, map, tuple.</td>
-                </tr>
-                <tr>
-                  <td>Algebraic</td>
-                  <td><code>T?</code> <code>T!E</code></td>
-                  <td>Shorthand for Option and Result.</td>
-                </tr>
-                <tr>
-                  <td>Function type</td>
-                  <td><code>(A, B) -&gt; C</code></td>
-                  <td>First-class callable type shape.</td>
-                </tr>
+                <tr><td>1</td><td>Include syntax reference in system prompt</td><td>—</td></tr>
+                <tr><td>2</td><td>Export grammar for constrained decoding</td><td><code>forma grammar</code></td></tr>
+                <tr><td>3</td><td>Provide few-shot examples</td><td>—</td></tr>
+                <tr><td>4</td><td>Specify requirements as contracts</td><td>—</td></tr>
+                <tr><td>5</td><td>Generate code with grammar constraints</td><td>LLM + grammar</td></tr>
+                <tr><td>6</td><td>Check for type errors</td><td><code>forma check --error-format json</code></td></tr>
+                <tr><td>7</td><td>Verify contracts hold</td><td><code>forma verify</code></td></tr>
+                <tr><td>8</td><td>Review contract explanations</td><td><code>forma explain</code></td></tr>
               </tbody>
             </table>
           </div>
-          <pre><code class="language-forma">f identity[T](x: T) -> T
-    x
 
-f first[T](list: [T]) -> T?
-    if len(list) > 0 then Some(list[0])
-    else None
-
-s Stack[T]
-    items: [T]
-    size: Int</code></pre>
+          <h3>Tips for Reliable Generation</h3>
+          <ul>
+            <li><strong>Start with contracts:</strong> Specify what the code should do before asking for implementation</li>
+            <li><strong>Use explicit types:</strong> Include type annotations to reduce ambiguity</li>
+            <li><strong>Request small functions:</strong> Smaller functions with clear contracts are more reliable</li>
+            <li><strong>Feed back errors:</strong> Use JSON error output to help the LLM self-correct</li>
+            <li><strong>Verify iteratively:</strong> Run <code>forma verify</code> after each generation and refine</li>
+          </ul>
         </section>
 
+        <!-- SYNTAX BASICS -->
+        <section class="reference-block reveal" id="syntax">
+          <h2>Syntax Basics</h2>
+          <p>FORMA uses indentation-based syntax with short keywords for token efficiency.</p>
+
+          <h3>Variables and Assignment</h3>
+          <pre><code class="language-forma"># Type inference with :=
+x := 42              # Int
+name := "Alice"      # Str
+ratio := 3.14        # Float
+active := true       # Bool
+
+# Explicit type annotation
+count: Int = 0
+items: [Str] = ["a", "b", "c"]
+
+# Mutable reassignment
+mut counter := 0
+counter := counter + 1</code></pre>
+
+          <h3>Comments</h3>
+          <pre><code class="language-forma"># Single-line comment
+
+# Multi-line comments use multiple #
+# This is line one
+# This is line two
+
+f example()
+    x := 42  # Inline comment</code></pre>
+
+          <h3>Short Keywords</h3>
+          <p>FORMA uses abbreviated keywords for token efficiency (38% fewer tokens than Rust):</p>
+          <div class="table-wrap">
+            <table class="reference-table">
+              <thead>
+                <tr><th>Keyword</th><th>Meaning</th><th>Example</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>f</code></td><td>function</td><td><code>f add(a: Int, b: Int) -> Int</code></td></tr>
+                <tr><td><code>s</code></td><td>struct</td><td><code>s Point { x: Int, y: Int }</code></td></tr>
+                <tr><td><code>e</code></td><td>enum</td><td><code>e Color { Red, Green, Blue }</code></td></tr>
+                <tr><td><code>t</code></td><td>trait</td><td><code>t Display { f show(&self) -> Str }</code></td></tr>
+                <tr><td><code>i</code></td><td>impl</td><td><code>i Point { ... }</code></td></tr>
+                <tr><td><code>m</code></td><td>match</td><td><code>m value { ... }</code></td></tr>
+                <tr><td><code>wh</code></td><td>while</td><td><code>wh x > 0 { ... }</code></td></tr>
+                <tr><td><code>lp</code></td><td>loop (infinite)</td><td><code>lp { if done then br }</code></td></tr>
+                <tr><td><code>br</code></td><td>break</td><td><code>br</code> or <code>br 'label</code></td></tr>
+                <tr><td><code>ct</code></td><td>continue</td><td><code>ct</code> or <code>ct 'label</code></td></tr>
+                <tr><td><code>ret</code></td><td>return</td><td><code>ret value</code></td></tr>
+                <tr><td><code>as f</code></td><td>async function</td><td><code>as f fetch() -> Str</code></td></tr>
+                <tr><td><code>aw</code></td><td>await</td><td><code>result := aw task</code></td></tr>
+                <tr><td><code>sp</code></td><td>spawn</td><td><code>task := sp async_work()</code></td></tr>
+                <tr><td><code>us</code></td><td>use (import)</td><td><code>us std.io</code></td></tr>
+                <tr><td><code>md</code></td><td>module</td><td><code>md math { ... }</code></td></tr>
+                <tr><td><code>pub</code></td><td>public</td><td><code>pub f api() -> Int</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>String Interpolation</h3>
+          <pre><code class="language-forma">name := "Alice"
+age := 30
+
+# f-string interpolation
+greeting := f"Hello, {name}!"
+info := f"{name} is {age} years old"
+
+# Expressions in interpolation
+calc := f"2 + 2 = {2 + 2}"
+upper := f"Name: {str_upper(name)}"</code></pre>
+        </section>
+
+        <!-- TYPE SYSTEM -->
+        <section class="reference-block reveal" id="types">
+          <h2>Type System</h2>
+          <p>FORMA has a strong, static type system with inference, algebraic types, and generics.</p>
+
+          <h3>Primitive Types</h3>
+          <pre><code class="language-forma"># Core primitives
+x: Int = 42           # Default integer (platform-sized)
+y: Float = 3.14       # 64-bit floating point
+b: Bool = true        # Boolean
+c: Char = 'a'         # Unicode character
+s: Str = "hello"      # UTF-8 string
+u: () = ()            # Unit type (void equivalent)
+
+# Sized integers
+small: i8 = 127
+medium: i32 = 1000000
+large: i64 = 9223372036854775807
+unsigned: u32 = 4294967295
+size: usize = 1024    # Platform-sized unsigned</code></pre>
+
+          <h3>Collection Types</h3>
+          <pre><code class="language-forma"># Dynamic list
+numbers: [Int] = [1, 2, 3, 4, 5]
+names: [Str] = ["Alice", "Bob"]
+empty_list: [Int] = []
+
+# Fixed-size array
+fixed: [Int; 3] = [1, 2, 3]
+
+# Map (dictionary)
+ages: {Str: Int} = {"Alice": 30, "Bob": 25}
+empty_map: {Str: Int} = {}
+
+# Tuple
+pair: (Int, Str) = (42, "answer")
+triple: (Int, Int, Int) = (1, 2, 3)
+
+# Accessing elements
+first := numbers[0]          # 1
+alice_age := ages["Alice"]   # 30
+x := pair.0                  # 42</code></pre>
+
+          <h3>Option and Result Types</h3>
+          <pre><code class="language-forma"># Option - for values that might not exist
+# T? is shorthand for Option[T]
+maybe_num: Int? = Some(42)
+nothing: Int? = None
+
+# Result - for operations that might fail
+# T!E is shorthand for Result[T, E]
+success: Int!Str = Ok(42)
+failure: Int!Str = Err("something went wrong")
+
+# Full generic syntax also works
+opt: Option[Int] = Some(42)
+res: Result[Int, Str] = Ok(42)</code></pre>
+
+          <h3>Function Types</h3>
+          <pre><code class="language-forma"># Function type signature: (Args) -> Return
+f apply(x: Int, func: (Int) -> Int) -> Int
+    func(x)
+
+# Using closures with function types
+double := |x: Int| -> Int x * 2
+result := apply(5, double)  # 10
+
+# Higher-order functions
+f compose(f: (Int) -> Int, g: (Int) -> Int) -> (Int) -> Int
+    |x: Int| -> Int f(g(x))</code></pre>
+
+          <h3>Type Aliases</h3>
+          <pre><code class="language-forma"># Create type aliases for clarity
+type UserId = Int
+type UserMap = {UserId: Str}
+type Callback = (Int, Int) -> Int
+
+f get_user(id: UserId, users: UserMap) -> Str?
+    map_get(users, id)</code></pre>
+        </section>
+
+        <!-- CONTROL FLOW -->
         <section class="reference-block reveal" id="control">
           <h2>Control Flow</h2>
-          <p>
-            Conditionals and matches are expression-capable. Loop forms include while, for-in, and infinite loop, with short control keywords.
-          </p>
-          <div class="reference-grid two">
-            <article>
-              <h3>If / Else</h3>
-              <pre><code class="language-forma"># Single-expression form
+          <p>All control flow constructs are expressions that return values.</p>
+
+          <h3>If Expressions</h3>
+          <pre><code class="language-forma"># If as expression (single line)
 result := if x > 0 then "positive" else "non-positive"
 
-# Block form
-if x > 0
-    print("positive")
-else if x == 0
-    print("zero")
+# If as expression (multi-line)
+category := if x > 100
+    "large"
+else if x > 10
+    "medium"
 else
-    print("negative")</code></pre>
-            </article>
-            <article>
-              <h3>Loops</h3>
-              <pre><code class="language-forma">i := 0
-wh i &lt; 10
+    "small"
+
+# If as statement (for side effects)
+if user_logged_in
+    print("Welcome back!")
+else
+    print("Please log in")
+
+# Nested conditions
+if x > 0
+    if y > 0
+        print("Both positive")
+    else
+        print("x positive, y non-positive")
+else
+    print("x non-positive")</code></pre>
+
+          <h3>Match Expressions</h3>
+          <pre><code class="language-forma"># Basic pattern matching
+f describe(n: Int) -> Str
+    m n
+        0 -> "zero"
+        1 -> "one"
+        2 -> "two"
+        _ -> "many"
+
+# Match with guards
+f classify(n: Int) -> Str
+    m n
+        x if x < 0 -> "negative"
+        0 -> "zero"
+        x if x <= 10 -> "small positive"
+        _ -> "large positive"
+
+# Destructuring in match
+f process_result(r: Int!Str) -> Str
+    m r
+        Ok(v) if v > 100 -> f"large value: {v}"
+        Ok(v) -> f"value: {v}"
+        Err(e) -> f"error: {e}"
+
+# Tuple destructuring
+f describe_point(p: (Int, Int)) -> Str
+    m p
+        (0, 0) -> "origin"
+        (x, 0) -> f"on x-axis at {x}"
+        (0, y) -> f"on y-axis at {y}"
+        (x, y) -> f"point at ({x}, {y})"</code></pre>
+
+          <h3>Loops</h3>
+          <pre><code class="language-forma"># For-in loop (iteration)
+for item in [1, 2, 3, 4, 5]
+    print(item)
+
+# For with index
+for i in 0..10
+    print(f"Index: {i}")
+
+# For with range (inclusive)
+for i in 1..=5
+    print(i)  # 1, 2, 3, 4, 5
+
+# While loop
+mut count := 0
+wh count < 5
+    print(count)
+    count := count + 1
+
+# Infinite loop with break
+mut i := 0
+lp
+    i := i + 1
+    if i > 10 then br
     print(i)
-    i := i + 1</code></pre>
-              <pre><code class="language-forma">'outer: for i in [1, 2, 3]
-    for j in [10, 20, 30]
-        if i * j > 40 then br 'outer
+
+# Labeled loops for nested break/continue
+'outer: for i in 0..10
+    for j in 0..10
+        if i * j > 50 then br 'outer
+        if j % 2 == 0 then ct
         print(f"{i} * {j} = {i * j}")</code></pre>
-            </article>
-          </div>
-          <div class="inline-notes">
-            <span><code>br</code> break</span>
-            <span><code>ct</code> continue</span>
-            <span><code>ret</code> return</span>
-            <span><code>lp</code> infinite loop</span>
-          </div>
+
+          <h3>Early Return</h3>
+          <pre><code class="language-forma">f find_negative(nums: [Int]) -> Int?
+    for n in nums
+        if n < 0
+            ret Some(n)  # Early return
+    None  # Implicit return (last expression)</code></pre>
         </section>
 
+        <!-- FUNCTIONS -->
         <section class="reference-block reveal" id="functions">
           <h2>Functions</h2>
-          <p>
-            Functions are declared with <code>f</code>. Use block bodies for multi-step logic and <code>=</code> for compact one-liners.
-          </p>
-<pre><code class="language-forma">f add(a: Int, b: Int) -> Int
+          <p>Functions are declared with <code>f</code> and support multiple styles.</p>
+
+          <h3>Basic Functions</h3>
+          <pre><code class="language-forma"># Standard function
+f add(a: Int, b: Int) -> Int
     a + b
 
-f greet(name: Str) -> Str
-    f"Hello, {name}!"</code></pre>
-          <pre><code class="language-forma">f double(x: Int) -> Int = x * 2
-f is_even(n: Int) -> Bool = n % 2 == 0
-</code></pre>
-          <pre><code class="language-forma">f is_prime(n: Int) -> Bool
-    if n &lt; 2 then return false
-    if n == 2 then return true
-    if n % 2 == 0 then return false
-    i := 3
-    wh i * i &lt;= n
-        if n % i == 0 then return false
-        i := i + 2
-    true</code></pre>
-          <p>
-            Async functions are prefixed with <code>as</code>. Await uses <code>aw</code> and task creation uses <code>sp</code>.
-          </p>
+# Single-expression shorthand
+f multiply(a: Int, b: Int) -> Int = a * b
+
+# No return value (returns unit)
+f greet(name: Str)
+    print(f"Hello, {name}!")
+
+# Multiple parameters with same type
+f sum3(a: Int, b: Int, c: Int) -> Int
+    a + b + c</code></pre>
+
+          <h3>Functions with Default Values</h3>
+          <pre><code class="language-forma">f greet(name: Str, greeting: Str = "Hello") -> Str
+    f"{greeting}, {name}!"
+
+# Usage
+greet("Alice")              # "Hello, Alice!"
+greet("Bob", "Hi")          # "Hi, Bob!"</code></pre>
+
+          <h3>Generic Functions</h3>
+          <pre><code class="language-forma"># Generic identity function
+f identity[T](x: T) -> T
+    x
+
+# Generic with multiple type parameters
+f pair[A, B](a: A, b: B) -> (A, B)
+    (a, b)
+
+# Generic with trait bounds
+f print_all[T](items: [T]) where T: Display
+    for item in items
+        print(item.display())</code></pre>
+
+          <h3>Closures (Anonymous Functions)</h3>
+          <pre><code class="language-forma"># Basic closure
+add := |a: Int, b: Int| a + b
+result := add(3, 4)  # 7
+
+# Closure with explicit return type
+square := |x: Int| -> Int x * x
+
+# Closure capturing environment
+multiplier := 3
+scale := |x: Int| x * multiplier
+
+# Passing closures to functions
+numbers := [1, 2, 3, 4, 5]
+doubled := map(numbers, |x: Int| x * 2)  # [2, 4, 6, 8, 10]
+evens := filter(numbers, |x: Int| x % 2 == 0)  # [2, 4]</code></pre>
+
+          <h3>Recursive Functions</h3>
+          <pre><code class="language-forma"># Simple recursion
+f factorial(n: Int) -> Int
+    if n <= 1 then 1
+    else n * factorial(n - 1)
+
+# Tail-recursive (optimized)
+f factorial_tail(n: Int, acc: Int = 1) -> Int
+    if n <= 1 then acc
+    else factorial_tail(n - 1, n * acc)
+
+# Mutual recursion
+f is_even(n: Int) -> Bool
+    if n == 0 then true
+    else is_odd(n - 1)
+
+f is_odd(n: Int) -> Bool
+    if n == 0 then false
+    else is_even(n - 1)</code></pre>
         </section>
 
+        <!-- STRUCTS AND ENUMS -->
         <section class="reference-block reveal" id="data-model">
-          <h2>Structs, Enums, and Pattern Matching</h2>
-          <p>
-            Data modeling centers on structs and enums, with exhaustive pattern matching as the primary branching tool.
-          </p>
-          <div class="reference-grid two">
-            <article>
-              <h3>Structs and Methods</h3>
-<pre><code class="language-forma">s Point
+          <h2>Structs and Enums</h2>
+          <p>Define custom data types with structs and enums, plus methods via impl blocks.</p>
+
+          <h3>Structs</h3>
+          <pre><code class="language-forma"># Basic struct
+s Point
     x: Float
     y: Float
 
+# Creating instances
+origin := Point { x: 0.0, y: 0.0 }
+p := Point { x: 3.0, y: 4.0 }
+
+# Accessing fields
+print(p.x)  # 3.0
+
+# Struct with various field types
+s User
+    id: Int
+    name: Str
+    email: Str
+    active: Bool
+    tags: [Str]
+
+# Nested structs
+s Rectangle
+    top_left: Point
+    bottom_right: Point</code></pre>
+
+          <h3>Methods (impl blocks)</h3>
+          <pre><code class="language-forma">s Point
+    x: Float
+    y: Float
+
+# Add methods to Point
 i Point
-    f distance(&amp;self) -> Float
+    # Method taking &self (immutable borrow)
+    f distance(&self) -> Float
         sqrt(self.x * self.x + self.y * self.y)
 
-    f translate(&amp;self, dx: Float, dy: Float) -> Point
+    f distance_to(&self, other: &Point) -> Float
+        dx := self.x - other.x
+        dy := self.y - other.y
+        sqrt(dx * dx + dy * dy)
+
+    # Method returning new instance
+    f translate(&self, dx: Float, dy: Float) -> Point
         Point { x: self.x + dx, y: self.y + dy }
 
-f main()
-    p := Point { x: 3.0, y: 4.0 }
-    print(p.distance())  # 5.0</code></pre>
-            </article>
-            <article>
-              <h3>Enums and Match</h3>
-              <pre><code class="language-forma">e Direction
+    # Associated function (no self) - like static method
+    f origin() -> Point
+        Point { x: 0.0, y: 0.0 }
+
+# Usage
+p := Point { x: 3.0, y: 4.0 }
+dist := p.distance()           # 5.0
+moved := p.translate(1.0, 1.0) # Point { x: 4.0, y: 5.0 }
+zero := Point.origin()         # Point { x: 0.0, y: 0.0 }</code></pre>
+
+          <h3>Enums</h3>
+          <pre><code class="language-forma"># Simple enum (unit variants)
+e Direction
     North
     South
     East
     West
 
+# Enum with associated data
 e Shape
-    Circle(Float)
-    Rectangle(Float, Float)
-    Triangle(Float, Float, Float)</code></pre>
-              <pre><code class="language-forma">f describe(n: Int) -> Str
-    m n
-        0 -> "zero"
-        1 -> "one"
-        _ -> "many"</code></pre>
-            </article>
-          </div>
-          <p>
-            Match arms support literals, tuple/struct destructuring, wildcard <code>_</code>, and guards with <code>if</code>.
-          </p>
+    Circle(Float)              # radius
+    Rectangle(Float, Float)    # width, height
+    Triangle(Float, Float, Float)  # three sides
+
+# Enum with named fields
+e Message
+    Quit
+    Move { x: Int, y: Int }
+    Write(Str)
+    Color(Int, Int, Int)
+
+# Using enums
+dir := Direction.North
+shape := Shape.Circle(5.0)
+msg := Message.Move { x: 10, y: 20 }</code></pre>
+
+          <h3>Pattern Matching on Enums</h3>
+          <pre><code class="language-forma">f area(shape: Shape) -> Float
+    m shape
+        Shape.Circle(r) -> 3.14159 * r * r
+        Shape.Rectangle(w, h) -> w * h
+        Shape.Triangle(a, b, c) ->
+            # Heron's formula
+            s := (a + b + c) / 2.0
+            sqrt(s * (s - a) * (s - b) * (s - c))
+
+f process_message(msg: Message)
+    m msg
+        Message.Quit -> print("Quitting")
+        Message.Move { x, y } -> print(f"Moving to ({x}, {y})")
+        Message.Write(text) -> print(f"Writing: {text}")
+        Message.Color(r, g, b) -> print(f"RGB({r}, {g}, {b})")
+
+# Methods on enums
+i Direction
+    f opposite(&self) -> Direction
+        m self
+            Direction.North -> Direction.South
+            Direction.South -> Direction.North
+            Direction.East -> Direction.West
+            Direction.West -> Direction.East</code></pre>
         </section>
 
+        <!-- ERROR HANDLING -->
         <section class="reference-block reveal" id="errors">
           <h2>Error Handling</h2>
-          <p>
-            FORMA uses explicit value-based errors: <code>T?</code> for optional values and <code>T!E</code> for fallible operations.
-            The language avoids exception-style control flow.
-          </p>
-          <pre><code class="language-forma">f parse_positive(s: Str) -> Int!Str
-    n := str_to_int(s)
-    m n
-        Some(v) if v > 0 -> Ok(v)
-        Some(_) -> Err("not positive")
-        None -> Err("not a number")</code></pre>
-          <pre><code class="language-forma">f read_config(path: Str) -> Str!Str
-    content := file_read(path)?    # Returns Err if file_read fails
-    Ok(content)</code></pre>
-          <pre><code class="language-forma">f main()
-    name := env_get("USER") ?? "unknown"
-    print(f"Hello, {name}")</code></pre>
-          <div class="inline-notes">
-            <span><code>?</code> propagate error</span>
-            <span><code>!</code> unwrap or panic</span>
-            <span><code>??</code> coalesce default value</span>
-          </div>
-          <h3>Option/Result Utilities</h3>
+          <p>FORMA uses explicit value-based error handling with Option and Result types.</p>
+
+          <h3>Option Type</h3>
+          <pre><code class="language-forma"># Option represents a value that might not exist
+# Some(value) = value present
+# None = value absent
+
+f find_user(id: Int) -> User?
+    if id == 1
+        Some(User { id: 1, name: "Alice" })
+    else
+        None
+
+# Pattern matching on Option
+f greet_user(id: Int)
+    m find_user(id)
+        Some(user) -> print(f"Hello, {user.name}!")
+        None -> print("User not found")
+
+# Using ?? for default values
+name := find_user(999)?.name ?? "Unknown"
+
+# Chaining optional operations
+f get_user_email(id: Int) -> Str?
+    user := find_user(id)?  # Returns None if user not found
+    Some(user.email)</code></pre>
+
+          <h3>Result Type</h3>
+          <pre><code class="language-forma"># Result represents an operation that might fail
+# Ok(value) = success
+# Err(error) = failure
+
+f parse_int(s: Str) -> Int!Str
+    m str_to_int(s)
+        Some(n) -> Ok(n)
+        None -> Err(f"'{s}' is not a valid integer")
+
+f divide(a: Int, b: Int) -> Int!Str
+    if b == 0
+        Err("division by zero")
+    else
+        Ok(a / b)
+
+# Pattern matching on Result
+f process(input: Str)
+    m parse_int(input)
+        Ok(n) -> print(f"Parsed: {n}")
+        Err(e) -> print(f"Error: {e}")
+
+# Error propagation with ?
+f calculate(a: Str, b: Str) -> Int!Str
+    x := parse_int(a)?  # Returns Err early if parsing fails
+    y := parse_int(b)?
+    divide(x, y)?       # Returns Err early if division fails</code></pre>
+
+          <h3>Error Handling Operators</h3>
+          <pre><code class="language-forma"># ? - Propagate error (return early on Err/None)
+f load_config() -> Config!Str
+    content := file_read("config.json")?  # Returns Err if read fails
+    config := json_parse(content)?        # Returns Err if parse fails
+    Ok(config)
+
+# ! - Unwrap (panic on Err/None)
+f must_have_config() -> Config
+    file_read("config.json")!  # Panics if file not found
+
+# ?? - Coalesce (provide default)
+port := env_get("PORT") ?? "8080"
+count := str_to_int(input) ?? 0</code></pre>
+
+          <h3>Option/Result Utility Functions</h3>
+          <pre><code class="language-forma"># Checking state
+is_some(Some(42))     # true
+is_none(None)         # true
+is_ok(Ok(42))         # true
+is_err(Err("bad"))    # true
+
+# Unwrapping (panics if None/Err)
+unwrap(Some(42))      # 42
+unwrap(None)          # PANIC!
+
+# Unwrap with default
+unwrap_or(Some(42), 0)   # 42
+unwrap_or(None, 0)       # 0
+
+# Unwrap with custom panic message
+expect(Some(42), "expected a value")  # 42
+expect(None, "expected a value")      # PANIC: "expected a value"
+
+# Map over Option/Result
+map_opt(Some(5), |x| x * 2)   # Some(10)
+map_opt(None, |x| x * 2)      # None
+
+# Flatten nested Options
+flatten(Some(Some(42)))  # Some(42)
+flatten(Some(None))      # None</code></pre>
+        </section>
+
+        <!-- CONTRACTS -->
+        <section class="reference-block reveal" id="contracts">
+          <h2>Contract System</h2>
+          <p>Contracts specify what functions require (preconditions) and guarantee (postconditions).
+             They're the foundation of FORMA's verification story.</p>
+
+          <h3>Basic Contracts</h3>
+          <pre><code class="language-forma"># @pre - Precondition (what must be true when function is called)
+# @post - Postcondition (what will be true when function returns)
+
+@pre(n >= 0)
+@post(result >= 1)
+f factorial(n: Int) -> Int
+    if n <= 1 then 1
+    else n * factorial(n - 1)
+
+# Multiple contracts
+@pre(a >= 0)
+@pre(b >= 0)
+@post(result >= a)
+@post(result >= b)
+f max(a: Int, b: Int) -> Int
+    if a > b then a else b
+
+# Contracts with error messages
+@pre(divisor != 0, "divisor cannot be zero")
+@post(result * divisor == dividend, "multiplication inverse")
+f divide(dividend: Int, divisor: Int) -> Int
+    dividend / divisor</code></pre>
+
+          <h3>The <code>old()</code> Expression</h3>
+          <p>Capture values at function entry for comparison in postconditions:</p>
+          <pre><code class="language-forma"># old(expr) captures the value of expr when the function is called
+@post(result == old(balance) + amount)
+f deposit(amount: Int) -> Int
+    balance := balance + amount
+    balance
+
+@post(len(result) == old(len(items)) + 1)
+f append[T](items: [T], item: T) -> [T]
+    vec_push(items, item)
+    items
+
+# Useful for tracking state changes
+@pre(len(stack) > 0)
+@post(result == old(stack[len(stack) - 1]))
+@post(len(stack) == old(len(stack)) - 1)
+f pop[T](ref mut stack: [T]) -> T
+    vec_pop(stack)</code></pre>
+
+          <h3>Quantifiers: <code>forall</code> and <code>exists</code></h3>
+          <pre><code class="language-forma"># forall - every element satisfies condition
+@pre(forall i in 0..len(arr)-1: arr[i] <= arr[i+1])  # sorted input
+f binary_search(arr: [Int], target: Int) -> Int?
+    # ... implementation
+
+# exists - at least one element satisfies condition
+@post(result != None ==> exists i in 0..len(arr): arr[i] == target)
+f linear_search(arr: [Int], target: Int) -> Int?
+    for i in 0..len(arr)
+        if arr[i] == target
+            ret Some(i)
+    None
+
+# Combined quantifiers
+@post(forall i in 0..len(result)-1: result[i] <= result[i+1])
+@post(forall x in input: exists y in result: x == y)
+f sort(input: [Int]) -> [Int]
+    # ... sorting implementation</code></pre>
+
+          <h3>Implication in Contracts</h3>
+          <pre><code class="language-forma"># ==> means "implies" (if left is true, right must be true)
+@pre(amount > 0 ==> balance >= amount)
+f withdraw(amount: Int) -> Int!Str
+    if amount <= 0
+        Err("amount must be positive")
+    else if balance < amount
+        Err("insufficient funds")
+    else
+        balance := balance - amount
+        Ok(balance)
+
+# Common pattern: conditional postcondition
+@post(result.is_ok() ==> result.unwrap() > 0)
+@post(result.is_err() ==> input <= 0)
+f positive_only(input: Int) -> Int!Str
+    if input > 0 then Ok(input)
+    else Err("must be positive")</code></pre>
+
+          <h3>Membership Testing</h3>
+          <pre><code class="language-forma"># 'in' tests membership in a collection
+@pre(status in ["pending", "active", "completed", "cancelled"])
+f update_order_status(order_id: Int, status: Str) -> Bool
+    # ... implementation
+
+@pre(day in 1..=31)
+@pre(month in 1..=12)
+f make_date(day: Int, month: Int, year: Int) -> Date
+    # ... implementation</code></pre>
+
+          <h3>Named Contract Patterns</h3>
+          <p>Reusable patterns for common specifications:</p>
+          <pre><code class="language-forma"># @sorted - array is in ascending order
+@sorted
+f is_sorted_check(arr: [Int]) -> Bool
+    # Expanded to: forall i in 0..len(arr)-1: arr[i] <= arr[i+1]
+
+# @permutation - output is reordering of input
+@sorted
+@permutation(input)
+f quicksort(input: [Int]) -> [Int]
+    # ... sorting implementation
+
+# @nonempty - collection has elements
+@nonempty(items)
+f first[T](items: [T]) -> T
+    items[0]
+
+# @bounded - value within range
+@bounded(temperature, -273, 1000)
+f celsius_to_fahrenheit(temperature: Float) -> Float
+    temperature * 9.0 / 5.0 + 32.0
+
+# @unique - no duplicate elements
+@unique(result)
+f remove_duplicates(input: [Int]) -> [Int]
+    # ... implementation
+
+# @pure - function has no side effects
+@pure
+f calculate_hash(data: Bytes) -> Int
+    # ... pure computation
+
+# @unchanged - value not modified
+@unchanged(config)
+f read_setting(config: Config, key: Str) -> Str?
+    map_get(config.settings, key)</code></pre>
+
           <div class="table-wrap">
             <table class="reference-table">
               <thead>
-                <tr>
-                  <th>Function</th>
-                  <th>Signature</th>
-                  <th>Description</th>
-                </tr>
+                <tr><th>Pattern</th><th>Expansion</th><th>Use In</th></tr>
               </thead>
               <tbody>
-                <tr>
-                  <td><code>is_some</code></td>
-                  <td><code>Option[T] -&gt; Bool</code></td>
-                  <td><code>true</code> if <code>Some</code>.</td>
-                </tr>
-                <tr>
-                  <td><code>is_none</code></td>
-                  <td><code>Option[T] -&gt; Bool</code></td>
-                  <td><code>true</code> if <code>None</code>.</td>
-                </tr>
-                <tr>
-                  <td><code>is_ok</code></td>
-                  <td><code>Result[T, E] -&gt; Bool</code></td>
-                  <td><code>true</code> if <code>Ok</code>.</td>
-                </tr>
-                <tr>
-                  <td><code>is_err</code></td>
-                  <td><code>Result[T, E] -&gt; Bool</code></td>
-                  <td><code>true</code> if <code>Err</code>.</td>
-                </tr>
-                <tr>
-                  <td><code>unwrap</code></td>
-                  <td><code>Option[T] -&gt; T</code></td>
-                  <td>Extract value, panic on <code>None</code>.</td>
-                </tr>
-                <tr>
-                  <td><code>unwrap_or</code></td>
-                  <td><code>(Option[T], T) -&gt; T</code></td>
-                  <td>Extract or return default.</td>
-                </tr>
-                <tr>
-                  <td><code>expect</code></td>
-                  <td><code>(Option[T], Str) -&gt; T</code></td>
-                  <td>Extract or panic with custom message.</td>
-                </tr>
+                <tr><td><code>@sorted</code></td><td><code>forall i in 0..len(x)-1: x[i] &lt;= x[i+1]</code></td><td>Pre/Post</td></tr>
+                <tr><td><code>@sorted_desc</code></td><td><code>forall i in 0..len(x)-1: x[i] &gt;= x[i+1]</code></td><td>Pre/Post</td></tr>
+                <tr><td><code>@permutation(a, b)</code></td><td>b is reordering of a</td><td>Post only</td></tr>
+                <tr><td><code>@nonempty(x)</code></td><td><code>len(x) &gt; 0</code></td><td>Pre only</td></tr>
+                <tr><td><code>@bounded(x, lo, hi)</code></td><td><code>x &gt;= lo &amp;&amp; x &lt;= hi</code></td><td>Pre/Post</td></tr>
+                <tr><td><code>@positive(x)</code></td><td><code>x &gt; 0</code></td><td>Pre/Post</td></tr>
+                <tr><td><code>@nonnegative(x)</code></td><td><code>x &gt;= 0</code></td><td>Pre/Post</td></tr>
+                <tr><td><code>@nonzero(x)</code></td><td><code>x != 0</code></td><td>Pre/Post</td></tr>
+                <tr><td><code>@unique(x)</code></td><td><code>forall i,j: i != j =&gt; x[i] != x[j]</code></td><td>Pre/Post</td></tr>
+                <tr><td><code>@same_length(a, b)</code></td><td><code>len(a) == len(b)</code></td><td>Pre/Post</td></tr>
+                <tr><td><code>@unchanged(x)</code></td><td><code>x == old(x)</code></td><td>Post only</td></tr>
+                <tr><td><code>@pure</code></td><td>no side effects</td><td>Post only</td></tr>
               </tbody>
             </table>
           </div>
-          <pre><code class="language-forma"># Check status
-is_some(Some(42))       # true
-is_none(None)           # true
-is_ok(Ok(42))           # true
-is_err(Err("bad"))      # true
-
-# Unwrapping (Option only)
-unwrap(Some(42))             # 42
-unwrap_or(Some(42), 0)      # 42
-unwrap_or(None, 0)          # 0
-expect(Some(42), "missing")  # 42</code></pre>
-          <h3>Pattern Matching on Option/Result</h3>
-          <pre><code class="language-forma">f describe(opt: Int?) -> Str
-    m opt
-        Some(v) -> f"got {v}"
-        None -> "nothing"
-
-f handle(res: Int!Str) -> Str
-    m res
-        Ok(v) -> f"success: {v}"
-        Err(e) -> f"error: {e}"</code></pre>
-          <pre><code class="language-forma">f classify(opt: Int?) -> Str
-    m opt
-        Some(n) if n > 0 -> "positive"
-        Some(n) if n &lt; 0 -> "negative"
-        Some(_) -> "zero"
-        None -> "absent"</code></pre>
-          <h3>Practical Patterns</h3>
-          <pre><code class="language-forma">f safe_div(a: Int, b: Int) -> Int?
-    if b == 0 then None
-    else Some(a / b)
-
-f main()
-    result := safe_div(10, 0) ?? 0    # 0</code></pre>
-          <pre><code class="language-forma">f parse_positive(s: Str) -> Int!Str
-    m str_to_int(s)
-        Some(n) if n > 0 -> Ok(n)
-        Some(_) -> Err("not positive")
-        None -> Err("not a number")
-
-f add_parsed(a: Str, b: Str) -> Int!Str
-    x := parse_positive(a)?    # Returns Err early if parsing fails
-    y := parse_positive(b)?
-    Ok(x + y)</code></pre>
-          <pre><code class="language-forma">f main()
-    # These are equivalent for Option values:
-    a := unwrap_or(str_to_int("abc"), 0)
-    b := str_to_int("abc") ?? 0</code></pre>
-          <pre><code class="language-forma"># str_to_int: Str -> Int?
-m str_to_int("42")
-    Some(n) -> print(n)    # 42
-    None -> print("failed")
-
-# vec_get: ([T], Int) -> T?
-arr := [10, 20, 30]
-m vec_get(arr, 1)
-    Some(v) -> print(v)    # 20
-    None -> print("out of bounds")</code></pre>
         </section>
 
-        <section class="reference-block reveal" id="abstractions">
-          <h2>Generics, Traits, and Closures</h2>
-          <p>
-            Reusable abstractions combine <code>[T]</code> generics, trait interfaces, and inline closures for higher-order operations.
-          </p>
-          <div class="reference-grid two">
-            <article>
-              <h3>Generics + Traits</h3>
-<pre><code class="language-forma">t Display
-    f display(&amp;self) -> Str
+        <!-- VERIFICATION WORKFLOW -->
+        <section class="reference-block reveal" id="verification">
+          <h2>Verification Workflow</h2>
+          <p>FORMA provides tools to explain contracts in plain language and verify them through property-based testing.</p>
 
-t Area
-    f area(&amp;self) -> Float
-</code></pre>
-              <pre><code class="language-forma">f print_area[T](shape: T) -> Unit where T: Area + Display
-    print(f"{shape.display()}: area = {shape.area()}")</code></pre>
-            </article>
-            <article>
-              <h3>Closures</h3>
-              <pre><code class="language-forma">f main()
-    add := |a: Int, b: Int| a + b
-    print(add(3, 4))          # 7
+          <h3><code>forma explain</code> — Understand Contracts</h3>
+          <pre><code class="language-bash"># Human-readable explanation
+$ forma explain math.forma --format human
 
-    square := |x: Int| -> Int x * x
-    print(square(5))          # 25</code></pre>
-              <pre><code class="language-forma">f apply(x: Int, func: (Int) -> Int) -> Int
-    func(x)
+Function: factorial(n: Int) -> Int
+  Requires: n must be greater than or equal to 0
+  Ensures: result will be greater than or equal to 1
 
-f main()
-    result := apply(5, |x: Int| x * 2)
-    print(result)  # 10</code></pre>
-            </article>
-          </div>
+Function: binary_search(arr: [Int], target: Int) -> Option[Int]
+  Requires: arr must be sorted in ascending order
+  Ensures: if result is Some(i), then arr[i] equals target
+
+# JSON output for tooling
+$ forma explain math.forma --format json
+{
+  "functions": [{
+    "name": "factorial",
+    "signature": "(n: Int) -> Int",
+    "contracts": [{
+      "kind": "precondition",
+      "expression": "n >= 0",
+      "human_readable": "n must be greater than or equal to 0"
+    }, {
+      "kind": "postcondition",
+      "expression": "result >= 1",
+      "human_readable": "result will be greater than or equal to 1"
+    }]
+  }]
+}</code></pre>
+          <p class="micro-note"><strong>Use case:</strong> AI generates code with contracts. You review the <code>explain</code>
+             output to verify intent matches the specification, without reading implementation.</p>
+
+          <h3><code>forma verify</code> — Test Contracts</h3>
+          <pre><code class="language-bash"># Basic verification (100 random test cases per function)
+$ forma verify src/
+
+Verifying: factorial
+  ✓ 100/100 examples passed
+
+Verifying: binary_search
+  ✓ 100/100 examples passed
+
+Verifying: quicksort
+  ✗ Postcondition failed: @permutation
+    Counterexample: input = [3, 1, 2]
+    Output: [1, 2] (missing element)
+
+# More thorough testing
+$ forma verify src/ --examples 1000
+
+# Deterministic for CI (same seed = same tests)
+$ forma verify src/ --examples 500 --seed 42
+
+# JSON report for automation
+$ forma verify src --report --format json --examples 1000 --seed 42
+{
+  "summary": {
+    "total_functions": 12,
+    "passed": 11,
+    "failed": 1,
+    "skipped": 0,
+    "total_examples": 12000
+  },
+  "results": [{
+    "function": "factorial",
+    "status": "PASS",
+    "examples_run": 1000,
+    "examples_passed": 1000
+  }, {
+    "function": "quicksort",
+    "status": "FAIL",
+    "contract": "@permutation",
+    "counterexample": {"input": [3, 1, 2]},
+    "actual_output": [1, 2]
+  }]
+}</code></pre>
+
+          <h3>The Verification Workflow</h3>
+          <pre><code class="language-forma"># 1. Write function with contracts
+@pre(len(arr) > 0)
+@post(result >= arr[0])
+@post(forall x in arr: result >= x)
+f max_element(arr: [Int]) -> Int
+    mut max := arr[0]
+    for x in arr
+        if x > max
+            max := x
+    max</code></pre>
+          <pre><code class="language-bash"># 2. Explain to verify intent
+$ forma explain myfile.forma
+Function: max_element(arr: [Int]) -> Int
+  Requires: arr must have at least one element
+  Ensures: result will be greater than or equal to the first element
+  Ensures: result will be greater than or equal to every element in arr
+
+# 3. Verify behavior
+$ forma verify myfile.forma --examples 500
+Verifying: max_element
+  ✓ 500/500 examples passed
+
+# 4. Integrate in CI
+$ forma verify src --report --format json --seed 42 > verify-report.json</code></pre>
+
+          <h3>Disabling Contract Checking</h3>
+          <pre><code class="language-bash"># For performance in production
+forma run app.forma --no-check-contracts</code></pre>
         </section>
 
+        <!-- REFERENCES AND BORROWING -->
         <section class="reference-block reveal" id="references">
-          <h2>References and Borrow Rules</h2>
-          <p>
-            FORMA uses second-class references: they are valid for parameter passing and local borrow semantics,
-            but are restricted to keep lifetime analysis tractable.
-          </p>
-          <pre><code class="language-forma">f swap(ref mut arr: [Int], i: Int, j: Int) -> Unit
+          <h2>References and Borrowing</h2>
+          <p>FORMA uses second-class references: they can be passed as parameters but cannot be stored in data structures
+             or returned from functions. This provides memory safety without lifetime annotations.</p>
+
+          <h3>Immutable References</h3>
+          <pre><code class="language-forma"># &T is an immutable reference to T
+f print_point(p: &Point)
+    print(f"({p.x}, {p.y})")
+
+# Creating references
+point := Point { x: 3.0, y: 4.0 }
+print_point(&point)  # Pass reference
+
+# Multiple immutable references are allowed
+f compare_points(a: &Point, b: &Point) -> Bool
+    a.x == b.x && a.y == b.y</code></pre>
+
+          <h3>Mutable References</h3>
+          <pre><code class="language-forma"># ref mut for mutable references
+f increment(ref mut x: Int)
+    x := x + 1
+
+# Usage
+mut value := 10
+increment(ref mut value)
+print(value)  # 11
+
+# Mutable reference to array
+f swap(ref mut arr: [Int], i: Int, j: Int)
     temp := arr[i]
     arr[i] := arr[j]
     arr[j] := temp
 
-f sort(ref mut arr: [Int]) -> Unit
-    n := len(arr)
-    if n > 1 then
-        quicksort(ref mut arr, 0, n - 1)</code></pre>
-          <pre><code class="language-forma">f main()
-    data := [3, 1, 2]
-    swap(ref mut data, 0, 2)
-    print(data)                     # [2, 1, 3]</code></pre>
-          <ul>
-            <li>Multiple shared borrows are allowed.</li>
-            <li>Only one mutable borrow is allowed at a time.</li>
-            <li>Shared and mutable borrows cannot overlap.</li>
-          </ul>
+mut numbers := [1, 2, 3]
+swap(ref mut numbers, 0, 2)
+print(numbers)  # [3, 2, 1]</code></pre>
+
+          <h3>Borrow Rules</h3>
+          <pre><code class="language-forma"># Rule 1: Multiple immutable borrows OK
+f example1()
+    data := [1, 2, 3]
+    ref1 := &data
+    ref2 := &data  # OK - multiple immutable refs
+    print(ref1[0])
+    print(ref2[0])
+
+# Rule 2: Only one mutable borrow at a time
+f example2()
+    mut data := [1, 2, 3]
+    process(ref mut data)  # OK
+    # Cannot have another mutable ref while this one exists
+
+# Rule 3: Cannot mix mutable and immutable
+f example3()
+    mut data := [1, 2, 3]
+    # Either use &data OR ref mut data, not both at once</code></pre>
+
+          <h3>Why Second-Class References?</h3>
+          <pre><code class="language-forma"># These patterns are NOT allowed (would require lifetimes):
+
+# Cannot return a reference
+# f bad_return() -> &Int    # ERROR
+#     x := 42
+#     &x  # Would be dangling reference
+
+# Cannot store references in structs
+# s BadStruct              # ERROR
+#     ref: &Int            # Not allowed
+
+# Instead, use owned values:
+f good_return() -> Int
+    x := 42
+    x  # Return owned value
+
+s GoodStruct
+    value: Int  # Owned value</code></pre>
         </section>
 
-        <section class="reference-block reveal" id="modules">
-          <h2>Modules, Imports, and Contracts</h2>
-          <div class="reference-grid two">
-            <article>
-              <h3>Modules and Imports</h3>
-              <pre><code class="language-forma">us std.io
-us std.collections
-us std.math</code></pre>
-              <pre><code class="language-forma">us collections.{Vec, Map}</code></pre>
-              <pre><code class="language-forma">us std.fs -> filesystem</code></pre>
-              <pre><code class="language-forma">pub md utils
-    pub f helper() -> Int
-        42</code></pre>
-            </article>
-            <article>
-              <h3>Contracts</h3>
-<pre><code class="language-forma">@pre(n >= 0, "n must be non-negative")
-@post(result >= 1, "factorial is always positive")
-f factorial(n: Int) -> Int
-    if n &lt;= 1 then 1
-    else n * factorial(n - 1)</code></pre>
-              <pre><code class="language-forma">@pre(values.len() > 0)
-@post(forall i in 0..result.len()-1: result[i] <= result[i+1])
-@post(permutation(values, result))
-f sort(values: [Int]) -> [Int]
-    sort_ints(values)</code></pre>
-              <p class="micro-note">Contracts are optional; runtime checks are enabled by default. Disable with <code>forma run --no-check-contracts file.forma</code>.</p>
-              <p class="micro-note">Contract expressions support <code>old(expr)</code>, <code>forall</code>, <code>exists</code>, <code>in</code>, and implication <code>=&gt;</code>.</p>
-              <div class="table-wrap">
-                <table class="reference-table">
-                  <thead>
-                    <tr>
-                      <th>Pattern</th>
-                      <th>Context</th>
-                      <th>Expansion</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><td><code>@nonempty(x)</code></td><td>Pre-only</td><td><code>x.len() &gt; 0</code></td></tr>
-                    <tr><td><code>@nonnegative(x)</code></td><td>Both</td><td><code>x &gt;= 0</code></td></tr>
-                    <tr><td><code>@positive(x)</code></td><td>Both</td><td><code>x &gt; 0</code></td></tr>
-                    <tr><td><code>@nonzero(x)</code></td><td>Both</td><td><code>x != 0</code></td></tr>
-                    <tr><td><code>@bounded(x, lo, hi)</code></td><td>Both</td><td><code>x &gt;= lo &amp;&amp; x &lt;= hi</code></td></tr>
-                    <tr><td><code>@sorted(x)</code></td><td>Both</td><td><code>forall i in 0..x.len()-1: x[i] &lt;= x[i+1]</code></td></tr>
-                    <tr><td><code>@sorted_desc(x)</code></td><td>Both</td><td><code>forall i in 0..x.len()-1: x[i] &gt;= x[i+1]</code></td></tr>
-                    <tr><td><code>@unique(x)</code></td><td>Both</td><td><code>forall i,j: i != j =&gt; x[i] != x[j]</code></td></tr>
-                    <tr><td><code>@same_length(a, b)</code></td><td>Both</td><td><code>a.len() == b.len()</code></td></tr>
-                    <tr><td><code>@permutation(a, b)</code></td><td>Both</td><td><code>permutation(a, b)</code></td></tr>
-                    <tr><td><code>@unchanged(x)</code></td><td>Post-only</td><td><code>x == old(x)</code></td></tr>
-                    <tr><td><code>@pure</code></td><td>Post-only</td><td><code>true</code> (no side effects marker)</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </article>
-          </div>
+        <!-- GENERICS AND TRAITS -->
+        <section class="reference-block reveal" id="generics">
+          <h2>Generics and Traits</h2>
+
+          <h3>Generic Types</h3>
+          <pre><code class="language-forma"># Generic struct
+s Pair[A, B]
+    first: A
+    second: B
+
+# Generic methods
+i Pair[A, B]
+    f swap(&self) -> Pair[B, A]
+        Pair { first: self.second, second: self.first }
+
+# Usage
+pair := Pair { first: 42, second: "hello" }
+swapped := pair.swap()  # Pair { first: "hello", second: 42 }</code></pre>
+
+          <h3>Traits (Interfaces)</h3>
+          <pre><code class="language-forma"># Define a trait
+t Display
+    f display(&self) -> Str
+
+t Area
+    f area(&self) -> Float
+
+# Implement traits for types
+s Circle
+    radius: Float
+
+i Display for Circle
+    f display(&self) -> Str
+        f"Circle(radius={self.radius})"
+
+i Area for Circle
+    f area(&self) -> Float
+        3.14159 * self.radius * self.radius
+
+# Using trait methods
+circle := Circle { radius: 5.0 }
+print(circle.display())  # "Circle(radius=5.0)"
+print(circle.area())     # 78.53975</code></pre>
+
+          <h3>Trait Bounds</h3>
+          <pre><code class="language-forma"># Single bound
+f print_it[T](item: T) where T: Display
+    print(item.display())
+
+# Multiple bounds
+f print_area[T](shape: T) where T: Display + Area
+    print(f"{shape.display()}: area = {shape.area()}")
+
+# Bounds on struct
+s Container[T] where T: Clone
+    items: [T]</code></pre>
+
+          <h3>Common Traits</h3>
+          <pre><code class="language-forma"># Eq - equality comparison
+t Eq
+    f eq(&self, other: &Self) -> Bool
+
+# Ord - ordering comparison
+t Ord
+    f cmp(&self, other: &Self) -> Ordering
+
+# Clone - create copies
+t Clone
+    f clone(&self) -> Self
+
+# Hash - compute hash value
+t Hash
+    f hash(&self) -> Int
+
+# Default - provide default value
+t Default
+    f default() -> Self</code></pre>
         </section>
 
+        <!-- ASYNC AND CONCURRENCY -->
         <section class="reference-block reveal" id="concurrency">
           <h2>Async and Concurrency</h2>
-          <p>
-            Async functions use <code>as f</code>, spawning uses <code>sp</code>, and awaiting uses <code>aw</code>.
-            Channels and mutexes provide coordination primitives.
-          </p>
-          <pre><code class="language-forma">as f fetch_data(url: Str) -> Str!Str
+
+          <h3>Async Functions</h3>
+          <pre><code class="language-forma"># Declare async function with 'as f'
+as f fetch_data(url: Str) -> Str!Str
     response := http_get(url)?
-    Ok(response)</code></pre>
+    Ok(response)
+
+# Async main
+as f main()
+    data := aw fetch_data("https://api.example.com")
+    print(data)</code></pre>
+
+          <h3>Spawn and Await</h3>
           <pre><code class="language-forma">as f main()
-    # Spawn concurrent work
+    # Spawn concurrent tasks
     task1 := sp fetch_data("https://api.example.com/a")
     task2 := sp fetch_data("https://api.example.com/b")
+    task3 := sp fetch_data("https://api.example.com/c")
 
-    # Await results
+    # Await results (runs concurrently)
     result1 := aw task1
     result2 := aw task2
-    print("Both complete!")</code></pre>
+    result3 := aw task3
+
+    print("All fetches complete!")</code></pre>
+
+          <h3>Channels</h3>
           <pre><code class="language-forma">as f main()
+    # Create channel
     ch := channel_new()
     sender := ch.0
     receiver := ch.1
 
-    sp producer(sender)
+    # Spawn producer
+    sp produce(sender)
 
-    msg := channel_recv(receiver)
-    print(msg)</code></pre>
+    # Receive messages
+    lp
+        m channel_recv(receiver)
+            Some(msg) -> print(msg)
+            None -> br  # Channel closed
+
+as f produce(sender: Sender[Str])
+    for i in 0..10
+        channel_send(sender, f"Message {i}")
+    channel_close(sender)</code></pre>
+
+          <h3>Mutex for Shared State</h3>
+          <pre><code class="language-forma">as f main()
+    # Create shared counter
+    counter := mutex_new(0)
+
+    # Spawn workers
+    tasks := []
+    for i in 0..10
+        task := sp increment_counter(counter)
+        vec_push(tasks, task)
+
+    # Wait for all
+    for task in tasks
+        aw task
+
+    # Read final value
+    value := mutex_lock(counter)
+    print(f"Final count: {value}")
+
+as f increment_counter(counter: Mutex[Int])
+    for _ in 0..100
+        mut guard := mutex_lock(counter)
+        guard := guard + 1
+        mutex_unlock(counter)</code></pre>
         </section>
 
+        <!-- STANDARD LIBRARY -->
         <section class="reference-block reveal" id="stdlib">
-          <h2>Standard Library Overview</h2>
-          <p>
-            FORMA exposes 298+ builtins across I/O, text processing, math, data structures, networking, persistence, and diagnostics.
-          </p>
-          <div class="table-wrap">
-            <table class="reference-table">
-              <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>Representative Functions</th>
-                  <th>Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>I/O</td>
-                  <td><code>print</code> <code>eprintln</code> <code>str</code></td>
-                  <td>Core output + conversion primitives.</td>
-                </tr>
-                <tr>
-                  <td>Strings</td>
-                  <td><code>str_len</code> <code>str_split</code> <code>str_trim</code> <code>str_slice</code></td>
-                  <td>Common text transforms and parsing helpers.</td>
-                </tr>
-                <tr>
-                  <td>Collections</td>
-                  <td><code>vec_push</code> <code>vec_pop</code> <code>map_get</code> <code>map_insert</code></td>
-                  <td>List/map operations + utility functions.</td>
-                </tr>
-                <tr>
-                  <td>Math</td>
-                  <td><code>abs</code> <code>sqrt</code> <code>pow</code> <code>sin</code> <code>log</code></td>
-                  <td>Numeric operations and transcendental math.</td>
-                </tr>
-                <tr>
-                  <td>File I/O</td>
-                  <td><code>file_read</code> <code>file_write</code> <code>dir_list</code></td>
-                  <td>Requires capability flags (<code>--allow-read</code>, <code>--allow-write</code>).</td>
-                </tr>
-                <tr>
-                  <td>Networking</td>
-                  <td><code>http_get</code> <code>http_serve</code> <code>tcp_connect</code> <code>tls_connect</code></td>
-                  <td>Requires <code>--allow-network</code>.</td>
-                </tr>
-                <tr>
-                  <td>Database</td>
-                  <td><code>db_open</code> <code>db_execute</code> <code>db_query</code></td>
-                  <td>SQLite workflow with row extraction helpers.</td>
-                </tr>
-                <tr>
-                  <td>JSON / Regex / Time / Random</td>
-                  <td><code>json_parse</code> <code>regex_match</code> <code>time_now</code> <code>random_int</code></td>
-                  <td>Common runtime features for service and tooling code.</td>
-                </tr>
-                <tr>
-                  <td>Process / Env / Unsafe</td>
-                  <td><code>exec</code> <code>env_get</code> <code>env_set</code> <code>alloc</code> <code>dealloc</code></td>
-                  <td>Capability-gated (<code>--allow-exec</code>, <code>--allow-env</code>, <code>--allow-unsafe</code>).</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <h2>Standard Library</h2>
+          <p>FORMA includes 298+ built-in functions across multiple categories.</p>
+
+          <h3>I/O and Printing</h3>
+          <pre><code class="language-forma"># Console output
+print("Hello")              # Print with newline
+print(42)                   # Print any value
+eprintln("Error!")          # Print to stderr
+
+# String conversion
+str(42)                     # "42"
+str(3.14)                   # "3.14"
+str(true)                   # "true"</code></pre>
+
+          <h3>String Operations</h3>
+          <pre><code class="language-forma">s := "Hello, World!"
+
+str_len(s)                  # 13
+str_upper(s)                # "HELLO, WORLD!"
+str_lower(s)                # "hello, world!"
+str_trim("  hi  ")          # "hi"
+str_trim_start("  hi")      # "hi"
+str_trim_end("hi  ")        # "hi"
+
+str_split("a,b,c", ",")     # ["a", "b", "c"]
+str_join(["a", "b"], "-")   # "a-b"
+
+str_contains(s, "World")    # true
+str_starts_with(s, "Hello") # true
+str_ends_with(s, "!")       # true
+
+str_slice(s, 0, 5)          # "Hello"
+str_replace(s, "World", "FORMA")  # "Hello, FORMA!"
+
+str_to_int("42")            # Some(42)
+str_to_float("3.14")        # Some(3.14)
+str_to_int("abc")           # None</code></pre>
+
+          <h3>Collection Operations</h3>
+          <pre><code class="language-forma"># Lists
+arr := [1, 2, 3, 4, 5]
+
+len(arr)                    # 5
+vec_push(arr, 6)            # [1, 2, 3, 4, 5, 6]
+vec_pop(arr)                # Some(6), arr = [1, 2, 3, 4, 5]
+vec_get(arr, 2)             # Some(3)
+vec_set(arr, 0, 10)         # [10, 2, 3, 4, 5]
+
+vec_first(arr)              # Some(1)
+vec_last(arr)               # Some(5)
+vec_reverse(arr)            # [5, 4, 3, 2, 1]
+vec_sort(arr)               # [1, 2, 3, 4, 5]
+
+vec_contains(arr, 3)        # true
+vec_index_of(arr, 3)        # Some(2)
+
+vec_slice(arr, 1, 4)        # [2, 3, 4]
+vec_concat([1, 2], [3, 4])  # [1, 2, 3, 4]
+
+# Higher-order functions
+map(arr, |x| x * 2)         # [2, 4, 6, 8, 10]
+filter(arr, |x| x > 2)      # [3, 4, 5]
+reduce(arr, 0, |a, b| a + b)  # 15
+any(arr, |x| x > 3)         # true
+all(arr, |x| x > 0)         # true
+
+# Maps
+m := {"a": 1, "b": 2}
+
+map_get(m, "a")             # Some(1)
+map_get(m, "c")             # None
+map_insert(m, "c", 3)       # {"a": 1, "b": 2, "c": 3}
+map_remove(m, "a")          # {"b": 2, "c": 3}
+map_contains(m, "b")        # true
+map_keys(m)                 # ["a", "b"]
+map_values(m)               # [1, 2]</code></pre>
+
+          <h3>Math Functions</h3>
+          <pre><code class="language-forma"># Basic math
+abs(-5)                     # 5
+min(3, 7)                   # 3
+max(3, 7)                   # 7
+clamp(15, 0, 10)            # 10
+
+# Floating point
+sqrt(16.0)                  # 4.0
+pow(2.0, 10.0)              # 1024.0
+floor(3.7)                  # 3.0
+ceil(3.2)                   # 4.0
+round(3.5)                  # 4.0
+
+# Trigonometry
+sin(0.0)                    # 0.0
+cos(0.0)                    # 1.0
+tan(0.0)                    # 0.0
+asin(0.0)                   # 0.0
+acos(1.0)                   # 0.0
+atan(0.0)                   # 0.0
+atan2(1.0, 1.0)             # 0.785...
+
+# Logarithms
+log(2.718)                  # ~1.0 (natural log)
+log10(100.0)                # 2.0
+log2(8.0)                   # 3.0
+exp(1.0)                    # ~2.718</code></pre>
+
+          <h3>File I/O</h3>
+          <pre><code class="language-forma"># Requires --allow-read and/or --allow-write
+
+# Reading
+content := file_read("data.txt")?
+lines := file_read_lines("data.txt")?
+bytes := file_read_bytes("image.png")?
+
+# Writing
+file_write("output.txt", "Hello!")?
+file_write_lines("output.txt", ["line1", "line2"])?
+file_write_bytes("output.bin", bytes)?
+
+# Appending
+file_append("log.txt", "New entry\n")?
+
+# File info
+file_exists("data.txt")     # true/false
+file_size("data.txt")       # bytes
+file_is_dir("src/")         # true/false
+
+# Directory operations
+files := dir_list("src/")?
+dir_create("new_dir")?
+dir_remove("old_dir")?</code></pre>
+
+          <h3>JSON</h3>
+          <pre><code class="language-forma"># Parsing
+data := json_parse("{\"name\": \"Alice\", \"age\": 30}")?
+
+# Accessing values
+name := json_get(data, "name")  # "Alice"
+age := json_get(data, "age")    # 30
+
+# Creating JSON
+obj := json_object()
+json_set(obj, "id", 1)
+json_set(obj, "active", true)
+
+# Serializing
+json_str := json_stringify(obj)  # {"id":1,"active":true}</code></pre>
+
+          <h3>HTTP (requires --allow-network)</h3>
+          <pre><code class="language-forma"># GET request
+response := http_get("https://api.example.com/data")?
+
+# POST request
+response := http_post(
+    "https://api.example.com/submit",
+    "{\"name\": \"test\"}",
+    {"Content-Type": "application/json"}
+)?
+
+# Simple HTTP server
+as f main()
+    http_serve("0.0.0.0:8080", handle_request)
+
+f handle_request(req: HttpRequest) -> HttpResponse
+    m req.path
+        "/" -> HttpResponse { status: 200, body: "Hello!" }
+        "/api" -> HttpResponse { status: 200, body: json_data }
+        _ -> HttpResponse { status: 404, body: "Not found" }</code></pre>
+
+          <h3>Time and Random</h3>
+          <pre><code class="language-forma"># Current time
+now := time_now()           # Unix timestamp (seconds)
+now_ms := time_now_ms()     # Milliseconds
+
+# Formatting
+time_format(now, "%Y-%m-%d %H:%M:%S")
+
+# Sleeping
+sleep(1000)                 # Sleep 1000ms
+
+# Random numbers
+random_int(1, 100)          # Random int in [1, 100]
+random_float()              # Random float in [0.0, 1.0)
+random_choice([1, 2, 3])    # Random element
+random_shuffle([1, 2, 3])   # Shuffled copy</code></pre>
+
+          <h3>Regex</h3>
+          <pre><code class="language-forma"># Matching
+regex_match("hello123", "\\d+")     # true
+regex_find("hello123", "\\d+")      # Some("123")
+regex_find_all("a1b2c3", "\\d")     # ["1", "2", "3"]
+
+# Replacing
+regex_replace("hello123", "\\d+", "XXX")  # "helloXXX"
+
+# Splitting
+regex_split("a1b2c3", "\\d")        # ["a", "b", "c"]</code></pre>
+
+          <h3>Environment (requires --allow-env)</h3>
+          <pre><code class="language-forma">env_get("HOME")             # Some("/home/user")
+env_get("MISSING")          # None
+env_set("MY_VAR", "value")
+env_vars()                  # Map of all env vars</code></pre>
         </section>
 
+        <!-- CLI AND TOOLING -->
         <section class="reference-block reveal" id="tooling">
-          <h2>Tooling and CLI</h2>
-          <p>
-            The CLI covers execution, checking, building, verification reporting, grammar export, project scaffolding, and editor-facing queries.
-          </p>
-          <pre><code class="language-bash">forma run &lt;file&gt;                   # Run a FORMA program
-forma run &lt;file&gt; --dump-mir        # Run with MIR dump
-forma run &lt;file&gt; --no-check-contracts # Disable runtime contracts
-forma run &lt;file&gt; --allow-read      # Allow file reads
-forma run &lt;file&gt; --allow-write     # Allow file writes
-forma run &lt;file&gt; --allow-network   # Allow networking
-forma run &lt;file&gt; --allow-exec      # Allow process execution
-forma run &lt;file&gt; --allow-env       # Allow env var access
-forma run &lt;file&gt; --allow-unsafe    # Allow pointer/unsafe builtins
-forma run &lt;file&gt; --allow-all       # Allow all capabilities
-forma check &lt;file&gt;                 # Type check without running
-forma check &lt;file&gt; --partial       # Partial checking
-forma build &lt;file&gt;                 # Build native executable (LLVM feature)
-forma explain &lt;file&gt;               # Explain contracts in plain English
-forma explain &lt;file&gt; --examples=3 --seed 42 --format json
-forma explain &lt;file&gt; --max-examples 3 --seed 42 --format json
-forma verify &lt;file-or-dir&gt; --report --format human
-forma verify &lt;file-or-dir&gt; --report --format json --examples 20 --seed 42
-forma verify &lt;file-or-dir&gt; --report --max-steps 10000 --timeout 1000
-forma lex &lt;file&gt;                   # Dump tokens
-forma parse &lt;file&gt;                 # Dump AST
-forma grammar --format ebnf        # Export grammar as EBNF
-forma grammar --format json        # Export grammar as JSON
-forma fmt &lt;file&gt;                   # Format source code
-forma repl                         # Interactive REPL
-forma new &lt;name&gt;                   # Create new project
-forma init                         # Initialize project in current dir
-forma typeof &lt;file&gt; --position 5:10  # Query type at position
-forma complete &lt;file&gt; --position 5:10  # Get completions</code></pre>
-          <h3>Error Formats</h3>
-          <div class="reference-grid two">
-            <article>
-              <p class="micro-note">Default (human-readable)</p>
-              <pre><code>error[type_mismatch]: expected Int, found Str
-  --&gt; main.forma:5:12</code></pre>
-            </article>
-            <article>
-              <p class="micro-note">JSON mode (machine-readable)</p>
-              <pre><code>{
+          <h2>CLI and Tooling</h2>
+
+          <h3>Running Programs</h3>
+          <pre><code class="language-bash"># Basic execution
+forma run program.forma
+
+# With capabilities
+forma run program.forma --allow-read         # File reading
+forma run program.forma --allow-write        # File writing
+forma run program.forma --allow-network      # HTTP, sockets
+forma run program.forma --allow-exec         # Process execution
+forma run program.forma --allow-env          # Environment variables
+forma run program.forma --allow-unsafe       # Unsafe operations
+forma run program.forma --allow-all          # All capabilities
+
+# Contract control
+forma run program.forma --no-check-contracts # Disable contract checks
+
+# Debugging
+forma run program.forma --dump-mir           # Show MIR output</code></pre>
+
+          <h3>Type Checking</h3>
+          <pre><code class="language-bash"># Check without running
+forma check program.forma
+
+# Partial checking (for incomplete programs)
+forma check program.forma --partial
+
+# JSON errors for tooling
+forma check program.forma --error-format json</code></pre>
+
+          <h3>Verification Commands</h3>
+          <pre><code class="language-bash"># Explain contracts
+forma explain file.forma --format human
+forma explain file.forma --format json
+
+# Verify contracts
+forma verify file.forma
+forma verify src/                           # Verify directory
+forma verify src/ --examples 1000           # More test cases
+forma verify src/ --seed 42                 # Deterministic
+forma verify src/ --report --format json    # CI-friendly output</code></pre>
+
+          <h3>Grammar Export</h3>
+          <pre><code class="language-bash"># For constrained LLM generation
+forma grammar --format ebnf > forma.ebnf
+forma grammar --format json > forma-grammar.json</code></pre>
+
+          <h3>Development Tools</h3>
+          <pre><code class="language-bash"># Formatting
+forma fmt file.forma                # Format file
+forma fmt src/ --check              # Check formatting (CI)
+
+# REPL
+forma repl                          # Interactive mode
+
+# Type queries (for IDE integration)
+forma typeof file.forma --position 5:10
+forma complete file.forma --position 5:10
+
+# LSP server
+forma lsp                           # Start language server
+
+# Lexer/parser debugging
+forma lex file.forma                # Show tokens
+forma parse file.forma              # Show AST</code></pre>
+
+          <h3>Project Management</h3>
+          <pre><code class="language-bash"># Create project
+forma new my_project
+forma init                          # Initialize in current dir
+
+# Build native binary (requires LLVM)
+forma build program.forma
+forma build program.forma -o output</code></pre>
+
+          <h3>JSON Error Format</h3>
+          <pre><code class="language-json">{
   "success": false,
   "errors": [{
     "file": "main.forma",
@@ -693,65 +1671,194 @@ forma complete &lt;file&gt; --position 5:10  # Get completions</code></pre>
     "column": 12,
     "severity": "error",
     "code": "type_mismatch",
-    "message": "expected Int, found Str"
+    "message": "expected Int, found Str",
+    "expected": "Int",
+    "found": "Str",
+    "suggestion": "use str_to_int() to convert"
   }]
 }</code></pre>
-            </article>
-          </div>
         </section>
 
-        <section class="reference-block reveal" id="ai-workflows">
-          <h2>AI Workflows</h2>
-          <p>
-            FORMA exposes dedicated surfaces for constrained generation, automated repair loops, and trust verification workflows.
-          </p>
-          <div class="reference-grid two">
-            <article>
-              <h3>Constrained Syntax Generation</h3>
-              <pre><code class="language-bash">forma grammar --format ebnf &gt; forma.ebnf
-forma grammar --format json &gt; forma.json</code></pre>
-              <p class="micro-note">Use grammar files to restrict decoding to valid FORMA syntax.</p>
-            </article>
-            <article>
-              <h3>Repair + Verification Loop Inputs</h3>
-              <pre><code class="language-bash">forma check --error-format json broken.forma</code></pre>
-              <p class="micro-note">Type query: <code>forma typeof myfile.forma --position "5:10"</code>.</p>
-              <p class="micro-note">Completions: <code>forma complete myfile.forma --position "5:10"</code>.</p>
-              <p class="micro-note">Explain: <code>forma explain myfile.forma --format json --examples=3 --seed 42</code>.</p>
-              <p class="micro-note">Verify: <code>forma verify src --report --format json --examples 20 --seed 42</code>.</p>
-              <p class="micro-note">`verify` emits <code>PASS</code>/<code>WARN</code>/<code>SKIP</code>/<code>FAIL</code> contract status per function.</p>
-            </article>
-          </div>
-          <h3>Token-Efficient Keyword Set</h3>
-          <div class="inline-notes">
-            <span><code>f</code> function</span>
-            <span><code>s</code> struct</span>
-            <span><code>e</code> enum</span>
-            <span><code>m</code> match</span>
-            <span><code>wh</code> while</span>
-            <span><code>lp</code> loop</span>
-            <span><code>as/aw/sp</code> async trio</span>
-          </div>
+        <!-- COMMON PATTERNS -->
+        <section class="reference-block reveal" id="patterns">
+          <h2>Common Patterns</h2>
+          <p>Idiomatic FORMA code patterns for common tasks.</p>
+
+          <h3>Builder Pattern</h3>
+          <pre><code class="language-forma">s RequestBuilder
+    url: Str
+    method: Str
+    headers: {Str: Str}
+    body: Str?
+
+i RequestBuilder
+    f new(url: Str) -> RequestBuilder
+        RequestBuilder {
+            url: url,
+            method: "GET",
+            headers: {},
+            body: None
+        }
+
+    f method(&self, m: Str) -> RequestBuilder
+        RequestBuilder { method: m, ..self }
+
+    f header(&self, key: Str, value: Str) -> RequestBuilder
+        mut h := self.headers
+        map_insert(h, key, value)
+        RequestBuilder { headers: h, ..self }
+
+    f body(&self, b: Str) -> RequestBuilder
+        RequestBuilder { body: Some(b), ..self }
+
+# Usage
+request := RequestBuilder.new("https://api.example.com")
+    .method("POST")
+    .header("Content-Type", "application/json")
+    .body("{\"data\": 123}")</code></pre>
+
+          <h3>Result Chaining</h3>
+          <pre><code class="language-forma">f process_file(path: Str) -> Data!Str
+    content := file_read(path)?
+    parsed := json_parse(content)?
+    validated := validate(parsed)?
+    Ok(transform(validated))
+
+# Alternative with map/and_then
+f process_file_v2(path: Str) -> Data!Str
+    file_read(path)
+        .and_then(|c| json_parse(c))
+        .and_then(|p| validate(p))
+        .map(|v| transform(v))</code></pre>
+
+          <h3>State Machine</h3>
+          <pre><code class="language-forma">e State
+    Idle
+    Loading
+    Ready(Data)
+    Error(Str)
+
+s Machine
+    state: State
+
+i Machine
+    f new() -> Machine
+        Machine { state: State.Idle }
+
+    f transition(&self, event: Event) -> Machine
+        new_state := m (self.state, event)
+            (State.Idle, Event.Start) -> State.Loading
+            (State.Loading, Event.Success(data)) -> State.Ready(data)
+            (State.Loading, Event.Failure(e)) -> State.Error(e)
+            (State.Error(_), Event.Retry) -> State.Loading
+            (s, _) -> s  # No transition
+        Machine { state: new_state }</code></pre>
+
+          <h3>Iteration with Index</h3>
+          <pre><code class="language-forma">items := ["a", "b", "c"]
+
+# Using enumerate
+for (i, item) in enumerate(items)
+    print(f"{i}: {item}")
+
+# Manual indexing
+for i in 0..len(items)
+    print(f"{i}: {items[i]}")</code></pre>
+
+          <h3>Retry Pattern</h3>
+          <pre><code class="language-forma">@pre(max_attempts > 0)
+f retry[T, E](max_attempts: Int, operation: () -> T!E) -> T!E
+    mut attempts := 0
+    lp
+        attempts := attempts + 1
+        m operation()
+            Ok(v) -> ret Ok(v)
+            Err(e) if attempts >= max_attempts -> ret Err(e)
+            Err(_) -> sleep(1000 * attempts)  # Exponential backoff
+
+# Usage
+result := retry(3, || http_get("https://api.example.com"))</code></pre>
+
+          <h3>Resource Cleanup</h3>
+          <pre><code class="language-forma">f with_file[T](path: Str, operation: (File) -> T) -> T!Str
+    file := file_open(path)?
+    result := operation(file)
+    file_close(file)
+    Ok(result)
+
+# Usage
+with_file("data.txt", |f|
+    content := file_read_all(f)
+    process(content)
+)?</code></pre>
         </section>
 
+        <!-- QUICK REFERENCE -->
         <section class="reference-block reveal" id="appendix">
-          <h2>Keyword and Operator Appendix</h2>
+          <h2>Quick Reference</h2>
+
+          <h3>Keywords</h3>
           <div class="reference-grid two">
             <article>
-              <h3>Keywords</h3>
-              <p class="micro-note">Core: <code>f s e t i m if then else for in wh lp br ct ret as aw sp us md pub mut ref mv un type where linear affine</code></p>
-              <p class="micro-note">Literals/constructors: <code>true false T F none N Some Ok Err ok err</code></p>
+              <p class="micro-note"><strong>Core:</strong></p>
+              <p><code>f s e t i m if then else for in wh lp br ct ret as aw sp us md pub mut ref mv type where</code></p>
             </article>
             <article>
-              <h3>Operators</h3>
-              <p class="micro-note">Arithmetic: <code>+ - * / %</code></p>
-              <p class="micro-note">Comparison: <code>== != &lt; &lt;= &gt; &gt;=</code></p>
-              <p class="micro-note">Logical: <code>&amp;&amp; || !</code></p>
-              <p class="micro-note">Bitwise: <code>&amp; | ^ &lt;&lt; &gt;&gt;</code></p>
-              <p class="micro-note">Special: <code>:= = += -= *= /= %= ? ?? -&gt; =&gt; .. ..= :: . @</code></p>
+              <p class="micro-note"><strong>Values:</strong></p>
+              <p><code>true false None Some Ok Err</code></p>
             </article>
           </div>
+
+          <h3>Operators</h3>
+          <div class="reference-grid two">
+            <article>
+              <p class="micro-note"><strong>Arithmetic:</strong> <code>+ - * / %</code></p>
+              <p class="micro-note"><strong>Comparison:</strong> <code>== != &lt; &lt;= &gt; &gt;=</code></p>
+              <p class="micro-note"><strong>Logical:</strong> <code>&amp;&amp; || !</code></p>
+            </article>
+            <article>
+              <p class="micro-note"><strong>Bitwise:</strong> <code>&amp; | ^ &lt;&lt; &gt;&gt;</code></p>
+              <p class="micro-note"><strong>Assignment:</strong> <code>:= = += -= *= /= %=</code></p>
+              <p class="micro-note"><strong>Special:</strong> <code>? ?? ! -&gt; =&gt; .. ..= @ &amp;</code></p>
+            </article>
+          </div>
+
+          <h3>Type Shortcuts</h3>
+          <div class="table-wrap">
+            <table class="reference-table">
+              <thead>
+                <tr><th>Shorthand</th><th>Full Form</th><th>Example</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>T?</code></td><td><code>Option[T]</code></td><td><code>Int?</code> = <code>Option[Int]</code></td></tr>
+                <tr><td><code>T!E</code></td><td><code>Result[T, E]</code></td><td><code>Int!Str</code> = <code>Result[Int, Str]</code></td></tr>
+                <tr><td><code>[T]</code></td><td><code>Vec[T]</code></td><td><code>[Int]</code> = dynamic array</td></tr>
+                <tr><td><code>[T; N]</code></td><td><code>Array[T, N]</code></td><td><code>[Int; 3]</code> = fixed array</td></tr>
+                <tr><td><code>{K: V}</code></td><td><code>Map[K, V]</code></td><td><code>{Str: Int}</code> = hash map</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Contract Quick Reference</h3>
+          <div class="table-wrap">
+            <table class="reference-table">
+              <thead>
+                <tr><th>Syntax</th><th>Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>@pre(condition)</code></td><td>Precondition - must be true when called</td></tr>
+                <tr><td><code>@post(condition)</code></td><td>Postcondition - will be true on return</td></tr>
+                <tr><td><code>old(expr)</code></td><td>Value of expr at function entry</td></tr>
+                <tr><td><code>result</code></td><td>Return value (in postconditions)</td></tr>
+                <tr><td><code>forall x in coll: P</code></td><td>All elements satisfy P</td></tr>
+                <tr><td><code>exists x in coll: P</code></td><td>Some element satisfies P</td></tr>
+                <tr><td><code>a ==> b</code></td><td>a implies b</td></tr>
+                <tr><td><code>x in coll</code></td><td>x is member of coll</td></tr>
+              </tbody>
+            </table>
+          </div>
         </section>
+
       </div>
     </section>
   </main>

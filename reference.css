@@ -418,4 +418,47 @@ body.reference-page {
   #showcaseSource {
     margin-left: 0;
   }
+
+  .reference-block pre {
+    font-size: 0.72rem;
+    padding: 0.6rem;
+    border-radius: 8px;
+  }
+
+  .reference-table {
+    min-width: 100%;
+    font-size: 0.75rem;
+  }
+
+  .reference-table th,
+  .reference-table td {
+    padding: 0.4rem 0.35rem;
+    font-size: 0.72rem;
+  }
+
+  .table-wrap {
+    border-radius: 8px;
+  }
+
+  .reference-chips {
+    gap: 0.35rem;
+  }
+
+  .reference-chips span {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.45rem;
+  }
+
+  .reference-page .site-header {
+    padding: 0.6rem 0.8rem;
+  }
+
+  .reference-page .site-view-switcher {
+    gap: 0.3rem;
+  }
+
+  .reference-page .site-view-switcher a {
+    font-size: 0.72rem;
+    padding: 0.3rem 0.5rem;
+  }
 }

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="FORMA is an AI-native systems programming language with memory safety, constrained generation, and verification UX for explainable AI-authored code.">
-  <title>FORMA Language | forma-lang.dev</title>
+  <meta name="description" content="FORMA is an AI-native systems programming language with memory safety, constrained generation, and verification tools that let you trust AI-generated code without reading every line.">
+  <title>FORMA Language | Trust AI-Generated Code | forma-lang.dev</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -18,13 +18,13 @@
     </a>
     <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="siteNav">Menu</button>
     <nav class="site-nav" id="siteNav">
+      <a href="#problem">The Problem</a>
+      <a href="#tools">Tools</a>
       <a href="#playground">Playground</a>
-      <a href="#examples">Examples</a>
-      <a href="#commands">CLI</a>
       <a href="#roadmap">Roadmap</a>
     </nav>
     <nav class="site-view-switcher" aria-label="Switch site view">
-      <a href="index.html" aria-current="page">Interactive</a>
+      <a href="index.html" aria-current="page">Overview</a>
       <a href="technical.html">Architecture</a>
       <a href="reference.html">Reference</a>
     </nav>
@@ -41,33 +41,32 @@
       <div class="hero-grid">
         <div class="hero-copy">
           <p class="eyebrow">AI-native systems programming</p>
-          <h1>Code that writes itself correctly, and proves it.</h1>
+          <h1>AI writes code faster than you can review it. We built a language and tools to fix that.</h1>
           <p class="lede">
-            FORMA is built for AI-assisted development: memory-safe by design, grammar-constrained for reliable generation,
-            concise enough to reduce token costs, and equipped with verification UX to make generated code auditable.
+            FORMA is a systems language designed for AI code generation. Memory-safe without lifetime annotations.
+            Grammar-constrained to prevent invalid syntax. And the first language with built-in tools to <strong>explain</strong>
+            and <strong>verify</strong> what AI-generated code actually does—so you can trust it without reading every line.
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="#playground">Try Live Playground</a>
-            <a class="button" href="https://github.com/sfw/forma" target="_blank" rel="noreferrer">Read Compiler Source</a>
-            <a class="button" href="technical.html">Open Architecture Brief</a>
-            <a class="button" href="reference.html">Read Language Reference</a>
+            <a class="button primary" href="technical.html">Architecture Deep Dive</a>
+            <a class="button" href="reference.html">Language Reference</a>
           </div>
           <div class="stats-grid">
-            <article class="stat-card">
+            <article class="stat-card stat-highlight">
               <p class="stat-value">94.8%</p>
-              <p class="stat-label">Rust AI failures linked to lifetime errors</p>
+              <p class="stat-label">of AI-generated Rust failures are lifetime errors. FORMA has zero.</p>
             </article>
             <article class="stat-card">
               <p class="stat-value">38%</p>
-              <p class="stat-label">Fewer tokens than equivalent Rust code</p>
+              <p class="stat-label">fewer tokens than equivalent Rust—lower inference costs at scale</p>
             </article>
             <article class="stat-card">
               <p class="stat-value">298+</p>
-              <p class="stat-label">Built-in standard library functions</p>
+              <p class="stat-label">built-in functions—no external dependencies for common tasks</p>
             </article>
             <article class="stat-card">
-              <p class="stat-value">21</p>
-              <p class="stat-label">Showcase programs in current repository</p>
+              <p class="stat-value">46</p>
+              <p class="stat-label">development sprints of research-driven iteration</p>
             </article>
           </div>
         </div>
@@ -87,11 +86,209 @@
       </div>
     </section>
 
+    <section class="section reveal" id="problem">
+      <div class="section-header">
+        <p class="eyebrow">The Trust Problem</p>
+        <h2>You're generating thousands of lines of code you can't fully review</h2>
+        <p>AI coding assistants are transforming development. But they create a new problem: <strong>code you didn't write that you're responsible for</strong>.</p>
+      </div>
+
+      <div class="problem-grid">
+        <article class="problem-card">
+          <h3>The Volume Problem</h3>
+          <p>AI generates code faster than humans can review. A single prompt can produce hundreds of lines. Multiply that across a team, and you have a codebase growing faster than anyone can audit.</p>
+        </article>
+        <article class="problem-card">
+          <h3>The Complexity Problem</h3>
+          <p>Systems code is the hardest to verify. Memory management, concurrency, error handling—the things that cause production failures are exactly what's hardest to review at a glance.</p>
+        </article>
+        <article class="problem-card">
+          <h3>The Liability Problem</h3>
+          <p>When AI-generated code fails in production, it's your responsibility. "The AI wrote it" isn't a defense. You need a way to verify correctness before you ship.</p>
+        </article>
+      </div>
+
+      <div class="problem-solution">
+        <h3>The FORMA Approach: Trust Through Verification</h3>
+        <p>
+          Instead of asking you to review every line, FORMA gives you tools to verify what the code <em>promises</em>.
+          Contracts specify behavior. <code>forma explain</code> translates them to English. <code>forma verify</code> tests them automatically.
+          You review the specification, not the implementation.
+        </p>
+      </div>
+    </section>
+
+    <section class="section reveal" id="tools">
+      <div class="section-header">
+        <p class="eyebrow">The Verification Toolchain</p>
+        <h2>Tools that make AI-generated code trustworthy</h2>
+        <p>FORMA isn't just a language—it's a complete toolchain for generating, constraining, and verifying AI-authored code.</p>
+      </div>
+
+      <div class="tools-grid">
+        <article class="tool-card tool-featured">
+          <h3>forma explain</h3>
+          <p class="tool-tagline">Understand what code promises without reading it</p>
+          <p>Translates function contracts into plain English. See what the AI claims the code does—preconditions, postconditions, invariants—in human language.</p>
+          <pre><code>$ forma explain sort.forma --format human
+
+┌─────────────────────────────────────────────────┐
+│ verified_sort(items: [Int]) -> [Int]            │
+├─────────────────────────────────────────────────┤
+│ Requires:                                       │
+│   • items must not be empty                     │
+│                                                 │
+│ Guarantees:                                     │
+│   • Output is sorted in ascending order         │
+│   • Output contains exactly the same elements   │
+│     as input (permutation)                      │
+└─────────────────────────────────────────────────┘</code></pre>
+          <p class="tool-note">JSON output available for CI integration and automated review pipelines.</p>
+        </article>
+
+        <article class="tool-card tool-featured">
+          <h3>forma verify --report</h3>
+          <p class="tool-tagline">Prove contracts hold with generated test cases</p>
+          <p>Automatically generates inputs, runs them against contracts, and produces a trust report. PASS/WARN/SKIP/FAIL status for every function. Deterministic with seed control.</p>
+          <pre><code>$ forma verify src/ --report --format human
+
+═══════════════════════════════════════════════════
+              FORMA Verification Report
+═══════════════════════════════════════════════════
+
+src/sort.forma
+├─ verified_sort ..................... ✓ PASS (3 contracts)
+├─ binary_search ..................... ✓ PASS (2 contracts)
+└─ merge ............................ ⚠ WARN (no contracts)
+
+Summary: 2 verified, 1 warning, 0 failures</code></pre>
+          <p class="tool-note">Capabilities revoked by default—safe to run in CI without side effects.</p>
+        </article>
+
+        <article class="tool-card">
+          <h3>Grammar Export</h3>
+          <p class="tool-tagline">Constrain generation to valid syntax</p>
+          <p>Export FORMA's grammar as EBNF or JSON. Feed it to constrained decoding pipelines (llama.cpp, Outlines, etc.) to guarantee the AI only produces syntactically valid code.</p>
+          <pre><code>$ forma grammar --format json > forma.json
+# Use with constrained decoding to eliminate syntax errors</code></pre>
+        </article>
+
+        <article class="tool-card">
+          <h3>JSON Diagnostics</h3>
+          <p class="tool-tagline">Machine-readable errors for self-correction loops</p>
+          <p>Compiler errors in structured JSON with location, severity, code, and suggestions. Feed them back to the AI for automatic repair without human intervention.</p>
+          <pre><code>$ forma check --error-format json broken.forma
+{"errors":[{"line":5,"code":"type_mismatch",
+  "message":"expected Int, found Str",
+  "suggestion":"Convert with str_to_int()"}]}</code></pre>
+        </article>
+
+        <article class="tool-card">
+          <h3>Contract Patterns</h3>
+          <p class="tool-tagline">Express invariants concisely</p>
+          <p>11 built-in contract patterns: <code>@sorted</code>, <code>@nonempty</code>, <code>@permutation</code>, <code>@bounded</code>, and more. Plus <code>forall</code>, <code>exists</code>, <code>old()</code>, and implication for custom specifications.</p>
+          <pre><code>@nonempty(items)
+@sorted(result)
+@permutation(items, result)
+f verified_sort(items: [Int]) -> [Int]</code></pre>
+        </article>
+
+        <article class="tool-card">
+          <h3>Type Queries</h3>
+          <p class="tool-tagline">Context-aware completions for AI prompts</p>
+          <p>Query types at any position. Get completions with full signatures. Provide context to AI systems for more accurate generation in complex codebases.</p>
+          <pre><code>$ forma typeof app.forma --position 12:8
+$ forma complete app.forma --position 12:8</code></pre>
+        </article>
+      </div>
+
+      <div class="tools-workflow">
+        <h3>The AI-Assisted Development Workflow</h3>
+        <div class="workflow-steps">
+          <div class="workflow-step">
+            <span class="step-number">1</span>
+            <h4>Constrain</h4>
+            <p>Export grammar, feed to AI. Generation is syntactically valid by construction.</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <span class="step-number">2</span>
+            <h4>Generate</h4>
+            <p>AI writes code with contracts specifying behavior.</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <span class="step-number">3</span>
+            <h4>Explain</h4>
+            <p>Review contracts in English. Understand promises without reading implementation.</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <span class="step-number">4</span>
+            <h4>Verify</h4>
+            <p>Run verification report. Get PASS/FAIL for every contract.</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <span class="step-number">5</span>
+            <h4>Ship</h4>
+            <p>Trust the code because you verified the specification.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal" id="language">
+      <div class="section-header">
+        <p class="eyebrow">The Language</p>
+        <h2>Systems programming without the AI failure modes</h2>
+        <p>FORMA is memory-safe, statically typed, and compiles to native code. It's designed so AI can generate it reliably.</p>
+      </div>
+
+      <div class="language-grid">
+        <article class="language-card">
+          <h3>No Lifetime Annotations</h3>
+          <p>Second-class references give you memory safety without explicit lifetimes. The #1 source of AI-generated Rust failures—eliminated by design.</p>
+        </article>
+        <article class="language-card">
+          <h3>Token Efficient</h3>
+          <p>Short keywords (<code>f</code>, <code>s</code>, <code>e</code>, <code>m</code>, <code>wh</code>), type shortcuts (<code>T?</code>, <code>T!E</code>), minimal punctuation. 38% fewer tokens than Rust for equivalent programs.</p>
+        </article>
+        <article class="language-card">
+          <h3>Batteries Included</h3>
+          <p>298+ built-in functions: HTTP, TCP/TLS, SQLite, compression, JSON, regex, async/await. No package ecosystem to navigate—AI can use the stdlib directly.</p>
+        </article>
+        <article class="language-card">
+          <h3>Capability Security</h3>
+          <p>File, network, and process access are gated by flags (<code>--allow-read</code>, <code>--allow-network</code>). Safe sandboxing for AI-generated code execution.</p>
+        </article>
+      </div>
+
+      <div class="code-comparison">
+        <h3>Quick Syntax Overview</h3>
+        <pre><code># Functions use 'f', return type after ->
+f factorial(n: Int) -> Int
+    if n <= 1 then 1
+    else n * factorial(n - 1)
+
+# Contracts specify behavior
+@pre(n >= 0, "n must be non-negative")
+@post(result >= 1, "factorial is always positive")
+f verified_factorial(n: Int) -> Int
+    if n <= 1 then 1 else n * verified_factorial(n - 1)
+
+# Async with 'as', spawn with 'sp', await with 'aw'
+as f fetch_all(urls: [Str]) -> [Str]
+    tasks := urls | map(|url| sp http_get(url))
+    tasks | map(|t| aw t)</code></pre>
+      </div>
+    </section>
+
     <section class="section reveal" id="playground">
       <div class="section-header">
         <p class="eyebrow">Interactive</p>
         <h2>Live FORMA Playground</h2>
-        <p>Load working examples, inspect syntax metrics, and generate machine-readable diagnostics for correction loops.</p>
+        <p>Load working examples, inspect token metrics, and see structured diagnostics.</p>
       </div>
 
       <div class="playground">
@@ -147,56 +344,12 @@
       </div>
     </section>
 
-    <section class="section reveal" id="examples">
-      <div class="section-header">
-        <p class="eyebrow">Showcase</p>
-        <h2>Example Explorer</h2>
-        <p>Search through runnable examples and send any one directly into the playground editor.</p>
-      </div>
-
-      <div class="example-tools">
-        <input id="exampleSearch" type="search" placeholder="Search by name, concept, or keyword..." aria-label="Search examples">
-      </div>
-      <div class="example-grid" id="exampleGrid"></div>
-    </section>
-
-    <section class="section reveal" id="commands">
-      <div class="section-header">
-        <p class="eyebrow">Developer Tooling</p>
-        <h2>CLI Command Builder</h2>
-        <p>Compose practical FORMA commands for run/check/build, explain/verify reports, grammar export, and editor queries.</p>
-      </div>
-
-      <div class="command-builder">
-        <div class="builder-grid">
-          <label>
-            Goal
-            <select id="goalSelect"></select>
-          </label>
-          <label>
-            Error Format
-            <select id="errorFormatSelect">
-              <option value="human">human</option>
-              <option value="json">json</option>
-            </select>
-          </label>
-          <label>
-            File
-            <input id="fileInput" type="text" value="main.forma">
-          </label>
-        </div>
-        <pre class="command-preview" id="commandPreview"></pre>
-        <div class="builder-actions">
-          <button class="button tiny" id="copyCommandBtn">Copy Command</button>
-        </div>
-      </div>
-    </section>
 
     <section class="section reveal" id="roadmap">
       <div class="section-header">
         <p class="eyebrow">Project Status</p>
-        <h2>Language Progress</h2>
-        <p>Track shipped compiler capabilities and active development targets.</p>
+        <h2>What's Shipped, What's Next</h2>
+        <p>FORMA is production-ready for AI-assisted development workflows. Here's where we are and where we're going.</p>
       </div>
 
       <div class="roadmap-filter" id="roadmapFilter">
@@ -205,6 +358,136 @@
         <button class="filter-btn" data-filter="building">Building</button>
       </div>
       <div class="roadmap-list" id="roadmapList"></div>
+
+      <div class="roadmap-future">
+        <h3>The Path to Formal Verification</h3>
+        <p>
+          Today, FORMA verifies contracts at runtime with generated test cases. The foundation is in place for the next level:
+          <strong>static verification</strong> that proves correctness without execution.
+        </p>
+        <div class="future-grid">
+          <article class="future-card">
+            <h4>What's Built</h4>
+            <ul>
+              <li>Clean MIR with CFG structure ideal for analysis</li>
+              <li>Contract expressions with quantifiers and old()</li>
+              <li>11 named patterns with formal semantics</li>
+              <li>Deterministic verification with seed control</li>
+            </ul>
+          </article>
+          <article class="future-card">
+            <h4>What's Coming</h4>
+            <ul>
+              <li>SMT solver integration (Z3) for bounded verification</li>
+              <li>Exportable verification conditions for external provers</li>
+              <li>Coverage-guided fuzzing with contract feedback</li>
+              <li>Refinement types for compile-time contract checking</li>
+            </ul>
+          </article>
+          <article class="future-card">
+            <h4>The Vision</h4>
+            <p>
+              A language where AI generates code with contracts, and the compiler <em>proves</em> those contracts hold—not
+              by testing, but by mathematical verification. Critical systems code that's correct by construction.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal" id="comparison">
+      <div class="section-header">
+        <p class="eyebrow">Positioning</p>
+        <h2>FORMA vs. Alternatives</h2>
+        <p>Several languages are exploring AI-first design. Here's how FORMA compares.</p>
+      </div>
+
+      <div class="comparison-table-wrap">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>FORMA</th>
+              <th>Rust</th>
+              <th>Mojo</th>
+              <th>Python</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Memory safe</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+              <td class="no">✗</td>
+            </tr>
+            <tr>
+              <td>No lifetime annotations</td>
+              <td class="yes">✓</td>
+              <td class="no">✗</td>
+              <td class="yes">✓</td>
+              <td class="na">N/A</td>
+            </tr>
+            <tr>
+              <td>Grammar export for constrained decoding</td>
+              <td class="yes">✓</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+            </tr>
+            <tr>
+              <td>JSON diagnostics for self-correction</td>
+              <td class="yes">✓</td>
+              <td class="partial">Partial</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+            </tr>
+            <tr>
+              <td>Contract explanation (explain command)</td>
+              <td class="yes">✓</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+            </tr>
+            <tr>
+              <td>Automated verification reports</td>
+              <td class="yes">✓</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+            </tr>
+            <tr>
+              <td>Capability-based sandboxing</td>
+              <td class="yes">✓</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+            </tr>
+            <tr>
+              <td>Native compilation</td>
+              <td class="yes">✓ (LLVM)</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+              <td class="no">✗</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="comparison-note">
+        Other AI-first languages exist. FORMA's differentiator is the <strong>complete verification toolchain</strong>:
+        grammar export, structured diagnostics, contract explanation, and automated verification reports—all designed
+        to work together for trustworthy AI-assisted development.
+      </p>
+    </section>
+
+    <section class="section cta-section reveal">
+      <h2>Ready to try FORMA?</h2>
+      <p>Clone the repo, build with Cargo, and run your first verified program in minutes.</p>
+      <div class="cta-actions">
+        <a class="button primary" href="https://github.com/sfw/forma" target="_blank" rel="noreferrer">Get Started on GitHub</a>
+        <a class="button" href="reference.html">Read the Full Reference</a>
+        <a class="button" href="technical.html">Explore the Architecture</a>
+      </div>
     </section>
   </main>
 
@@ -213,7 +496,7 @@
     <div class="footer-controls">
       <a class="button tiny" href="#hero">Back to top</a>
       <nav class="site-view-switcher" aria-label="Switch site view">
-        <a href="index.html" aria-current="page">Interactive</a>
+        <a href="index.html" aria-current="page">Overview</a>
         <a href="technical.html">Architecture</a>
         <a href="reference.html">Reference</a>
       </nav>

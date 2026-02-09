@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="FORMA architectural brief: design decisions, feature depth, delivery timeline, and engineering rationale.">
-  <title>FORMA Architecture Brief | forma-lang.dev</title>
+  <meta name="description" content="FORMA architectural deep dive: contract system, MIR architecture, verification toolchain, and the path to formal verification for critical systems.">
+  <title>FORMA Architecture Deep Dive | forma-lang.dev</title>
   <link rel="stylesheet" href="technical.css">
 </head>
 <body class="tech-page">
@@ -19,11 +19,11 @@
     <button class="tech-menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="siteNav">Menu</button>
     <nav class="tech-nav" id="siteNav">
       <a href="#why">Why</a>
+      <a href="#contracts">Contracts</a>
+      <a href="#mir">MIR</a>
+      <a href="#toolchain">Toolchain</a>
+      <a href="#roadmap">Roadmap</a>
       <a href="#inspirations">Inspirations</a>
-      <a href="#decisions">Decisions</a>
-      <a href="#features">Features</a>
-      <a href="#timeline">Timeline</a>
-      <a href="#sources">Research</a>
     </nav>
     <nav class="tech-view-switcher" aria-label="Switch site view">
       <a href="index.html">Interactive</a>
@@ -40,411 +40,788 @@
 
   <main>
     <section class="tech-hero reveal" id="top">
-      <p class="eyebrow">Architectural Brief</p>
-      <h1>FORMA is engineered for AI reliability without compromising systems-language power.</h1>
+      <p class="eyebrow">Architecture Deep Dive</p>
+      <h1>FORMA: The engineering decisions behind verifiable AI-generated code.</h1>
       <p class="hero-lede">
-        This is the technical sales sheet for FORMA: what was built, why specific architectural choices were made, and how those choices
-        produced a production-ready language/toolchain with strong AI-generation ergonomics.
+        This is the technical architecture document for FORMA. It covers the contract system, MIR intermediate representation,
+        verification toolchain integration, and the roadmap to formal verification for critical systems.
       </p>
       <div class="hero-actions">
-        <a class="tech-button primary" href="#decisions">See Core Decisions</a>
-        <a class="tech-button" href="#timeline">View Complete Timeline</a>
+        <a class="tech-button primary" href="index.html">Back to Overview</a>
+        <a class="tech-button" href="reference.html">Language Reference</a>
       </div>
       <div class="hero-metrics">
         <article class="metric-card">
-          <p class="metric-value">298+</p>
-          <p class="metric-label">Built-in standard library functions</p>
+          <p class="metric-value">~35%</p>
+          <p class="metric-label">Fewer tokens than Rust for AI generation</p>
         </article>
         <article class="metric-card">
-          <p class="metric-value">JSON + EBNF</p>
-          <p class="metric-label">Grammar export for constrained generation</p>
+          <p class="metric-value">Zero</p>
+          <p class="metric-label">Lifetime annotations—memory safety without complexity</p>
         </article>
         <article class="metric-card">
-          <p class="metric-value">JSON errors</p>
-          <p class="metric-label">Structured diagnostics for self-correction loops</p>
+          <p class="metric-value">@pre/@post</p>
+          <p class="metric-label">First-class contracts with quantifiers</p>
         </article>
         <article class="metric-card">
-          <p class="metric-value">v0.13</p>
-          <p class="metric-label">Active development release line</p>
+          <p class="metric-value">SMT-ready</p>
+          <p class="metric-label">MIR architecture designed for formal proofs</p>
         </article>
       </div>
     </section>
 
     <section class="tech-section reveal" id="why">
       <div class="section-head">
-        <p class="eyebrow">Design Goals</p>
-        <h2>What FORMA optimized for from day one</h2>
+        <p class="eyebrow">The Problem</p>
+        <h2>AI writes code faster than humans can review it</h2>
+        <p class="section-sub">
+          This is the core engineering challenge FORMA was built to solve. When AI generates thousands of lines of systems code,
+          traditional code review becomes a bottleneck. You need machine-verifiable guarantees.
+        </p>
       </div>
       <div class="goal-grid">
         <article class="goal-card">
-          <h3>1. AI-first correctness</h3>
-          <p>Reduce generation failure modes by making valid code easier to produce and invalid states harder to express.</p>
-          <p class="goal-outcome">Outcome: grammar export + structured diagnostics + simpler ownership model.</p>
+          <h3>1. The trust gap</h3>
+          <p>AI can generate syntactically correct code that passes type checking but violates semantic invariants.
+             You can't review 10,000 lines of generated code line-by-line. You need to specify what the code should do,
+             then verify that it does.</p>
+          <p class="goal-outcome">FORMA solution: Contract expressions that capture intent, verification tools that check behavior.</p>
         </article>
         <article class="goal-card">
-          <h3>2. Memory safety without lifetime syntax</h3>
-          <p>Keep ownership guarantees while removing lifetime annotation burden that harms AI reliability.</p>
-          <p class="goal-outcome">Outcome: second-class references + compile-time borrow/ownership rules.</p>
+          <h3>2. The lifetime problem</h3>
+          <p>94.8% of AI-generated Rust compilation failures are lifetime-related. This isn't a minor inconvenience—it's
+             the primary failure mode. Lifetime annotations require understanding ownership flow that AI systems frequently
+             get wrong.</p>
+          <p class="goal-outcome">FORMA solution: Second-class references. Memory safety without lifetime syntax.</p>
         </article>
         <article class="goal-card">
-          <h3>3. Minimal friction developer tooling</h3>
-          <p>Make every stage of authoring, checking, formatting, and IDE integration straightforward and scriptable.</p>
-          <p class="goal-outcome">Outcome: `check`, `fmt`, `repl`, `lsp`, `typeof`, completion, JSON error mode, plus `explain` and `verify` trust reporting.</p>
+          <h3>3. The feedback loop</h3>
+          <p>When AI-generated code fails, the error messages need to be machine-readable for automated correction.
+             Human-readable diagnostics don't help an AI agent self-repair.</p>
+          <p class="goal-outcome">FORMA solution: JSON error output, structured diagnostics, grammar export for constrained generation.</p>
         </article>
         <article class="goal-card">
-          <h3>4. Systems feature completeness</h3>
-          <p>Cover async networking, HTTP, sockets, SQLite, compression, and FFI in one language/runtime story.</p>
-          <p class="goal-outcome">Outcome: batteries-included capabilities with interpreter + LLVM native build path.</p>
+          <h3>4. The verification ceiling</h3>
+          <p>Runtime testing catches bugs after the fact. For critical systems—medical, financial, aerospace—you need
+             static guarantees before deployment. Property-based testing helps, but formal verification is the goal.</p>
+          <p class="goal-outcome">FORMA solution: Contract system designed for eventual SMT solver integration and formal proofs.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="tech-section reveal" id="contracts">
+      <div class="section-head">
+        <p class="eyebrow">Contract System Architecture</p>
+        <h2>Specifications that AI can generate and machines can verify</h2>
+        <p class="section-sub">
+          FORMA's contract system is the foundation of its verification story. Contracts capture what code should do
+          in a form that's both human-readable and machine-checkable.
+        </p>
+      </div>
+
+      <article class="decision-panel">
+        <h3>Contract Expression Language</h3>
+        <p>FORMA contracts support a rich expression language designed for specifying program behavior precisely.</p>
+        <div class="code-block">
+          <pre><code>// Basic preconditions and postconditions
+@pre(n >= 0)
+@post(result >= 1)
+fn factorial(n: Int) -> Int
+
+// Old expressions - capture values at function entry
+@post(result == old(balance) + amount)
+fn deposit(amount: Int) -> Int
+
+// Quantifiers - express properties over collections
+@pre(forall i in 0..len(arr)-1: arr[i] <= arr[i+1])  // sorted input
+@post(exists i in 0..len(arr): arr[i] == target)     // element found
+
+// Implication - conditional constraints
+@pre(amount > 0 ==> balance >= amount)
+fn withdraw(amount: Int) -> Result&lt;Int, Error&gt;
+
+// Membership testing
+@pre(status in ["active", "pending", "closed"])
+fn update_status(status: Str) -> Bool</code></pre>
+        </div>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Named Contract Patterns</h3>
+        <p>Common verification patterns are captured as reusable named contracts. This reduces specification boilerplate
+           and establishes a shared vocabulary for common guarantees.</p>
+        <div class="code-block">
+          <pre><code>// Built-in patterns
+@sorted       // Elements in ascending order
+@permutation  // Output is reordering of input (for sorting algorithms)
+@nonempty     // Collection has at least one element
+@bounded(min, max)  // Values within range
+@unique       // No duplicate elements
+
+// Usage
+@sorted
+@permutation(input)
+fn quicksort(input: [Int]) -> [Int]
+
+// The @pure pattern - no side effects
+@pure
+fn calculate_hash(data: Bytes) -> Int</code></pre>
+        </div>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Contract Evaluation Strategy</h3>
+        <p><strong>Current implementation:</strong> Runtime contract checking with property-based test generation.</p>
+        <p><strong>How it works:</strong></p>
+        <ul class="evidence-list">
+          <li><code>forma verify</code> generates random inputs satisfying preconditions</li>
+          <li>Executes the function and checks postconditions</li>
+          <li>Reports violations with counterexamples</li>
+          <li>Deterministic seeding (<code>--seed</code>) for reproducible CI runs</li>
+        </ul>
+        <p><strong>Why runtime first:</strong> Property-based testing provides immediate value while the formal verification
+           infrastructure is built. The contract language is designed to be forward-compatible with SMT solver backends.</p>
+        <div class="code-block">
+          <pre><code># Property-based verification with 1000 test cases
+forma verify src/math.forma --examples 1000 --seed 42
+
+# JSON output for CI integration
+forma verify src --report --format json</code></pre>
+        </div>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Contract AST Representation</h3>
+        <p>Contracts are first-class AST nodes, not comments or annotations that get stripped. This enables:</p>
+        <ul class="evidence-list">
+          <li>Type checking of contract expressions against function signatures</li>
+          <li>Extraction for documentation generation</li>
+          <li>Translation to verification conditions</li>
+          <li>Round-tripping through <code>forma fmt</code></li>
+        </ul>
+        <div class="code-block">
+          <pre><code>// Internal AST representation (simplified)
+Contract {
+    kind: Pre | Post | Invariant,
+    expression: Expr,
+    pattern_name: Option&lt;String&gt;,  // For @sorted, @pure, etc.
+    span: SourceSpan,
+}</code></pre>
+        </div>
+      </article>
+    </section>
+
+    <section class="tech-section reveal" id="mir">
+      <div class="section-head">
+        <p class="eyebrow">MIR Architecture</p>
+        <h2>The intermediate representation that enables verification</h2>
+        <p class="section-sub">
+          FORMA's Mid-level Intermediate Representation (MIR) is a control-flow graph designed for both execution
+          and analysis. It's the foundation for future formal verification integration.
+        </p>
+      </div>
+
+      <article class="decision-panel">
+        <h3>MIR Design Principles</h3>
+        <p><strong>Why MIR matters for verification:</strong> High-level source code is too complex for direct analysis.
+           MIR normalizes control flow into a form suitable for both interpretation and symbolic execution.</p>
+        <ul class="evidence-list">
+          <li><strong>Explicit control flow:</strong> All branches, loops, and early returns become explicit CFG edges</li>
+          <li><strong>SSA-like properties:</strong> Variables have single assignment points within basic blocks</li>
+          <li><strong>Type-erased operations:</strong> Generic code is monomorphized before MIR generation</li>
+          <li><strong>Ownership tracking:</strong> Move/borrow semantics are explicit in MIR operations</li>
+        </ul>
+      </article>
+
+      <article class="decision-panel">
+        <h3>MIR Structure</h3>
+        <div class="code-block">
+          <pre><code>// MIR for a simple function (conceptual representation)
+fn abs(x: Int) -> Int:
+    bb0:
+        _1 = x
+        switchInt(_1 < 0) -> [true: bb1, false: bb2]
+    bb1:
+        _2 = Neg(_1)
+        goto -> bb3
+    bb2:
+        _2 = _1
+        goto -> bb3
+    bb3:
+        return _2</code></pre>
+        </div>
+        <p><strong>Key properties:</strong></p>
+        <ul class="evidence-list">
+          <li>Basic blocks (bb0, bb1, ...) contain sequential operations</li>
+          <li>Terminators (switchInt, goto, return) control flow between blocks</li>
+          <li>Temporaries (_1, _2, ...) are SSA-style intermediate values</li>
+          <li>All operations are explicit—no implicit conversions or coercions</li>
+        </ul>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Compilation Pipeline</h3>
+        <p>FORMA's compilation pipeline produces a single MIR representation that serves both execution and verification:</p>
+        <div class="code-block">
+          <pre><code>┌─────────────────────────────────────────────────────────────────────┐
+│                        FORMA Source Code                            │
+│                    (with @pre/@post contracts)                      │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                │ Parse
+                                ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Typed AST                                   │
+│              (contracts are first-class AST nodes)                  │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                │ Lower
+                                ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                          MIR (CFG)                                  │
+│         (explicit control flow, ownership tracking)                 │
+└──────────────┬────────────────────────────────────┬─────────────────┘
+               │                                    │
+               ▼                                    ▼
+    ┌──────────────────────┐             ┌──────────────────────┐
+    │     Interpreter      │             │   VCGen (planned)    │
+    │   (forma run/verify) │             │    (SMT export)      │
+    └──────────────────────┘             └──────────────────────┘</code></pre>
+        </div>
+        <p><strong>Key insight:</strong> The same MIR serves runtime execution today and formal verification tomorrow.
+           No new IR needed—just a new backend that generates SMT queries instead of executing code.</p>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Why This Architecture Enables Formal Verification</h3>
+        <ul class="evidence-list">
+          <li><strong>Contracts at AST level:</strong> Specifications are preserved through compilation, not lost as comments</li>
+          <li><strong>Explicit CFG:</strong> Loop invariants and path conditions can be computed from MIR structure</li>
+          <li><strong>No implicit behavior:</strong> Every operation is explicit, making symbolic execution tractable</li>
+          <li><strong>Ownership in IR:</strong> Memory safety properties can be verified alongside functional correctness</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="tech-section reveal" id="toolchain">
+      <div class="section-head">
+        <p class="eyebrow">Verification Toolchain</p>
+        <h2>Tools that close the trust gap</h2>
+        <p class="section-sub">
+          FORMA's verification toolchain is designed for integration into AI-assisted development workflows.
+          Every tool produces machine-readable output suitable for automated pipelines.
+        </p>
+      </div>
+
+      <article class="decision-panel">
+        <h3><code>forma explain</code> — Contract Translation</h3>
+        <p>Translates contract expressions into human-readable or machine-readable explanations.
+           This bridges the gap between formal specifications and code review.</p>
+        <div class="code-block">
+          <pre><code># Human-readable explanation
+$ forma explain math.forma --format human
+
+Function: factorial(n: Int) -> Int
+  Precondition: n must be greater than or equal to 0
+  Postcondition: result must be greater than or equal to 1
+
+Function: binary_search(arr: [Int], target: Int) -> Option&lt;Int&gt;
+  Precondition: arr must be sorted in ascending order
+  Postcondition: if result is Some(i), then arr[i] equals target
+
+# JSON output for tooling integration
+$ forma explain math.forma --format json
+{
+  "functions": [{
+    "name": "factorial",
+    "contracts": [{
+      "kind": "precondition",
+      "expression": "n >= 0",
+      "human_readable": "n must be greater than or equal to 0",
+      "span": {"start": 12, "end": 18}
+    }]
+  }]
+}</code></pre>
+        </div>
+        <p><strong>Use case:</strong> AI generates code with contracts. Human reviews the <code>explain</code> output
+           to verify that the contracts match intent, without reading implementation details.</p>
+      </article>
+
+      <article class="decision-panel">
+        <h3><code>forma verify</code> — Property-Based Verification</h3>
+        <p>Runs property-based testing against contract specifications. Generates inputs satisfying preconditions,
+           executes functions, and checks postconditions.</p>
+        <div class="code-block">
+          <pre><code># Basic verification
+$ forma verify src/
+
+Verifying: factorial
+  ✓ 100/100 examples passed
+
+Verifying: binary_search
+  ✓ 100/100 examples passed
+
+Verifying: quicksort
+  ✗ Postcondition failed: @permutation
+    Counterexample: input = [3, 1, 2]
+    Output: [1, 2] (missing element)
+
+# CI-friendly report with deterministic seed
+$ forma verify src --report --format json --examples 1000 --seed 42
+{
+  "summary": {
+    "total_functions": 15,
+    "passed": 14,
+    "failed": 1,
+    "total_examples": 15000
+  },
+  "failures": [{
+    "function": "quicksort",
+    "contract": "@permutation",
+    "counterexample": {"input": [3, 1, 2]},
+    "actual_output": [1, 2]
+  }]
+}</code></pre>
+        </div>
+        <p><strong>Key features:</strong></p>
+        <ul class="evidence-list">
+          <li>Deterministic seeding for reproducible CI results</li>
+          <li>Configurable example count for thoroughness vs. speed tradeoff</li>
+          <li>Counterexample minimization (finds smallest failing input)</li>
+          <li>JSON output for automated failure triage</li>
+        </ul>
+      </article>
+
+      <article class="decision-panel">
+        <h3><code>forma grammar</code> — Constrained Generation</h3>
+        <p>Exports FORMA's grammar in formats suitable for constrained decoding in LLM pipelines.</p>
+        <div class="code-block">
+          <pre><code># EBNF format for parser generators
+$ forma grammar --format ebnf > forma.ebnf
+
+# JSON format for LLM constrained decoding
+$ forma grammar --format json > forma-grammar.json
+
+# Integration with constrained decoding
+# (pseudocode for LLM pipeline)
+grammar = load_grammar("forma-grammar.json")
+completion = llm.generate(
+    prompt="Write a sorting function in FORMA",
+    grammar_constraint=grammar
+)</code></pre>
+        </div>
+        <p><strong>Why this matters:</strong> Constrained decoding ensures AI-generated code is always syntactically valid.
+           Combined with contract verification, this creates a closed loop: generate valid syntax, verify semantic correctness.</p>
+      </article>
+
+      <article class="decision-panel">
+        <h3><code>forma check --error-format json</code> — Machine-Readable Diagnostics</h3>
+        <p>Structured error output enables AI agents to self-correct without parsing human-readable messages.</p>
+        <div class="code-block">
+          <pre><code>$ forma check broken.forma --error-format json
+{
+  "errors": [{
+    "code": "E0308",
+    "message": "mismatched types",
+    "severity": "error",
+    "span": {
+      "file": "broken.forma",
+      "start_line": 15,
+      "start_col": 12,
+      "end_line": 15,
+      "end_col": 18
+    },
+    "expected": "Int",
+    "found": "Str",
+    "suggestion": "Consider using parse_int() to convert"
+  }]
+}</code></pre>
+        </div>
+        <p><strong>Fields designed for AI consumption:</strong></p>
+        <ul class="evidence-list">
+          <li><code>span</code>: Exact location for targeted fixes</li>
+          <li><code>expected/found</code>: Type mismatch details</li>
+          <li><code>suggestion</code>: Actionable fix when available</li>
+          <li><code>code</code>: Stable error identifier for pattern matching</li>
+        </ul>
+      </article>
+
+      <div class="tools-workflow">
+        <h3>The AI-Assisted Development Workflow</h3>
+        <div class="workflow-steps">
+          <div class="workflow-step">
+            <span class="step-number">1</span>
+            <h4>Constrain</h4>
+            <p>Export grammar, feed to AI. Generation is syntactically valid by construction.</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <span class="step-number">2</span>
+            <h4>Generate</h4>
+            <p>AI writes code with contracts specifying behavior.</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <span class="step-number">3</span>
+            <h4>Explain</h4>
+            <p>Review contracts in English. Understand promises without reading implementation.</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <span class="step-number">4</span>
+            <h4>Verify</h4>
+            <p>Run verification report. Get PASS/FAIL for every contract.</p>
+          </div>
+          <div class="workflow-arrow">→</div>
+          <div class="workflow-step">
+            <span class="step-number">5</span>
+            <h4>Ship</h4>
+            <p>Trust the code because you verified the specification.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tech-section reveal" id="roadmap">
+      <div class="section-head">
+        <p class="eyebrow">Path to Formal Verification</p>
+        <h2>From property testing to mathematical proofs</h2>
+        <p class="section-sub">
+          FORMA's architecture was designed from day one with formal verification as the end goal.
+          Here's where we are, what's next, and why this matters for critical systems.
+        </p>
+      </div>
+
+      <article class="decision-panel highlight">
+        <h3>What's Already Built</h3>
+        <p>The foundation for formal verification is in place:</p>
+        <ul class="evidence-list">
+          <li><strong>Contract AST nodes:</strong> Contracts are first-class, type-checked, and preserved through compilation</li>
+          <li><strong>Rich expression language:</strong> Quantifiers (<code>forall</code>, <code>exists</code>), <code>old()</code> expressions, implication, membership</li>
+          <li><strong>Named patterns:</strong> <code>@sorted</code>, <code>@permutation</code>, <code>@pure</code>—reusable specifications</li>
+          <li><strong>MIR CFG:</strong> Structured intermediate representation suitable for symbolic execution</li>
+          <li><strong>Property-based verification:</strong> Runtime contract checking with counterexample generation</li>
+          <li><strong>Machine-readable output:</strong> All tools produce JSON for pipeline integration</li>
+        </ul>
+        <p class="evidence-proof"><strong>Status:</strong> The specification language and IR infrastructure are production-ready.
+           Property-based testing provides immediate value while formal verification is developed.</p>
+      </article>
+
+      <article class="decision-panel">
+        <h3>What's Next: SMT Solver Integration</h3>
+        <p>The path from property testing to formal proofs requires three components:</p>
+
+        <h4>1. Verification Condition Generation (VCGen)</h4>
+        <p>Transform MIR + contracts into logical formulas. For each function:</p>
+        <ul class="evidence-list">
+          <li>Precondition becomes an assumption</li>
+          <li>Postcondition becomes an assertion to prove</li>
+          <li>Loop invariants (when specified) enable bounded verification</li>
+          <li>Path conditions encode control flow</li>
+        </ul>
+        <div class="code-block">
+          <pre><code>// Source
+@pre(n >= 0)
+@post(result >= 1)
+fn factorial(n: Int) -> Int
+
+// Generated verification condition (simplified)
+∀n: Int.
+  (n >= 0) →  // precondition assumed
+  (factorial(n) >= 1)  // postcondition to prove</code></pre>
+        </div>
+
+        <h4>2. SMT Solver Backend</h4>
+        <p>Integration with Z3 or CVC5 to discharge verification conditions:</p>
+        <ul class="evidence-list">
+          <li>Translate VCs to SMT-LIB format</li>
+          <li>Query solver for satisfiability of negated postcondition</li>
+          <li>UNSAT = postcondition always holds (proven)</li>
+          <li>SAT = counterexample found (violation)</li>
+        </ul>
+
+        <h4>3. Refinement Types (Future)</h4>
+        <p>Embed specifications in the type system itself:</p>
+        <div class="code-block">
+          <pre><code>// Future syntax concept
+type PosInt = Int where self > 0
+type SortedList = [Int] where @sorted
+
+fn factorial(n: Nat) -> PosInt  // Nat = Int where self >= 0</code></pre>
+        </div>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Possible Future: Formal Verification for Critical Systems</h3>
+        <p>The architecture we've built doesn't just support runtime verification—it's structured to enable
+           formal proofs if and when they're needed. This is a potential direction, not a promise.</p>
+
+        <h4>Where the Architecture Could Go</h4>
+        <p>The MIR representation and contract system are already compatible with SMT solver integration.
+           If formal verification becomes a priority, the path is clear:</p>
+        <ul class="evidence-list">
+          <li>Export verification conditions to SMT-LIB format</li>
+          <li>Generate proof certificates for audit trails</li>
+          <li>Enable bounded verification for critical functions</li>
+        </ul>
+        <p>For most use cases, the current property-based verification is sufficient. But for teams that need
+           mathematical guarantees—medical, financial, aerospace—the foundation is ready.</p>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Why This Matters Now</h3>
+        <p>AI code generation is accelerating. The question isn't whether AI will write critical systems code—it's
+           whether that code will be verifiable.</p>
+        <ul class="evidence-list">
+          <li><strong>Regulation is coming:</strong> EU AI Act, FDA software guidelines, and financial regulations
+              increasingly require demonstrable correctness for automated systems</li>
+          <li><strong>Scale demands automation:</strong> Human code review doesn't scale to AI generation rates.
+              Machine-checkable proofs do.</li>
+          <li><strong>The window is now:</strong> Languages designed today will be used for critical systems in 5 years.
+              Verification must be built in, not bolted on.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="tech-section reveal" id="decisions">
+      <div class="section-head">
+        <p class="eyebrow">Core Architectural Decisions</p>
+        <h2>The engineering choices that made this possible</h2>
+      </div>
+
+      <article class="decision-panel">
+        <h3>Decision: Second-class references instead of explicit lifetimes</h3>
+        <p><strong>The problem:</strong> 94.8% of AI-generated Rust compilation failures are lifetime-related.
+           Lifetime annotations require understanding ownership flow—exactly what AI systems struggle with.</p>
+        <p><strong>The solution:</strong> References can be passed and used locally, but cannot be stored in data structures
+           or returned from functions. This eliminates the need for lifetime annotations while preserving memory safety.</p>
+        <p><strong>The tradeoff:</strong> Some patterns (self-referential structs, arena allocators) require different idioms.
+           For AI-generated code, this is a net win—the common case is dramatically simpler.</p>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Decision: Contracts are AST nodes, not comments</h3>
+        <p><strong>The problem:</strong> Languages that treat specifications as comments lose them during compilation.
+           This makes verification an afterthought rather than a first-class concern.</p>
+        <p><strong>The solution:</strong> Contracts are parsed into the AST, type-checked against function signatures,
+           and preserved through all compilation stages.</p>
+        <p><strong>The payoff:</strong> Contracts can be extracted for documentation, checked for consistency,
+           translated to verification conditions, and round-tripped through the formatter.</p>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Decision: MIR as the semantic anchor</h3>
+        <p><strong>The problem:</strong> Multiple backends (interpreter, LLVM) risk semantic drift. High-level AST is
+           too complex for direct analysis.</p>
+        <p><strong>The solution:</strong> A single MIR representation that both backends consume. All semantic analysis
+           (borrow checking, type checking, contract extraction) happens before MIR generation.</p>
+        <p><strong>The payoff:</strong> One IR to analyze, one IR to verify, one IR to execute. Future formal verification
+           operates on the same representation as the production runtime.</p>
+      </article>
+
+      <article class="decision-panel">
+        <h3>Decision: Interpreter-first, LLVM-later</h3>
+        <p><strong>The problem:</strong> Native compilation is slow to iterate on. Language evolution requires fast feedback.</p>
+        <p><strong>The solution:</strong> <code>forma run</code> uses the interpreter for development velocity.
+           <code>forma build</code> targets LLVM for production performance.</p>
+        <p><strong>The payoff:</strong> Fast iteration during language development, native performance when it matters.
+           The MIR-based architecture means both paths have identical semantics.</p>
+      </article>
+    </section>
+
+    <section class="tech-section reveal" id="timeline">
+      <div class="section-head">
+        <p class="eyebrow">Development Timeline</p>
+        <h2>46 sprints from concept to verification toolchain</h2>
+      </div>
+
+      <div class="timeline-list">
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Phase 1-2</p>
+            <p class="status-chip complete">Complete</p>
+          </div>
+          <h3>Language Foundation + Production Features</h3>
+          <p>Core syntax, type system, memory model, modules, async/await, HTTP, sockets, FFI, LSP server.</p>
+        </article>
+
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Phase 3-4</p>
+            <p class="status-chip complete">Complete</p>
+          </div>
+          <h3>Stability + Backend Hardening</h3>
+          <p>Pattern matching fixes, import resolution, formatter, REPL, MIR robustness, CLI ergonomics, LLVM pipeline.</p>
+        </article>
+
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Phase 5-6</p>
+            <p class="status-chip complete">Complete</p>
+          </div>
+          <h3>Memory Safety + Launch Hardening</h3>
+          <p>FFI safety layer, capability security model, panic hardening, transitive imports, CI coverage expansion.</p>
+        </article>
+
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Phase 7-8</p>
+            <p class="status-chip complete">Complete</p>
+          </div>
+          <h3>LSP Expansion + Verification UX</h3>
+          <p>Full LSP features (formatting, symbols, signature help, references), JSON error contracts,
+             contract language expansion (<code>old()</code>, quantifiers, named patterns),
+             <code>forma explain</code> and <code>forma verify --report</code>.</p>
+        </article>
+
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Future</p>
+            <p class="status-chip planned">Planned</p>
+          </div>
+          <h3>Formal Verification Integration</h3>
+          <p>VCGen implementation, SMT solver backend (Z3/CVC5), proof certificate export, refinement types exploration.</p>
         </article>
       </div>
     </section>
 
     <section class="tech-section reveal" id="inspirations">
       <div class="section-head">
-        <p class="eyebrow">Language Lineage</p>
-        <h2>Languages that informed FORMA</h2>
-        <p class="section-sub">FORMA combines ideas from established language ecosystems, tuned for AI-first authoring workflows.</p>
-      </div>
-      <div class="inspiration-grid">
-        <article class="inspiration-card">
-          <h3><a href="https://www.rust-lang.org/" target="_blank" rel="noreferrer">Rust</a></h3>
-          <p>Ownership/borrowing discipline, trait-oriented abstractions, and Result/Option-first error semantics.</p>
-        </article>
-        <article class="inspiration-card">
-          <h3><a href="https://go.dev/" target="_blank" rel="noreferrer">Go</a></h3>
-          <p>Toolchain pragmatism, batteries-included standard library shape, and practical concurrency ergonomics.</p>
-        </article>
-        <article class="inspiration-card">
-          <h3><a href="https://ziglang.org/" target="_blank" rel="noreferrer">Zig</a></h3>
-          <p>Explicit systems programming posture and straightforward native interop mindset.</p>
-        </article>
-        <article class="inspiration-card">
-          <h3><a href="https://www.swift.org/" target="_blank" rel="noreferrer">Swift</a></h3>
-          <p>Protocol-centric design influences and value-oriented API ergonomics.</p>
-        </article>
-        <article class="inspiration-card">
-          <h3><a href="https://www.haskell.org/" target="_blank" rel="noreferrer">Haskell</a> + <a href="https://ocaml.org/" target="_blank" rel="noreferrer">OCaml</a></h3>
-          <p>Algebraic data types, pattern matching, and expression-first semantics.</p>
-        </article>
-        <article class="inspiration-card">
-          <h3><a href="https://www.python.org/" target="_blank" rel="noreferrer">Python</a></h3>
-          <p>Indentation-significant readability and low-syntax-noise program flow.</p>
-        </article>
-        <article class="inspiration-card">
-          <h3><a href="https://www.typescriptlang.org/" target="_blank" rel="noreferrer">TypeScript</a></h3>
-          <p>Developer tooling expectations: fast feedback, editor integration, and machine-friendly diagnostics.</p>
-        </article>
-        <article class="inspiration-card">
-          <h3><a href="https://llvm.org/" target="_blank" rel="noreferrer">LLVM Ecosystem</a></h3>
-          <p>Native code generation strategy and long-term optimization path for systems workloads.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="tech-section reveal" id="decisions">
-      <div class="section-head">
-        <p class="eyebrow">Architectural Decisions</p>
-        <h2>The big choices and why they were the right calls</h2>
-      </div>
-
-      <article class="decision-panel">
-        <h3>Decision: Second-class references instead of explicit lifetimes</h3>
-        <p><strong>Why:</strong> Lifetime annotation complexity is a known high-error surface in AI-generated systems code.</p>
-        <p><strong>Implementation:</strong> References can be passed and used locally, but cannot be stored arbitrarily in data structures.</p>
-        <p><strong>Payoff:</strong> Preserved memory-safety reasoning with a dramatically simpler generation model for both AI and humans.</p>
-      </article>
-
-      <article class="decision-panel">
-        <h3>Decision: MIR as central semantic layer</h3>
-        <p><strong>Why:</strong> One canonical intermediate representation keeps front-end semantics stable across execution backends.</p>
-        <p><strong>Implementation:</strong> Parse + type-check + borrow-check lowers to MIR, then feeds interpreter and LLVM paths.</p>
-        <p><strong>Payoff:</strong> Faster feature iteration, better debugging, and lower risk of backend drift.</p>
-      </article>
-
-      <article class="decision-panel">
-        <h3>Decision: Interpreter-first with optional LLVM native compilation</h3>
-        <p><strong>Why:</strong> Language evolution speed required fast feedback while preserving a path to native performance.</p>
-        <p><strong>Implementation:</strong> `forma run` defaults to the interpreter; `forma build` targets LLVM/native builds.</p>
-        <p><strong>Payoff:</strong> High development velocity early, with production-oriented compilation when needed.</p>
-      </article>
-
-      <article class="decision-panel">
-        <h3>Decision: AI tooling is first-class, not an afterthought</h3>
-        <p><strong>Why:</strong> AI code generation quality depends on machine-readable syntax and diagnostics, not just language elegance.</p>
-        <p><strong>Implementation:</strong> EBNF/JSON grammar export, JSON error mode, type queries/completions, and verification UX (`explain`, `verify --report`).</p>
-        <p><strong>Payoff:</strong> FORMA can be integrated directly into constrained decoding and auto-repair pipelines.</p>
-      </article>
-
-      <article class="decision-panel">
-        <h3>Decision: Ship a broad standard library early</h3>
-        <p><strong>Why:</strong> AI systems generate better code when APIs are canonical, local, and predictable.</p>
-        <p><strong>Implementation:</strong> Consolidated stdlib coverage across core language, networking, data, storage, and ops workflows.</p>
-        <p><strong>Payoff:</strong> Real application prototypes can be built immediately, not after ecosystem bootstrap.</p>
-      </article>
-    </section>
-
-    <section class="tech-section reveal" id="features">
-      <div class="section-head">
-        <p class="eyebrow">Feature Depth</p>
-        <h2>Major features, in technical detail</h2>
-      </div>
-      <div class="feature-grid">
-        <article class="feature-card">
-          <h3>Structured Error Messages (Shipped)</h3>
-          <p>Compiler checks emit machine-readable JSON diagnostics with error metadata and location fields. This supports deterministic self-correction loops in AI agents.</p>
-          <pre><code>forma check --error-format json app.forma</code></pre>
-        </article>
-
-        <article class="feature-card">
-          <h3>Grammar Export (Shipped)</h3>
-          <p>FORMA exports grammar in both EBNF and JSON formats for constrained generation and syntax-valid decoding in external LLM tooling.</p>
-          <pre><code>forma grammar --format ebnf
-forma grammar --format json</code></pre>
-        </article>
-
-        <article class="feature-card">
-          <h3>Formatter + Style Canonicalization (Shipped)</h3>
-          <p>`forma fmt` provides deterministic source formatting to keep generated code consistent, reviewable, and easier to diff in mixed human/AI workflows.</p>
-          <pre><code>forma fmt src/main.forma</code></pre>
-        </article>
-
-        <article class="feature-card">
-          <h3>Tooling Surface: LSP + REPL + Type Queries (Shipped)</h3>
-          <p>FORMA exposes interactive authoring through LSP (diagnostics/completion/hover/goto/symbols/signature/formatting/references in single-file scope), REPL, and type-at-position queries.</p>
-          <pre><code>forma lsp
-forma repl
-forma typeof app.forma --position 12:8</code></pre>
-        </article>
-
-        <article class="feature-card">
-          <h3>Verification UX (Shipped)</h3>
-          <p>`forma explain` translates contract intent into human-readable or JSON output, and `forma verify --report` emits deterministic trust summaries for CI workflows.</p>
-          <pre><code>forma explain myfile.forma --format human
-forma verify src --report --format json --examples 20 --seed 42</code></pre>
-        </article>
-
-        <article class="feature-card">
-          <h3>Systems Runtime Features (Shipped)</h3>
-          <p>Async/await, task spawning, HTTP client/server, TCP/UDP, TLS support, compression, and SQLite give FORMA practical systems coverage beyond toy language scope.</p>
-          <p class="feature-note">Design intent: usable for real workloads, not just language demos.</p>
-        </article>
-
-        <article class="feature-card">
-          <h3>Safety Hardening Path (Completed Program)</h3>
-          <p>Post-core sprints completed deeper memory and reference semantics work, including explicit reference parameter modeling and FFI safety-layer planning.</p>
-          <p class="feature-note">Design intent: maintain safety guarantees while scaling interop and performance paths.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="tech-section reveal" id="timeline">
-      <div class="section-head">
-        <p class="eyebrow">Execution Timeline</p>
-        <h2>Delivery timeline: complete end-to-end</h2>
-        <p class="section-sub">All major phases and sprint groups are marked complete, including the Sprint 36-46 launch hardening, LSP expansion, and verification UX wave.</p>
-      </div>
-
-      <div class="timeline-list">
-        <article class="timeline-item">
-          <div class="timeline-head">
-            <p class="timeline-phase">Phase 1</p>
-            <p class="status-chip complete">Complete</p>
-          </div>
-          <h3>Language Core Foundation</h3>
-          <p>Syntax, parser strategy, type system, memory model concepts, modules, grammar specification, and AI-comparison framing.</p>
-        </article>
-
-        <article class="timeline-item">
-          <div class="timeline-head">
-            <p class="timeline-phase">Phase 2</p>
-            <p class="status-chip complete">Complete</p>
-          </div>
-          <h3>Production Feature Wave (Sprints 1-8)</h3>
-          <p>Async/concurrency, HTTP, sockets, FFI, LSP server, polish passes, and large-scale test expansion.</p>
-        </article>
-
-        <article class="timeline-item">
-          <div class="timeline-head">
-            <p class="timeline-phase">Phase 3</p>
-            <p class="status-chip complete">Complete</p>
-          </div>
-          <h3>Stability and Correctness Wave (Sprints 9-23)</h3>
-          <p>Pattern matching fixes, import behavior hardening, formatter and REPL improvements, panic-path reduction, and verification runs.</p>
-        </article>
-
-        <article class="timeline-item">
-          <div class="timeline-head">
-            <p class="timeline-phase">Phase 4</p>
-            <p class="status-chip complete">Complete</p>
-          </div>
-          <h3>Backend and Toolchain Hardening (Sprints 24-31)</h3>
-          <p>Runtime foundation, MIR/lexer robustness, CLI ergonomics, stdlib edge-case cleanup, and LLVM pipeline maturation.</p>
-        </article>
-
-        <article class="timeline-item">
-          <div class="timeline-head">
-            <p class="timeline-phase">Phase 5</p>
-            <p class="status-chip complete">Complete</p>
-          </div>
-          <h3>Memory Safety Expansion Program (Sprints 32-35)</h3>
-          <p>FFI safety-layer implementation path, capability-oriented security model, and explicit reference parameter direction.</p>
-        </article>
-
-        <article class="timeline-item">
-          <div class="timeline-head">
-            <p class="timeline-phase">Phase 6</p>
-            <p class="status-chip complete">Complete</p>
-          </div>
-          <h3>Launch Hardening and Risk Closure (Sprints 36-41)</h3>
-          <p>Closed launch blockers with capability enforcement, HTTP/runtime panic hardening, transitive import fixes, LLVM readiness cleanup, and CI launch-gate coverage expansion.</p>
-          <p>Sprints 39-41 added broad negative-path testing, resolved remaining `forma-tests` failures, hardened size/allocation guardrails, fixed contract-flag semantics, and improved imported-module diagnostic accuracy.</p>
-        </article>
-
-        <article class="timeline-item">
-          <div class="timeline-head">
-            <p class="timeline-phase">Phase 7</p>
-            <p class="status-chip complete">Complete</p>
-          </div>
-          <h3>Confidence Closure and LSP Expansion Wave (Sprints 42-45)</h3>
-          <p>Sprint 42 tightened CI and verification with `fmt` error-format forwarding, skip-list debt removal, coverage-audit tooling, and a large CLI/runtime test expansion.</p>
-          <p>Sprints 43-45 aligned CLI JSON error contracts (`run/check/build`), added core LSP features (formatting, symbols, signature help, references/hover improvements), and enforced coverage/CLI hardening for release confidence.</p>
-        </article>
-
-        <article class="timeline-item">
-          <div class="timeline-head">
-            <p class="timeline-phase">Phase 8</p>
-            <p class="status-chip complete">Complete</p>
-          </div>
-          <h3>Verification UX and Docs Overhaul (Sprint 46)</h3>
-          <p>Introduced richer contract language (`old()`, `forall`, `exists`, implication, membership), named patterns like <code>@pure</code>, and clearer span-keyed explain output.</p>
-          <p>Delivered `forma explain`/`forma verify --report` trust workflows, added verification-focused showcase programs, and refreshed README/reference/AI-reference documentation for the new UX.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="tech-section reveal" id="sources">
-      <div class="section-head">
-        <p class="eyebrow">Research Brief</p>
-        <h2>Technical research behind FORMA's design</h2>
+        <p class="eyebrow">Design Inspirations</p>
+        <h2>Standing on the shoulders of giants</h2>
         <p class="section-sub">
-          FORMA was designed through an applied research program: failure-mode analysis for AI-generated systems code,
-          syntax/token experiments, compiler architecture studies, runtime/FFI investigations, and iterative sprint validation.
+          FORMA synthesizes ideas from several language traditions, combining them in a way that's optimized
+          for AI code generation and verification.
         </p>
       </div>
-      <div class="evidence-grid">
-        <article class="evidence-card">
-          <h3>1) AI failure-mode research</h3>
-          <p class="evidence-lede">The first track focused on why LLMs fail in systems languages.</p>
-          <ul class="evidence-list">
-            <li>Borrow/lifetime reasoning was identified as the dominant compile-failure class in AI-generated systems code.</li>
-            <li>Type mismatch was the second major failure class, especially in generic and API-heavy code.</li>
-            <li>Design response: remove explicit lifetime syntax while preserving ownership and borrow constraints at compile time.</li>
-            <li>Resulting model: second-class references, explicit move/borrow semantics, and strict anti-escape constraints.</li>
-          </ul>
-          <p class="evidence-proof"><strong>Engineering outcome:</strong> memory safety reasoning is preserved while reducing the lifetime-surface AI must infer.</p>
+
+      <div class="inspiration-grid">
+        <article class="decision-panel">
+          <h3>Rust</h3>
+          <p><strong>What we took:</strong> Memory safety without garbage collection. Ownership semantics. Algebraic data types and pattern matching. Systems-level performance through LLVM.</p>
+          <p><strong>What we changed:</strong> Eliminated lifetime annotations entirely. Second-class references provide memory safety with dramatically simpler syntax—exactly what AI code generation needs.</p>
         </article>
 
-        <article class="evidence-card">
-          <h3>2) Token and syntax efficiency experiments</h3>
-          <p class="evidence-lede">A second track optimized language shape for inference-time cost and reliability.</p>
-          <ul class="evidence-list">
-            <li>Syntax compression experiments targeted lower prompt/completion token budgets for equivalent programs.</li>
-            <li>Shorthand keywords, type shortcuts, and punctuation minimization were benchmarked against baseline syntax.</li>
-            <li>Observed reduction target landed around 35-40% in representative code samples.</li>
-            <li>Research trade-off: aggressive compression improves throughput, but can increase lexical ambiguity if unmanaged.</li>
-          </ul>
-          <p class="evidence-proof"><strong>Engineering outcome:</strong> token efficiency became a first-class language constraint, not a post-hoc optimization.</p>
+        <article class="decision-panel">
+          <h3>Python</h3>
+          <p><strong>What we took:</strong> Indentation-based block structure. Clean, readable syntax. Implicit variable declaration.</p>
+          <p><strong>What we changed:</strong> Added static typing and compile-time safety. Kept the visual clarity while enabling the performance and correctness guarantees Python can't provide.</p>
         </article>
 
-        <article class="evidence-card">
-          <h3>3) Constrained decoding and recovery loop research</h3>
-          <p class="evidence-lede">This track treated tooling surfaces as part of language design.</p>
-          <ul class="evidence-list">
-            <li>Grammar export was modeled as a mechanism to prevent invalid syntax generation, not just document syntax.</li>
-            <li>Structured diagnostics were modeled for machine repair loops (error type, location, expected/found, suggestion).</li>
-            <li>Type-at-position querying was included to support constrained generation in active editing contexts.</li>
-            <li>Validation flow emphasized reproducible CLI checks and machine-readable output modes.</li>
-          </ul>
-          <p class="evidence-proof"><strong>Engineering outcome:</strong> language + tooling were co-designed for closed-loop AI generation and correction.</p>
+        <article class="decision-panel">
+          <h3>Dafny &amp; Eiffel</h3>
+          <p><strong>What we took:</strong> First-class contract expressions. @pre/@post annotations. The philosophy that specifications belong in the language, not in comments.</p>
+          <p><strong>What we changed:</strong> Designed contracts for AI consumption: machine-readable output, property-based testing as immediate value, SMT integration as the future goal.</p>
         </article>
 
-        <article class="evidence-card">
-          <h3>4) Runtime, async, and FFI architecture research</h3>
-          <p class="evidence-lede">The systems track studied implementation trade-offs across mature runtimes.</p>
-          <ul class="evidence-list">
-            <li>Runtime architecture compared interpreter-first velocity with native backend requirements and ABI constraints.</li>
-            <li>Async research evaluated single-thread simplicity vs work-stealing concurrency and settled on staged adoption.</li>
-            <li>FFI research compared C interop models and identified unavoidable unsafe boundaries around pointers and lifetimes.</li>
-            <li>Compiler architecture stabilized around a central MIR layer feeding both interpreter and LLVM paths.</li>
-          </ul>
-          <p class="evidence-proof"><strong>Engineering outcome:</strong> phased runtime growth without blocking language evolution or native-code trajectory.</p>
+        <article class="decision-panel">
+          <h3>Haskell &amp; ML</h3>
+          <p><strong>What we took:</strong> Pipeline operators for data transformation. Functional patterns. Strong type inference.</p>
+          <p><strong>What we changed:</strong> Made pipelines the primary composition mechanism, reducing token count and making data flow explicit and left-to-right readable.</p>
         </article>
       </div>
 
-      <div class="plan-delta">
-        <h3>Planning assumptions that changed during sprint execution</h3>
-        <p class="evidence-lede">
-          The table below summarizes where implementation data forced design updates.
-        </p>
-        <div class="delta-table-wrap">
-          <table class="delta-table">
-            <thead>
-              <tr>
-                <th>Initial assumption</th>
-                <th>Execution result</th>
-                <th>Design implication</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Single-letter keyword compression would remain unambiguous in practice.</td>
-                <td>Frequent collisions with natural variable names required contextual keyword parsing.</td>
-                <td>Compression must be constrained by parser ergonomics, not only token count.</td>
-              </tr>
-              <tr>
-                <td>Module/import behavior could tolerate soft failures while ecosystem stabilized.</td>
-                <td>Silent failures caused operational risk and were replaced with fail-fast import resolution.</td>
-                <td>Developer-facing reliability required explicit error surfaces over permissive fallback behavior.</td>
-              </tr>
-              <tr>
-                <td>Grammar export and machine-readable diagnostics could remain secondary.</td>
-                <td>They moved into core CLI surfaces to support constrained decoding and AI self-repair loops.</td>
-                <td>Tooling interfaces became part of the language contract, not auxiliary utilities.</td>
-              </tr>
-              <tr>
-                <td>Async runtime would likely stay minimal in early milestones.</td>
-                <td>Execution moved to true parallel spawn behavior with runtime-backed scheduling.</td>
-                <td>Concurrency became production-facing earlier than initially staged.</td>
-              </tr>
-              <tr>
-                <td>Broad FFI capability could ship quickly with minimal friction.</td>
-                <td>Pointer and lifetime boundaries required explicit caution and staged hardening.</td>
-                <td>Safety envelope for interop must be explicit, documented, and incrementally expanded.</td>
-              </tr>
-              <tr>
-                <td>Original goal tracking marked key AI-facing capabilities as partial/missing.</td>
-                <td>Subsequent sprint and verification cycles closed several of those gaps in the release line.</td>
-                <td>Roadmaps needed periodic re-baselining to prevent stale status narratives.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <article class="decision-panel">
+        <h3>The Synthesis</h3>
+        <p>FORMA isn't just a remix of existing languages. The combination creates something new: a systems language
+           with built-in verification that AI can actually generate correctly. Each design choice—from second-class
+           references to pipeline syntax to contract expressions—was made with a single question in mind:
+           <em>does this help AI write correct code?</em></p>
+      </article>
+    </section>
+
+    <section class="tech-section reveal" id="comparison">
+      <div class="section-head">
+        <p class="eyebrow">Competitive Landscape</p>
+        <h2>How FORMA compares</h2>
       </div>
 
-      <div class="evidence-note">
-        <p>
-          Net result: the language design was not static. Research hypotheses were repeatedly pressure-tested in implementation,
-          and sprint execution fed back into syntax, tooling, runtime, and safety decisions.
-        </p>
+      <div class="comparison-table-wrap">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>FORMA</th>
+              <th>Rust</th>
+              <th>Mojo</th>
+              <th>Dafny</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Memory safety without lifetime syntax</td>
+              <td class="yes">✓</td>
+              <td class="no">✗ (lifetimes required)</td>
+              <td class="partial">~ (GC fallback)</td>
+              <td class="yes">✓ (GC)</td>
+            </tr>
+            <tr>
+              <td>Contract expressions (@pre/@post)</td>
+              <td class="yes">✓ Built-in</td>
+              <td class="no">✗ (third-party)</td>
+              <td class="no">✗</td>
+              <td class="yes">✓ Built-in</td>
+            </tr>
+            <tr>
+              <td>Grammar export for constrained decoding</td>
+              <td class="yes">✓ EBNF + JSON</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+            </tr>
+            <tr>
+              <td>JSON error output</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+              <td class="partial">~</td>
+              <td class="partial">~</td>
+            </tr>
+            <tr>
+              <td>Property-based contract verification</td>
+              <td class="yes">✓ forma verify</td>
+              <td class="no">✗ (third-party)</td>
+              <td class="no">✗</td>
+              <td class="partial">~ (proof-focused)</td>
+            </tr>
+            <tr>
+              <td>SMT-based formal verification</td>
+              <td class="partial">~ (roadmap)</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+              <td class="yes">✓</td>
+            </tr>
+            <tr>
+              <td>Systems-level performance</td>
+              <td class="yes">✓ (LLVM backend)</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+              <td class="no">✗ (verification focus)</td>
+            </tr>
+            <tr>
+              <td>AI-first design philosophy</td>
+              <td class="yes">✓ Core goal</td>
+              <td class="no">✗</td>
+              <td class="partial">~ (ML focus)</td>
+              <td class="no">✗</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+      <p class="comparison-note">
+        <strong>FORMA's unique position:</strong> Combines systems-language capability (like Rust) with verification tooling (like Dafny),
+        while being designed from the ground up for AI code generation workflows.
+      </p>
     </section>
 
     <section class="tech-section final-callout reveal">
-      <h2>Net result</h2>
+      <h2>The bottom line</h2>
       <p>
-        FORMA combines the delivery pace of an interpreter-first language with the rigor of a systems compiler. The architecture is intentionally
-        biased toward AI-assisted development: constrained generation, structured feedback, predictable semantics, and practical runtime breadth.
+        FORMA is not just another programming language. It's infrastructure for a future where AI generates critical systems code
+        and humans verify it through specifications, not line-by-line review. The contract system, MIR architecture, and verification
+        toolchain are the foundation. SMT integration is the next milestone. Formally verified AI-generated code is the destination.
       </p>
+      <div class="hero-actions">
+        <a class="tech-button primary" href="index.html">Back to Overview</a>
+        <a class="tech-button" href="reference.html">Language Reference</a>
+      </div>
     </section>
   </main>
 
