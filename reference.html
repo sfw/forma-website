@@ -95,8 +95,8 @@ forma --version</code></pre>
 f main()
     print("Hello, FORMA!")
 
-    # Variables use := for assignment
-    name := "World"
+    # Variables: = for immutable, := for mutable
+    name = "World"
     print(f"Hello, {name}!")</code></pre>
           <pre><code class="language-bash">forma run hello.forma
 # Output:
@@ -122,17 +122,17 @@ f find_first_even(numbers: [Int]) -> Int?
 # Main entry point
 f main()
     # Safe division with contract protection
-    result := safe_divide(10, 2)
+    result = safe_divide(10, 2)
     print(f"10 / 2 = {result}")
 
     # Finding values with Option handling
-    nums := [1, 3, 5, 6, 7, 8]
+    nums = [1, 3, 5, 6, 7, 8]
     m find_first_even(nums)
         Some(n) -> print(f"First even: {n}")
         None -> print("No even numbers found")
 
     # Using ?? for default values
-    first := find_first_even([1, 3, 5]) ?? 0
+    first = find_first_even([1, 3, 5]) ?? 0
     print(f"First even or default: {first}")</code></pre>
           <pre><code class="language-bash">forma run calculator.forma
 # Output:
@@ -176,7 +176,8 @@ KEYWORDS: f=function, s=struct, e=enum, t=trait, i=impl, m=match
 TYPES: Int, Float, Bool, Str, Char
        [T]=list, {K:V}=map, T?=Option, T!E=Result, (A,B)=tuple
 
-VARIABLES: x := 42 (immutable), mut y := 0 (mutable)
+VARIABLES: x = 42 (immutable), y := 0 (mutable)
+           y := y + 1 (reassignment also uses :=)
 
 FUNCTIONS:
   f add(a: Int, b: Int) -> Int
@@ -201,8 +202,8 @@ STRUCTS AND METHODS:
 
 ERROR HANDLING:
   ? = propagate error, ?? = default value, ! = unwrap (panic)
-  result := risky_operation()?  # Returns early on Err
-  value := maybe_none ?? 0      # Default if None</code></pre>
+  result = risky_operation()?  # Returns early on Err
+  value = maybe_none ?? 0      # Default if None</code></pre>
 
           <h3>Step 2: Grammar-Constrained Generation</h3>
           <p>For guaranteed syntactic correctness, use constrained decoding with FORMA's grammar:</p>
@@ -219,7 +220,7 @@ forma grammar --format json > forma-grammar.json
 @pre(items.len() > 0)
 @post(forall x in items: result >= x)
 f max_element(items: [Int]) -> Int
-    mut max := items[0]
+    max := items[0]
     for x in items
         if x > max
             max := x
@@ -240,8 +241,8 @@ i User
 
 # Error handling with Result
 f parse_config(path: Str) -> Config!Str
-    content := file_read(path)?
-    data := json_parse(content)?
+    content = file_read(path)?
+    data = json_parse(content)?
     Ok(Config {
         host: json_get(data, "host") ?? "localhost",
         port: json_get(data, "port") ?? 8080
@@ -249,8 +250,8 @@ f parse_config(path: Str) -> Config!Str
 
 # Async HTTP handler
 as f handle_request(req: Request) -> Response!Str
-    user_id := json_get(req.body, "user_id")?
-    user := aw fetch_user(user_id)?
+    user_id = json_get(req.body, "user_id")?
+    user = aw fetch_user(user_id)?
     Ok(Response { status: 200, body: json_stringify(user) })</code></pre>
 
           <h3>Step 4: Verification Feedback Loop</h3>
@@ -320,19 +321,55 @@ f verified_sort(items: [Int]) -> [Int]
           <p>FORMA uses indentation-based syntax with short keywords for token efficiency.</p>
 
           <h3>Variables and Assignment</h3>
-          <pre><code class="language-forma"># Type inference with :=
-x := 42              # Int
-name := "Alice"      # Str
-ratio := 3.14        # Float
-active := true       # Bool
+          <p>FORMA uses two assignment operators with distinct meanings:</p>
 
-# Explicit type annotation
-count: Int = 0
-items: [Str] = ["a", "b", "c"]
+          <div class="table-wrap">
+            <table class="reference-table">
+              <thead>
+                <tr><th>Operator</th><th>Meaning</th><th>Use For</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>=</code></td><td>Immutable binding</td><td>Values that never change</td></tr>
+                <tr><td><code>:=</code></td><td>Mutable binding/assignment</td><td>Values that will be updated</td></tr>
+              </tbody>
+            </table>
+          </div>
 
-# Mutable reassignment
-mut counter := 0
-counter := counter + 1</code></pre>
+          <pre><code class="language-forma"># Immutable variables with = (cannot be changed after creation)
+x = 42
+name = "Alice"
+config = load_config()
+
+# Mutable variables with := (can be reassigned)
+counter := 0
+total := 0.0
+
+# Reassignment also uses :=
+counter := counter + 1
+total := total + amount
+
+# With explicit type annotations
+count: Int = 0          # immutable
+sum: Float := 0.0       # mutable</code></pre>
+
+          <h4>When to Use Each</h4>
+          <ul>
+            <li><strong>Use <code>=</code></strong> for constants, configuration, function results you won't modify, struct instances, closures</li>
+            <li><strong>Use <code>:=</code></strong> for loop counters, accumulators, state that changes, anything you'll reassign</li>
+          </ul>
+
+          <pre><code class="language-forma"># Typical pattern: mutable accumulator in a loop
+f sum_list(items: [Int]) -> Int
+    total := 0                    # mutable - will be updated
+    for item in items
+        total := total + item     # reassignment
+    total                         # return final value
+
+# Typical pattern: immutable intermediate values
+f process(data: Data) -> Result
+    validated = validate(data)    # immutable - just passing through
+    transformed = transform(validated)
+    Result { data: transformed }</code></pre>
 
           <h3>Comments</h3>
           <pre><code class="language-forma"># Single-line comment
@@ -342,7 +379,7 @@ counter := counter + 1</code></pre>
 # This is line two
 
 f example()
-    x := 42  # Inline comment</code></pre>
+    x = 42  # Inline comment</code></pre>
 
           <h3>Short Keywords</h3>
           <p>FORMA uses abbreviated keywords for token efficiency (38% fewer tokens than Rust):</p>
@@ -364,8 +401,8 @@ f example()
                 <tr><td><code>ct</code></td><td>continue</td><td><code>ct</code> or <code>ct 'label</code></td></tr>
                 <tr><td><code>ret</code></td><td>return</td><td><code>ret value</code></td></tr>
                 <tr><td><code>as f</code></td><td>async function</td><td><code>as f fetch() -> Str</code></td></tr>
-                <tr><td><code>aw</code></td><td>await</td><td><code>result := aw task</code></td></tr>
-                <tr><td><code>sp</code></td><td>spawn</td><td><code>task := sp async_work()</code></td></tr>
+                <tr><td><code>aw</code></td><td>await</td><td><code>result = aw task</code></td></tr>
+                <tr><td><code>sp</code></td><td>spawn</td><td><code>task = sp async_work()</code></td></tr>
                 <tr><td><code>us</code></td><td>use (import)</td><td><code>us std.io</code></td></tr>
                 <tr><td><code>md</code></td><td>module</td><td><code>md math { ... }</code></td></tr>
                 <tr><td><code>pub</code></td><td>public</td><td><code>pub f api() -> Int</code></td></tr>
@@ -374,16 +411,16 @@ f example()
           </div>
 
           <h3>String Interpolation</h3>
-          <pre><code class="language-forma">name := "Alice"
-age := 30
+          <pre><code class="language-forma">name = "Alice"
+age = 30
 
 # f-string interpolation
-greeting := f"Hello, {name}!"
-info := f"{name} is {age} years old"
+greeting = f"Hello, {name}!"
+info = f"{name} is {age} years old"
 
 # Expressions in interpolation
-calc := f"2 + 2 = {2 + 2}"
-upper := f"Name: {str_upper(name)}"</code></pre>
+calc = f"2 + 2 = {2 + 2}"
+upper = f"Name: {str_upper(name)}"</code></pre>
         </section>
 
         <!-- TYPE SYSTEM -->
@@ -425,9 +462,9 @@ pair: (Int, Str) = (42, "answer")
 triple: (Int, Int, Int) = (1, 2, 3)
 
 # Accessing elements
-first := numbers[0]          # 1
-alice_age := ages["Alice"]   # 30
-x := pair.0                  # 42</code></pre>
+first = numbers[0]           # 1
+alice_age = ages["Alice"]    # 30
+x = pair.0                   # 42</code></pre>
 
           <h3>Option and Result Types</h3>
           <pre><code class="language-forma"># Option - for values that might not exist
@@ -450,8 +487,8 @@ f apply(x: Int, func: (Int) -> Int) -> Int
     func(x)
 
 # Using closures with function types
-double := |x: Int| -> Int x * 2
-result := apply(5, double)  # 10
+double = |x: Int| -> Int x * 2
+result = apply(5, double)  # 10
 
 # Higher-order functions
 f compose(f: (Int) -> Int, g: (Int) -> Int) -> (Int) -> Int
@@ -474,10 +511,10 @@ f get_user(id: UserId, users: UserMap) -> Str?
 
           <h3>If Expressions</h3>
           <pre><code class="language-forma"># If as expression (single line)
-result := if x > 0 then "positive" else "non-positive"
+result = if x > 0 then "positive" else "non-positive"
 
 # If as expression (multi-line)
-category := if x > 100
+category = if x > 100
     "large"
 else if x > 10
     "medium"
@@ -545,13 +582,13 @@ for i in 1..=5
     print(i)  # 1, 2, 3, 4, 5
 
 # While loop
-mut count := 0
+count := 0
 wh count < 5
     print(count)
     count := count + 1
 
 # Infinite loop with break
-mut i := 0
+i := 0
 lp
     i := i + 1
     if i > 10 then br
@@ -617,20 +654,20 @@ f print_all[T](items: [T]) where T: Display
 
           <h3>Closures (Anonymous Functions)</h3>
           <pre><code class="language-forma"># Basic closure
-add := |a: Int, b: Int| a + b
-result := add(3, 4)  # 7
+add = |a: Int, b: Int| a + b
+result = add(3, 4)  # 7
 
 # Closure with explicit return type
-square := |x: Int| -> Int x * x
+square = |x: Int| -> Int x * x
 
 # Closure capturing environment
-multiplier := 3
-scale := |x: Int| x * multiplier
+multiplier = 3
+scale = |x: Int| x * multiplier
 
 # Passing closures to functions
-numbers := [1, 2, 3, 4, 5]
-doubled := map(numbers, |x: Int| x * 2)  # [2, 4, 6, 8, 10]
-evens := filter(numbers, |x: Int| x % 2 == 0)  # [2, 4]</code></pre>
+numbers = [1, 2, 3, 4, 5]
+doubled = map(numbers, |x: Int| x * 2)  # [2, 4, 6, 8, 10]
+evens = filter(numbers, |x: Int| x % 2 == 0)  # [2, 4]</code></pre>
 
           <h3>Recursive Functions</h3>
           <pre><code class="language-forma"># Simple recursion
@@ -665,8 +702,8 @@ s Point
     y: Float
 
 # Creating instances
-origin := Point { x: 0.0, y: 0.0 }
-p := Point { x: 3.0, y: 4.0 }
+origin = Point { x: 0.0, y: 0.0 }
+p = Point { x: 3.0, y: 4.0 }
 
 # Accessing fields
 print(p.x)  # 3.0
@@ -696,8 +733,8 @@ i Point
         sqrt(self.x * self.x + self.y * self.y)
 
     f distance_to(&self, other: &Point) -> Float
-        dx := self.x - other.x
-        dy := self.y - other.y
+        dx = self.x - other.x
+        dy = self.y - other.y
         sqrt(dx * dx + dy * dy)
 
     # Method returning new instance
@@ -709,10 +746,10 @@ i Point
         Point { x: 0.0, y: 0.0 }
 
 # Usage
-p := Point { x: 3.0, y: 4.0 }
-dist := p.distance()           # 5.0
-moved := p.translate(1.0, 1.0) # Point { x: 4.0, y: 5.0 }
-zero := Point.origin()         # Point { x: 0.0, y: 0.0 }</code></pre>
+p = Point { x: 3.0, y: 4.0 }
+dist = p.distance()            # 5.0
+moved = p.translate(1.0, 1.0)  # Point { x: 4.0, y: 5.0 }
+zero = Point.origin()          # Point { x: 0.0, y: 0.0 }</code></pre>
 
           <h3>Enums</h3>
           <pre><code class="language-forma"># Simple enum (unit variants)
@@ -736,9 +773,9 @@ e Message
     Color(Int, Int, Int)
 
 # Using enums
-dir := Direction.North
-shape := Shape.Circle(5.0)
-msg := Message.Move { x: 10, y: 20 }</code></pre>
+dir = Direction.North
+shape = Shape.Circle(5.0)
+msg = Message.Move { x: 10, y: 20 }</code></pre>
 
           <h3>Pattern Matching on Enums</h3>
           <pre><code class="language-forma">f area(shape: Shape) -> Float
@@ -747,7 +784,7 @@ msg := Message.Move { x: 10, y: 20 }</code></pre>
         Shape.Rectangle(w, h) -> w * h
         Shape.Triangle(a, b, c) ->
             # Heron's formula
-            s := (a + b + c) / 2.0
+            s = (a + b + c) / 2.0
             sqrt(s * (s - a) * (s - b) * (s - c))
 
 f process_message(msg: Message)
@@ -790,11 +827,11 @@ f greet_user(id: Int)
         None -> print("User not found")
 
 # Using ?? for default values
-name := find_user(999)?.name ?? "Unknown"
+name = find_user(999)?.name ?? "Unknown"
 
 # Chaining optional operations
 f get_user_email(id: Int) -> Str?
-    user := find_user(id)?  # Returns None if user not found
+    user = find_user(id)?  # Returns None if user not found
     Some(user.email)</code></pre>
 
           <h3>Result Type</h3>
@@ -821,15 +858,15 @@ f process(input: Str)
 
 # Error propagation with ?
 f calculate(a: Str, b: Str) -> Int!Str
-    x := parse_int(a)?  # Returns Err early if parsing fails
-    y := parse_int(b)?
-    divide(x, y)?       # Returns Err early if division fails</code></pre>
+    x = parse_int(a)?  # Returns Err early if parsing fails
+    y = parse_int(b)?
+    divide(x, y)?      # Returns Err early if division fails</code></pre>
 
           <h3>Error Handling Operators</h3>
           <pre><code class="language-forma"># ? - Propagate error (return early on Err/None)
 f load_config() -> Config!Str
-    content := file_read("config.json")?  # Returns Err if read fails
-    config := json_parse(content)?        # Returns Err if parse fails
+    content = file_read("config.json")?  # Returns Err if read fails
+    config = json_parse(content)?        # Returns Err if parse fails
     Ok(config)
 
 # ! - Unwrap (panic on Err/None)
@@ -837,8 +874,8 @@ f must_have_config() -> Config
     file_read("config.json")!  # Panics if file not found
 
 # ?? - Coalesce (provide default)
-port := env_get("PORT") ?? "8080"
-count := str_to_int(input) ?? 0</code></pre>
+port = env_get("PORT") ?? "8080"
+count = str_to_int(input) ?? 0</code></pre>
 
           <h3>Option/Result Utility Functions</h3>
           <pre><code class="language-forma"># Checking state
@@ -1117,7 +1154,7 @@ $ forma verify src --report --format json --examples 1000 --seed 42
 @post(result >= arr[0])
 @post(forall x in arr: result >= x)
 f max_element(arr: [Int]) -> Int
-    mut max := arr[0]
+    max := arr[0]
     for x in arr
         if x > max
             max := x
@@ -1154,7 +1191,7 @@ f print_point(p: &Point)
     print(f"({p.x}, {p.y})")
 
 # Creating references
-point := Point { x: 3.0, y: 4.0 }
+point = Point { x: 3.0, y: 4.0 }
 print_point(&point)  # Pass reference
 
 # Multiple immutable references are allowed
@@ -1167,7 +1204,7 @@ f increment(ref mut x: Int)
     x := x + 1
 
 # Usage
-mut value := 10
+value := 10
 increment(ref mut value)
 print(value)  # 11
 
@@ -1177,28 +1214,28 @@ f swap(ref mut arr: [Int], i: Int, j: Int)
     arr[i] := arr[j]
     arr[j] := temp
 
-mut numbers := [1, 2, 3]
+numbers := [1, 2, 3]
 swap(ref mut numbers, 0, 2)
 print(numbers)  # [3, 2, 1]</code></pre>
 
           <h3>Borrow Rules</h3>
           <pre><code class="language-forma"># Rule 1: Multiple immutable borrows OK
 f example1()
-    data := [1, 2, 3]
-    ref1 := &data
-    ref2 := &data  # OK - multiple immutable refs
+    data = [1, 2, 3]
+    ref1 = &data
+    ref2 = &data  # OK - multiple immutable refs
     print(ref1[0])
     print(ref2[0])
 
 # Rule 2: Only one mutable borrow at a time
 f example2()
-    mut data := [1, 2, 3]
+    data := [1, 2, 3]
     process(ref mut data)  # OK
     # Cannot have another mutable ref while this one exists
 
 # Rule 3: Cannot mix mutable and immutable
 f example3()
-    mut data := [1, 2, 3]
+    data := [1, 2, 3]
     # Either use &data OR ref mut data, not both at once</code></pre>
 
           <h3>Why Second-Class References?</h3>
@@ -1215,7 +1252,7 @@ f example3()
 
 # Instead, use owned values:
 f good_return() -> Int
-    x := 42
+    x = 42
     x  # Return owned value
 
 s GoodStruct
@@ -1238,8 +1275,8 @@ i Pair[A, B]
         Pair { first: self.second, second: self.first }
 
 # Usage
-pair := Pair { first: 42, second: "hello" }
-swapped := pair.swap()  # Pair { first: "hello", second: 42 }</code></pre>
+pair = Pair { first: 42, second: "hello" }
+swapped = pair.swap()  # Pair { first: "hello", second: 42 }</code></pre>
 
           <h3>Traits (Interfaces)</h3>
           <pre><code class="language-forma"># Define a trait
@@ -1262,7 +1299,7 @@ i Area for Circle
         3.14159 * self.radius * self.radius
 
 # Using trait methods
-circle := Circle { radius: 5.0 }
+circle = Circle { radius: 5.0 }
 print(circle.display())  # "Circle(radius=5.0)"
 print(circle.area())     # 78.53975</code></pre>
 
@@ -1308,34 +1345,34 @@ t Default
           <h3>Async Functions</h3>
           <pre><code class="language-forma"># Declare async function with 'as f'
 as f fetch_data(url: Str) -> Str!Str
-    response := http_get(url)?
+    response = http_get(url)?
     Ok(response)
 
 # Async main
 as f main()
-    data := aw fetch_data("https://api.example.com")
+    data = aw fetch_data("https://api.example.com")
     print(data)</code></pre>
 
           <h3>Spawn and Await</h3>
           <pre><code class="language-forma">as f main()
     # Spawn concurrent tasks
-    task1 := sp fetch_data("https://api.example.com/a")
-    task2 := sp fetch_data("https://api.example.com/b")
-    task3 := sp fetch_data("https://api.example.com/c")
+    task1 = sp fetch_data("https://api.example.com/a")
+    task2 = sp fetch_data("https://api.example.com/b")
+    task3 = sp fetch_data("https://api.example.com/c")
 
     # Await results (runs concurrently)
-    result1 := aw task1
-    result2 := aw task2
-    result3 := aw task3
+    result1 = aw task1
+    result2 = aw task2
+    result3 = aw task3
 
     print("All fetches complete!")</code></pre>
 
           <h3>Channels</h3>
           <pre><code class="language-forma">as f main()
     # Create channel
-    ch := channel_new()
-    sender := ch.0
-    receiver := ch.1
+    ch = channel_new()
+    sender = ch.0
+    receiver = ch.1
 
     # Spawn producer
     sp produce(sender)
@@ -1354,25 +1391,25 @@ as f produce(sender: Sender[Str])
           <h3>Mutex for Shared State</h3>
           <pre><code class="language-forma">as f main()
     # Create shared counter
-    counter := mutex_new(0)
+    counter = mutex_new(0)
 
     # Spawn workers
     tasks := []
     for i in 0..10
         task := sp increment_counter(counter)
-        vec_push(tasks, task)
+        tasks := vec_push(tasks, task)
 
     # Wait for all
     for task in tasks
         aw task
 
     # Read final value
-    value := mutex_lock(counter)
+    value = mutex_lock(counter)
     print(f"Final count: {value}")
 
 as f increment_counter(counter: Mutex[Int])
     for _ in 0..100
-        mut guard := mutex_lock(counter)
+        guard := mutex_lock(counter)
         guard := guard + 1
         mutex_unlock(counter)</code></pre>
         </section>
@@ -1394,7 +1431,7 @@ str(3.14)                   # "3.14"
 str(true)                   # "true"</code></pre>
 
           <h3>String Operations</h3>
-          <pre><code class="language-forma">s := "Hello, World!"
+          <pre><code class="language-forma">s = "Hello, World!"
 
 str_len(s)                  # 13
 str_upper(s)                # "HELLO, WORLD!"
@@ -1419,7 +1456,7 @@ str_to_int("abc")           # None</code></pre>
 
           <h3>Collection Operations</h3>
           <pre><code class="language-forma"># Lists
-arr := [1, 2, 3, 4, 5]
+arr = [1, 2, 3, 4, 5]
 
 len(arr)                    # 5
 vec_push(arr, 6)            # [1, 2, 3, 4, 5, 6]
@@ -1446,7 +1483,7 @@ any(arr, |x| x > 3)         # true
 all(arr, |x| x > 0)         # true
 
 # Maps
-m := {"a": 1, "b": 2}
+m = {"a": 1, "b": 2}
 
 map_get(m, "a")             # Some(1)
 map_get(m, "c")             # None
@@ -1489,9 +1526,9 @@ exp(1.0)                    # ~2.718</code></pre>
           <pre><code class="language-forma"># Requires --allow-read and/or --allow-write
 
 # Reading
-content := file_read("data.txt")?
-lines := file_read_lines("data.txt")?
-bytes := file_read_bytes("image.png")?
+content = file_read("data.txt")?
+lines = file_read_lines("data.txt")?
+bytes = file_read_bytes("image.png")?
 
 # Writing
 file_write("output.txt", "Hello!")?
@@ -1507,32 +1544,32 @@ file_size("data.txt")       # bytes
 file_is_dir("src/")         # true/false
 
 # Directory operations
-files := dir_list("src/")?
+files = dir_list("src/")?
 dir_create("new_dir")?
 dir_remove("old_dir")?</code></pre>
 
           <h3>JSON</h3>
           <pre><code class="language-forma"># Parsing
-data := json_parse("{\"name\": \"Alice\", \"age\": 30}")?
+data = json_parse("{\"name\": \"Alice\", \"age\": 30}")?
 
 # Accessing values
-name := json_get(data, "name")  # "Alice"
-age := json_get(data, "age")    # 30
+name = json_get(data, "name")  # "Alice"
+age = json_get(data, "age")    # 30
 
 # Creating JSON
-obj := json_object()
+obj = json_object()
 json_set(obj, "id", 1)
 json_set(obj, "active", true)
 
 # Serializing
-json_str := json_stringify(obj)  # {"id":1,"active":true}</code></pre>
+json_str = json_stringify(obj)  # {"id":1,"active":true}</code></pre>
 
           <h3>HTTP (requires --allow-network)</h3>
           <pre><code class="language-forma"># GET request
-response := http_get("https://api.example.com/data")?
+response = http_get("https://api.example.com/data")?
 
 # POST request
-response := http_post(
+response = http_post(
     "https://api.example.com/submit",
     "{\"name\": \"test\"}",
     {"Content-Type": "application/json"}
@@ -1550,8 +1587,8 @@ f handle_request(req: HttpRequest) -> HttpResponse
 
           <h3>Time and Random</h3>
           <pre><code class="language-forma"># Current time
-now := time_now()           # Unix timestamp (seconds)
-now_ms := time_now_ms()     # Milliseconds
+now = time_now()            # Unix timestamp (seconds)
+now_ms = time_now_ms()      # Milliseconds
 
 # Formatting
 time_format(now, "%Y-%m-%d %H:%M:%S")
@@ -1704,24 +1741,23 @@ i RequestBuilder
         RequestBuilder { method: m, ..self }
 
     f header(&self, key: Str, value: Str) -> RequestBuilder
-        mut h := self.headers
-        map_insert(h, key, value)
+        h = map_insert(self.headers, key, value)
         RequestBuilder { headers: h, ..self }
 
     f body(&self, b: Str) -> RequestBuilder
         RequestBuilder { body: Some(b), ..self }
 
 # Usage
-request := RequestBuilder.new("https://api.example.com")
+request = RequestBuilder.new("https://api.example.com")
     .method("POST")
     .header("Content-Type", "application/json")
     .body("{\"data\": 123}")</code></pre>
 
           <h3>Result Chaining</h3>
           <pre><code class="language-forma">f process_file(path: Str) -> Data!Str
-    content := file_read(path)?
-    parsed := json_parse(content)?
-    validated := validate(parsed)?
+    content = file_read(path)?
+    parsed = json_parse(content)?
+    validated = validate(parsed)?
     Ok(transform(validated))
 
 # Alternative with map/and_then
@@ -1746,7 +1782,7 @@ i Machine
         Machine { state: State.Idle }
 
     f transition(&self, event: Event) -> Machine
-        new_state := m (self.state, event)
+        new_state = m (self.state, event)
             (State.Idle, Event.Start) -> State.Loading
             (State.Loading, Event.Success(data)) -> State.Ready(data)
             (State.Loading, Event.Failure(e)) -> State.Error(e)
@@ -1755,7 +1791,7 @@ i Machine
         Machine { state: new_state }</code></pre>
 
           <h3>Iteration with Index</h3>
-          <pre><code class="language-forma">items := ["a", "b", "c"]
+          <pre><code class="language-forma">items = ["a", "b", "c"]
 
 # Using enumerate
 for (i, item) in enumerate(items)
@@ -1768,7 +1804,7 @@ for i in 0..len(items)
           <h3>Retry Pattern</h3>
           <pre><code class="language-forma">@pre(max_attempts > 0)
 f retry[T, E](max_attempts: Int, operation: () -> T!E) -> T!E
-    mut attempts := 0
+    attempts := 0
     lp
         attempts := attempts + 1
         m operation()
@@ -1777,18 +1813,18 @@ f retry[T, E](max_attempts: Int, operation: () -> T!E) -> T!E
             Err(_) -> sleep(1000 * attempts)  # Exponential backoff
 
 # Usage
-result := retry(3, || http_get("https://api.example.com"))</code></pre>
+result = retry(3, || http_get("https://api.example.com"))</code></pre>
 
           <h3>Resource Cleanup</h3>
           <pre><code class="language-forma">f with_file[T](path: Str, operation: (File) -> T) -> T!Str
-    file := file_open(path)?
-    result := operation(file)
+    file = file_open(path)?
+    result = operation(file)
     file_close(file)
     Ok(result)
 
 # Usage
 with_file("data.txt", |f|
-    content := file_read_all(f)
+    content = file_read_all(f)
     process(content)
 )?</code></pre>
         </section>
