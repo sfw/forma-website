@@ -52,7 +52,7 @@
       </div>
       <div class="hero-metrics">
         <article class="metric-card">
-          <p class="metric-value">320+</p>
+          <p class="metric-value">298+</p>
           <p class="metric-label">Built-in standard library functions</p>
         </article>
         <article class="metric-card">
@@ -65,7 +65,7 @@
         </article>
         <article class="metric-card">
           <p class="metric-value">v0.13</p>
-          <p class="metric-label">Stabilized production release line</p>
+          <p class="metric-label">Active development release line</p>
         </article>
       </div>
     </section>
@@ -89,7 +89,7 @@
         <article class="goal-card">
           <h3>3. Minimal friction developer tooling</h3>
           <p>Make every stage of authoring, checking, formatting, and IDE integration straightforward and scriptable.</p>
-          <p class="goal-outcome">Outcome: `check`, `fmt`, `repl`, `lsp`, `typeof`, completion, JSON error mode.</p>
+          <p class="goal-outcome">Outcome: `check`, `fmt`, `repl`, `lsp`, `typeof`, completion, JSON error mode, plus `explain` and `verify` trust reporting.</p>
         </article>
         <article class="goal-card">
           <h3>4. Systems feature completeness</h3>
@@ -171,7 +171,7 @@
       <article class="decision-panel">
         <h3>Decision: AI tooling is first-class, not an afterthought</h3>
         <p><strong>Why:</strong> AI code generation quality depends on machine-readable syntax and diagnostics, not just language elegance.</p>
-        <p><strong>Implementation:</strong> EBNF/JSON grammar export, JSON error mode, type queries, completion surfaces.</p>
+        <p><strong>Implementation:</strong> EBNF/JSON grammar export, JSON error mode, type queries/completions, and verification UX (`explain`, `verify --report`).</p>
         <p><strong>Payoff:</strong> FORMA can be integrated directly into constrained decoding and auto-repair pipelines.</p>
       </article>
 
@@ -210,10 +210,17 @@ forma grammar --format json</code></pre>
 
         <article class="feature-card">
           <h3>Tooling Surface: LSP + REPL + Type Queries (Shipped)</h3>
-          <p>FORMA exposes interactive authoring and static introspection through LSP, REPL, and position-based type lookup.</p>
+          <p>FORMA exposes interactive authoring through LSP (diagnostics/completion/hover/goto/symbols/signature/formatting/references in single-file scope), REPL, and type-at-position queries.</p>
           <pre><code>forma lsp
 forma repl
-forma typeof app.forma --line 12 --column 8</code></pre>
+forma typeof app.forma --position 12:8</code></pre>
+        </article>
+
+        <article class="feature-card">
+          <h3>Verification UX (Shipped)</h3>
+          <p>`forma explain` translates contract intent into human-readable or JSON output, and `forma verify --report` emits deterministic trust summaries for CI workflows.</p>
+          <pre><code>forma explain myfile.forma --format human
+forma verify src --report --format json --examples 20 --seed 42</code></pre>
         </article>
 
         <article class="feature-card">
@@ -234,7 +241,7 @@ forma typeof app.forma --line 12 --column 8</code></pre>
       <div class="section-head">
         <p class="eyebrow">Execution Timeline</p>
         <h2>Delivery timeline: complete end-to-end</h2>
-        <p class="section-sub">All major phases and sprint groups are marked complete, including the Sprint 36-45 hardening and LSP wave.</p>
+        <p class="section-sub">All major phases and sprint groups are marked complete, including the Sprint 36-46 launch hardening, LSP expansion, and verification UX wave.</p>
       </div>
 
       <div class="timeline-list">
@@ -298,9 +305,19 @@ forma typeof app.forma --line 12 --column 8</code></pre>
             <p class="timeline-phase">Phase 7</p>
             <p class="status-chip complete">Complete</p>
           </div>
-          <h3>Confidence Closure and LSP Completion Wave (Sprints 42-45)</h3>
+          <h3>Confidence Closure and LSP Expansion Wave (Sprints 42-45)</h3>
           <p>Sprint 42 tightened CI and verification with `fmt` error-format forwarding, skip-list debt removal, coverage-audit tooling, and a large CLI/runtime test expansion.</p>
-          <p>Sprints 43-45 aligned CLI JSON error contracts (`run/check/build`), completed core LSP feature expansion (formatting, symbols, signature help, references, hover quality), and enforced coverage/CLI hardening for release confidence.</p>
+          <p>Sprints 43-45 aligned CLI JSON error contracts (`run/check/build`), added core LSP features (formatting, symbols, signature help, references/hover improvements), and enforced coverage/CLI hardening for release confidence.</p>
+        </article>
+
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Phase 8</p>
+            <p class="status-chip complete">Complete</p>
+          </div>
+          <h3>Verification UX and Docs Overhaul (Sprint 46)</h3>
+          <p>Introduced richer contract language (`old()`, `forall`, `exists`, implication, membership), named patterns like <code>@pure</code>, and clearer span-keyed explain output.</p>
+          <p>Delivered `forma explain`/`forma verify --report` trust workflows, added verification-focused showcase programs, and refreshed README/reference/AI-reference documentation for the new UX.</p>
         </article>
       </div>
     </section>

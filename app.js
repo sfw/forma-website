@@ -132,7 +132,7 @@ const ROADMAP_ITEMS = [
   { label: "Generics with monomorphization", state: "shipped" },
   { label: "Linear types and capability system", state: "shipped" },
   { label: "Module system", state: "shipped" },
-  { label: "Standard library (320+ builtins)", state: "shipped" },
+  { label: "Standard library (298+ builtins)", state: "shipped" },
   { label: "Grammar export (EBNF, JSON)", state: "shipped" },
   { label: "LLVM native compilation", state: "shipped" },
   { label: "Package manager (path-based dependencies)", state: "shipped" },
@@ -140,9 +140,12 @@ const ROADMAP_ITEMS = [
   { label: "HTTP client and server", state: "shipped" },
   { label: "TCP/UDP sockets and TLS", state: "shipped" },
   { label: "SQLite support", state: "shipped" },
-  { label: "LSP diagnostics/completion/hover/goto", state: "shipped" },
+  { label: "Compression (gzip, zlib)", state: "shipped" },
+  { label: "LSP (diagnostics/completion/hover/goto/symbols/signature/format/references [single-file])", state: "shipped" },
+  { label: "Verification UX (explain, verify --report)", state: "shipped" },
   { label: "Formatter and REPL", state: "shipped" },
-  { label: "Full LSP refactoring/rename/references", state: "shipped" },
+  { label: "21 showcase examples passing", state: "shipped" },
+  { label: "Full LSP (rename/refactor and cross-file references)", state: "building" },
   { label: "Package registry", state: "building" }
 ];
 
@@ -150,32 +153,52 @@ const GOALS = [
   {
     id: "run",
     label: "Run a program",
-    build: ({ file, errorFormat }) => `forma --error-format ${errorFormat} run ${file}`
+    build: ({ file }) => `forma run ${file}`
   },
   {
     id: "check",
     label: "Check source file",
-    build: ({ file, errorFormat }) => `forma --error-format ${errorFormat} check ${file}`
+    build: ({ file, errorFormat }) => `forma check ${file}${errorFormat === "json" ? " --error-format json" : ""}`
   },
   {
     id: "check-partial",
     label: "Check incomplete source",
-    build: ({ file, errorFormat }) => `forma --error-format ${errorFormat} check --partial ${file}`
+    build: ({ file, errorFormat }) => `forma check --partial ${file}${errorFormat === "json" ? " --error-format json" : ""}`
+  },
+  {
+    id: "build",
+    label: "Build executable",
+    build: ({ file, errorFormat }) => `forma build ${file}${errorFormat === "json" ? " --error-format json" : ""}`
   },
   {
     id: "typeof",
     label: "Query type at location",
-    build: ({ file, errorFormat }) => `forma --error-format ${errorFormat} typeof ${file} --line 12 --column 8`
+    build: ({ file }) => `forma typeof ${file} --position 12:8`
   },
   {
     id: "grammar-json",
     label: "Export grammar JSON",
-    build: ({ errorFormat }) => `forma --error-format ${errorFormat} grammar --format json > forma-grammar.json`
+    build: () => "forma grammar --format json > forma-grammar.json"
   },
   {
     id: "grammar-ebnf",
     label: "Export grammar EBNF",
-    build: ({ errorFormat }) => `forma --error-format ${errorFormat} grammar --format ebnf > forma.ebnf`
+    build: () => "forma grammar --format ebnf > forma.ebnf"
+  },
+  {
+    id: "explain-human",
+    label: "Explain contracts (human)",
+    build: ({ file }) => `forma explain ${file} --format human`
+  },
+  {
+    id: "explain-json",
+    label: "Explain contracts (json + examples)",
+    build: ({ file }) => `forma explain ${file} --format json --examples=3 --seed 42`
+  },
+  {
+    id: "verify-report",
+    label: "Verify contracts (report json)",
+    build: ({ file }) => `forma verify ${file} --report --format json --examples 20 --seed 42`
   },
   {
     id: "fmt",
@@ -250,7 +273,7 @@ function initHeroCommands() {
       output: [
         "Grammar exported successfully.",
         "Output ready for constrained decoding pipelines.",
-        "Wrote 214 rules to ./forma.json"
+        "Grammar export written to ./forma.json"
       ]
     },
     {
@@ -262,27 +285,27 @@ function initHeroCommands() {
       ]
     },
     {
-      command: "forma typeof app.forma --line 18 --column 7",
+      command: "forma explain app.forma --format human",
       output: [
-        "Type query resolved at 18:7.",
-        "Result<Order, ValidationError>",
-        "Use this to debug inference at exact cursor positions."
+        "┌─ verified_sort(items: [Int]) -> [Int]",
+        "│  Requires: items is not empty",
+        "└─ Guarantees: sorted + permutation"
       ]
     },
     {
-      command: "forma run hello.forma",
+      command: "forma explain app.forma --format json --examples=3 --seed 42",
       output: [
-        "Program output:",
-        "Hello from FORMA runtime!",
-        "Program completed successfully."
+        "Explain report generated (json).",
+        "Includes valid + invalid contract examples.",
+        "Deterministic output using seed=42."
       ]
     },
     {
-      command: "forma repl",
+      command: "forma verify src --report --format json --examples 20 --seed 42",
       output: [
-        "Interactive REPL started.",
-        "Type expressions to evaluate, or :help for commands.",
-        "Session keeps context until you run :reset or :quit."
+        "Trust report complete: PASS/WARN/SKIP/FAIL.",
+        "Capabilities revoked by default for CI-safe runs.",
+        "Use --allow-side-effects to opt in."
       ]
     }
   ];

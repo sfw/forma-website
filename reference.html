@@ -43,7 +43,7 @@
         <span>Second-class references</span>
         <span>Result/Option-first errors</span>
         <span>Async + spawn + await</span>
-        <span>320+ builtins</span>
+        <span>298+ builtins</span>
         <span>Grammar + JSON diagnostics</span>
       </div>
       <div class="reference-actions">
@@ -512,7 +512,38 @@ us std.math</code></pre>
 f factorial(n: Int) -> Int
     if n &lt;= 1 then 1
     else n * factorial(n - 1)</code></pre>
-              <p class="micro-note">Enable runtime contract checks with <code>forma run --check-contracts file.forma</code>.</p>
+              <pre><code class="language-forma">@pre(values.len() > 0)
+@post(forall i in 0..result.len()-1: result[i] <= result[i+1])
+@post(permutation(values, result))
+f sort(values: [Int]) -> [Int]
+    sort_ints(values)</code></pre>
+              <p class="micro-note">Contracts are optional; runtime checks are enabled by default. Disable with <code>forma run --no-check-contracts file.forma</code>.</p>
+              <p class="micro-note">Contract expressions support <code>old(expr)</code>, <code>forall</code>, <code>exists</code>, <code>in</code>, and implication <code>=&gt;</code>.</p>
+              <div class="table-wrap">
+                <table class="reference-table">
+                  <thead>
+                    <tr>
+                      <th>Pattern</th>
+                      <th>Context</th>
+                      <th>Expansion</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><code>@nonempty(x)</code></td><td>Pre-only</td><td><code>x.len() &gt; 0</code></td></tr>
+                    <tr><td><code>@nonnegative(x)</code></td><td>Both</td><td><code>x &gt;= 0</code></td></tr>
+                    <tr><td><code>@positive(x)</code></td><td>Both</td><td><code>x &gt; 0</code></td></tr>
+                    <tr><td><code>@nonzero(x)</code></td><td>Both</td><td><code>x != 0</code></td></tr>
+                    <tr><td><code>@bounded(x, lo, hi)</code></td><td>Both</td><td><code>x &gt;= lo &amp;&amp; x &lt;= hi</code></td></tr>
+                    <tr><td><code>@sorted(x)</code></td><td>Both</td><td><code>forall i in 0..x.len()-1: x[i] &lt;= x[i+1]</code></td></tr>
+                    <tr><td><code>@sorted_desc(x)</code></td><td>Both</td><td><code>forall i in 0..x.len()-1: x[i] &gt;= x[i+1]</code></td></tr>
+                    <tr><td><code>@unique(x)</code></td><td>Both</td><td><code>forall i,j: i != j =&gt; x[i] != x[j]</code></td></tr>
+                    <tr><td><code>@same_length(a, b)</code></td><td>Both</td><td><code>a.len() == b.len()</code></td></tr>
+                    <tr><td><code>@permutation(a, b)</code></td><td>Both</td><td><code>permutation(a, b)</code></td></tr>
+                    <tr><td><code>@unchanged(x)</code></td><td>Post-only</td><td><code>x == old(x)</code></td></tr>
+                    <tr><td><code>@pure</code></td><td>Post-only</td><td><code>true</code> (no side effects marker)</td></tr>
+                  </tbody>
+                </table>
+              </div>
             </article>
           </div>
         </section>
@@ -549,7 +580,7 @@ f factorial(n: Int) -> Int
         <section class="reference-block reveal" id="stdlib">
           <h2>Standard Library Overview</h2>
           <p>
-            FORMA exposes broad builtin coverage for I/O, text processing, math, data structures, networking, persistence, and diagnostics.
+            FORMA exposes 298+ builtins across I/O, text processing, math, data structures, networking, persistence, and diagnostics.
           </p>
           <div class="table-wrap">
             <table class="reference-table">
@@ -601,6 +632,11 @@ f factorial(n: Int) -> Int
                   <td><code>json_parse</code> <code>regex_match</code> <code>time_now</code> <code>random_int</code></td>
                   <td>Common runtime features for service and tooling code.</td>
                 </tr>
+                <tr>
+                  <td>Process / Env / Unsafe</td>
+                  <td><code>exec</code> <code>env_get</code> <code>env_set</code> <code>alloc</code> <code>dealloc</code></td>
+                  <td>Capability-gated (<code>--allow-exec</code>, <code>--allow-env</code>, <code>--allow-unsafe</code>).</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -609,17 +645,27 @@ f factorial(n: Int) -> Int
         <section class="reference-block reveal" id="tooling">
           <h2>Tooling and CLI</h2>
           <p>
-            The CLI covers execution, checking, formatting, grammar export, project scaffolding, and editor-facing queries.
+            The CLI covers execution, checking, building, verification reporting, grammar export, project scaffolding, and editor-facing queries.
           </p>
           <pre><code class="language-bash">forma run &lt;file&gt;                   # Run a FORMA program
 forma run &lt;file&gt; --dump-mir        # Run with MIR dump
-forma run &lt;file&gt; --check-contracts # Enable contract checking
+forma run &lt;file&gt; --no-check-contracts # Disable runtime contracts
 forma run &lt;file&gt; --allow-read      # Allow file reads
 forma run &lt;file&gt; --allow-write     # Allow file writes
 forma run &lt;file&gt; --allow-network   # Allow networking
+forma run &lt;file&gt; --allow-exec      # Allow process execution
+forma run &lt;file&gt; --allow-env       # Allow env var access
+forma run &lt;file&gt; --allow-unsafe    # Allow pointer/unsafe builtins
 forma run &lt;file&gt; --allow-all       # Allow all capabilities
 forma check &lt;file&gt;                 # Type check without running
 forma check &lt;file&gt; --partial       # Partial checking
+forma build &lt;file&gt;                 # Build native executable (LLVM feature)
+forma explain &lt;file&gt;               # Explain contracts in plain English
+forma explain &lt;file&gt; --examples=3 --seed 42 --format json
+forma explain &lt;file&gt; --max-examples 3 --seed 42 --format json
+forma verify &lt;file-or-dir&gt; --report --format human
+forma verify &lt;file-or-dir&gt; --report --format json --examples 20 --seed 42
+forma verify &lt;file-or-dir&gt; --report --max-steps 10000 --timeout 1000
 forma lex &lt;file&gt;                   # Dump tokens
 forma parse &lt;file&gt;                 # Dump AST
 forma grammar --format ebnf        # Export grammar as EBNF
@@ -657,7 +703,7 @@ forma complete &lt;file&gt; --position 5:10  # Get completions</code></pre>
         <section class="reference-block reveal" id="ai-workflows">
           <h2>AI Workflows</h2>
           <p>
-            FORMA exposes dedicated surfaces for constrained generation, automated repair loops, and type-aware completions.
+            FORMA exposes dedicated surfaces for constrained generation, automated repair loops, and trust verification workflows.
           </p>
           <div class="reference-grid two">
             <article>
@@ -667,10 +713,13 @@ forma grammar --format json &gt; forma.json</code></pre>
               <p class="micro-note">Use grammar files to restrict decoding to valid FORMA syntax.</p>
             </article>
             <article>
-              <h3>Repair Loop Inputs</h3>
+              <h3>Repair + Verification Loop Inputs</h3>
               <pre><code class="language-bash">forma check --error-format json broken.forma</code></pre>
               <p class="micro-note">Type query: <code>forma typeof myfile.forma --position "5:10"</code>.</p>
               <p class="micro-note">Completions: <code>forma complete myfile.forma --position "5:10"</code>.</p>
+              <p class="micro-note">Explain: <code>forma explain myfile.forma --format json --examples=3 --seed 42</code>.</p>
+              <p class="micro-note">Verify: <code>forma verify src --report --format json --examples 20 --seed 42</code>.</p>
+              <p class="micro-note">`verify` emits <code>PASS</code>/<code>WARN</code>/<code>SKIP</code>/<code>FAIL</code> contract status per function.</p>
             </article>
           </div>
           <h3>Token-Efficient Keyword Set</h3>
