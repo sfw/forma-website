@@ -174,7 +174,7 @@ KEYWORDS: f=function, s=struct, e=enum, t=trait, i=impl, m=match
           as f=async function, aw=await, sp=spawn, us=use
 
 TYPES: Int, Float, Bool, Str, Char
-       [T]=list, {K:V}=map, T?=Option, T!E=Result, (A,B)=tuple
+       [T]=list, Map[K,V]=map, T?=Option, T!E=Result, (A,B)=tuple
 
 VARIABLES: x = 42 (immutable), y := 0 (mutable)
            y := y + 1 (reassignment also uses :=)
@@ -260,7 +260,7 @@ as f handle_request(req: Request) -> Response!Str
 forma check generated.forma --error-format json
 
 # If errors, feed the JSON back to the LLM:
-# {"errors":[{"line":5,"code":"type_mismatch","expected":"Int","found":"Str"}]}
+# {"errors":[{"line":5,"code":"TYPE","expected":"Int","found":"Str"}]}
 
 # 2. Verify contracts hold
 forma verify generated.forma --examples 100
@@ -382,7 +382,7 @@ f example()
     x = 42  # Inline comment</code></pre>
 
           <h3>Short Keywords</h3>
-          <p>FORMA uses abbreviated keywords for token efficiency (38% fewer tokens than Rust):</p>
+          <p>FORMA uses abbreviated keywords for token efficiency (~35% fewer tokens than Rust):</p>
           <div class="table-wrap">
             <table class="reference-table">
               <thead>
@@ -395,10 +395,10 @@ f example()
                 <tr><td><code>t</code></td><td>trait</td><td><code>t Display { f show(&self) -> Str }</code></td></tr>
                 <tr><td><code>i</code></td><td>impl</td><td><code>i Point { ... }</code></td></tr>
                 <tr><td><code>m</code></td><td>match</td><td><code>m value { ... }</code></td></tr>
-                <tr><td><code>wh</code></td><td>while</td><td><code>wh x > 0 { ... }</code></td></tr>
-                <tr><td><code>lp</code></td><td>loop (infinite)</td><td><code>lp { if done then br }</code></td></tr>
-                <tr><td><code>br</code></td><td>break</td><td><code>br</code> or <code>br 'label</code></td></tr>
-                <tr><td><code>ct</code></td><td>continue</td><td><code>ct</code> or <code>ct 'label</code></td></tr>
+                <tr><td><code>wh</code></td><td>while</td><td><code>wh x > 0</code> (indented block)</td></tr>
+                <tr><td><code>lp</code></td><td>loop (infinite)</td><td><code>lp</code> (indented block with <code>br</code>)</td></tr>
+                <tr><td><code>br</code></td><td>break</td><td><code>br</code></td></tr>
+                <tr><td><code>ct</code></td><td>continue</td><td><code>ct</code></td></tr>
                 <tr><td><code>ret</code></td><td>return</td><td><code>ret value</code></td></tr>
                 <tr><td><code>as f</code></td><td>async function</td><td><code>as f fetch() -> Str</code></td></tr>
                 <tr><td><code>aw</code></td><td>await</td><td><code>result = aw task</code></td></tr>
@@ -450,12 +450,8 @@ numbers: [Int] = [1, 2, 3, 4, 5]
 names: [Str] = ["Alice", "Bob"]
 empty_list: [Int] = []
 
-# Fixed-size array
-fixed: [Int; 3] = [1, 2, 3]
-
-# Map (dictionary)
-ages: {Str: Int} = {"Alice": 30, "Bob": 25}
-empty_map: {Str: Int} = {}
+# Map (dictionary) - use map_new() and map_insert(), or literal syntax
+ages = {"Alice": 30, "Bob": 25}
 
 # Tuple
 pair: (Int, Str) = (42, "answer")
@@ -463,7 +459,7 @@ triple: (Int, Int, Int) = (1, 2, 3)
 
 # Accessing elements
 first = numbers[0]           # 1
-alice_age = ages["Alice"]    # 30
+alice_age = map_get(ages, "Alice")  # Some(30)
 x = pair.0                   # 42</code></pre>
 
           <h3>Option and Result Types</h3>
@@ -497,7 +493,7 @@ f compose(f: (Int) -> Int, g: (Int) -> Int) -> (Int) -> Int
           <h3>Type Aliases</h3>
           <pre><code class="language-forma"># Create type aliases for clarity
 type UserId = Int
-type UserMap = {UserId: Str}
+type UserMap = Map[UserId, Str]
 type Callback = (Int, Int) -> Int
 
 f get_user(id: UserId, users: UserMap) -> Str?
@@ -594,10 +590,9 @@ lp
     if i > 10 then br
     print(i)
 
-# Labeled loops for nested break/continue
-'outer: for i in 0..10
+# Nested loops with break
+for i in 0..10
     for j in 0..10
-        if i * j > 50 then br 'outer
         if j % 2 == 0 then ct
         print(f"{i} * {j} = {i * j}")</code></pre>
 
@@ -962,12 +957,12 @@ f binary_search(arr: [Int], target: Int) -> Int?
     # ... implementation
 
 # exists - at least one element satisfies condition
-@post(result != None ==> exists i in 0..len(arr): arr[i] == target)
-f linear_search(arr: [Int], target: Int) -> Int?
+@post(exists i in 0..len(arr): arr[i] == target)
+f find_element(arr: [Int], target: Int) -> Int
     for i in 0..len(arr)
         if arr[i] == target
-            ret Some(i)
-    None
+            ret i
+    -1
 
 # Combined quantifiers
 @post(forall i in 0..len(result)-1: result[i] <= result[i+1])
@@ -975,21 +970,16 @@ f linear_search(arr: [Int], target: Int) -> Int?
 f sort(input: [Int]) -> [Int]
     # ... sorting implementation</code></pre>
 
-          <h3>Implication in Contracts</h3>
-          <pre><code class="language-forma"># ==> means "implies" (if left is true, right must be true)
-@pre(amount > 0 ==> balance >= amount)
-f withdraw(amount: Int) -> Int!Str
-    if amount <= 0
-        Err("amount must be positive")
-    else if balance < amount
-        Err("insufficient funds")
-    else
-        balance := balance - amount
-        Ok(balance)
+          <h3>Multiple Preconditions</h3>
+          <pre><code class="language-forma"># Use multiple @pre annotations for conditional constraints
+@pre(amount > 0, "amount must be positive")
+@pre(balance >= amount, "insufficient funds")
+f withdraw(balance: Int, amount: Int) -> Int!Str
+    Ok(balance - amount)
 
-# Common pattern: conditional postcondition
-@post(result.is_ok() ==> result.unwrap() > 0)
-@post(result.is_err() ==> input <= 0)
+# Separate preconditions for each requirement
+@pre(input > 0)
+@post(result > 0)
 f positive_only(input: Int) -> Int!Str
     if input > 0 then Ok(input)
     else Err("must be positive")</code></pre>
@@ -1057,7 +1047,7 @@ f read_setting(config: Config, key: Str) -> Str?
                 <tr><td><code>@positive(x)</code></td><td><code>x &gt; 0</code></td><td>Pre/Post</td></tr>
                 <tr><td><code>@nonnegative(x)</code></td><td><code>x &gt;= 0</code></td><td>Pre/Post</td></tr>
                 <tr><td><code>@nonzero(x)</code></td><td><code>x != 0</code></td><td>Pre/Post</td></tr>
-                <tr><td><code>@unique(x)</code></td><td><code>forall i,j: i != j =&gt; x[i] != x[j]</code></td><td>Pre/Post</td></tr>
+                <tr><td><code>@unique(x)</code></td><td>no duplicate elements in x</td><td>Pre/Post</td></tr>
                 <tr><td><code>@same_length(a, b)</code></td><td><code>len(a) == len(b)</code></td><td>Pre/Post</td></tr>
                 <tr><td><code>@unchanged(x)</code></td><td><code>x == old(x)</code></td><td>Post only</td></tr>
                 <tr><td><code>@pure</code></td><td>no side effects</td><td>Post only</td></tr>
@@ -1075,28 +1065,26 @@ f read_setting(config: Config, key: Str) -> Str?
           <pre><code class="language-bash"># Human-readable explanation
 $ forma explain math.forma --format human
 
-Function: factorial(n: Int) -> Int
-  Requires: n must be greater than or equal to 0
-  Ensures: result will be greater than or equal to 1
-
-Function: binary_search(arr: [Int], target: Int) -> Option[Int]
-  Requires: arr must be sorted in ascending order
-  Ensures: if result is Some(i), then arr[i] equals target
+┌─ factorial(n: Int) -> Int
+│  Requires:
+│    - n is at least 0
+│  Guarantees:
+│    - result is at least 1
+└─
 
 # JSON output for tooling
 $ forma explain math.forma --format json
 {
   "functions": [{
     "name": "factorial",
-    "signature": "(n: Int) -> Int",
-    "contracts": [{
-      "kind": "precondition",
+    "signature": "factorial(n: Int) -> Int",
+    "preconditions": [{
       "expression": "n >= 0",
-      "human_readable": "n must be greater than or equal to 0"
-    }, {
-      "kind": "postcondition",
+      "english": "n is at least 0"
+    }],
+    "postconditions": [{
       "expression": "result >= 1",
-      "human_readable": "result will be greater than or equal to 1"
+      "english": "result is at least 1"
     }]
   }]
 }</code></pre>
@@ -1104,19 +1092,18 @@ $ forma explain math.forma --format json
              output to verify intent matches the specification, without reading implementation.</p>
 
           <h3><code>forma verify</code> — Test Contracts</h3>
-          <pre><code class="language-bash"># Basic verification (100 random test cases per function)
-$ forma verify src/
+          <pre><code class="language-bash"># Basic verification (20 random test cases per function by default)
+$ forma verify sort.forma --report --format human
 
-Verifying: factorial
-  ✓ 100/100 examples passed
+FORMA Verification Report
 
-Verifying: binary_search
-  ✓ 100/100 examples passed
+sort.forma
+  ✓ PASS verified_sort    contracts:3  examples:20/20
 
-Verifying: quicksort
-  ✗ Postcondition failed: @permutation
-    Counterexample: input = [3, 1, 2]
-    Output: [1, 2] (missing element)
+Summary
+  Functions: 1
+  Verified: 1, Skipped: 0, Failures: 0
+  Examples passed: 20/20
 
 # More thorough testing
 $ forma verify src/ --examples 1000
@@ -1125,27 +1112,18 @@ $ forma verify src/ --examples 1000
 $ forma verify src/ --examples 500 --seed 42
 
 # JSON report for automation
-$ forma verify src --report --format json --examples 1000 --seed 42
+$ forma verify src --report --format json --seed 42
 {
+  "files": [{"path": "src/sort.forma", "functions": [
+    {"name": "verified_sort", "status": "PASS",
+     "contract_count": 3, "examples_run": 20,
+     "examples_passed": 20, "issues": []}
+  ]}],
   "summary": {
-    "total_functions": 12,
-    "passed": 11,
-    "failed": 1,
-    "skipped": 0,
-    "total_examples": 12000
-  },
-  "results": [{
-    "function": "factorial",
-    "status": "PASS",
-    "examples_run": 1000,
-    "examples_passed": 1000
-  }, {
-    "function": "quicksort",
-    "status": "FAIL",
-    "contract": "@permutation",
-    "counterexample": {"input": [3, 1, 2]},
-    "actual_output": [1, 2]
-  }]
+    "total_functions": 1, "functions_with_contracts": 1,
+    "verified": 1, "failures": 0,
+    "total_examples": 20, "examples_passed": 20
+  }
 }</code></pre>
 
           <h3>The Verification Workflow</h3>
@@ -1160,16 +1138,19 @@ f max_element(arr: [Int]) -> Int
             max := x
     max</code></pre>
           <pre><code class="language-bash"># 2. Explain to verify intent
-$ forma explain myfile.forma
-Function: max_element(arr: [Int]) -> Int
-  Requires: arr must have at least one element
-  Ensures: result will be greater than or equal to the first element
-  Ensures: result will be greater than or equal to every element in arr
+$ forma explain myfile.forma --format human
+┌─ max_element(arr: [Int]) -> Int
+│  Requires:
+│    - arr has more than 0 elements
+│  Guarantees:
+│    - result is at least arr[0]
+│    - for every x in arr, result is at least x
+└─
 
 # 3. Verify behavior
-$ forma verify myfile.forma --examples 500
-Verifying: max_element
-  ✓ 500/500 examples passed
+$ forma verify myfile.forma --report --examples 500
+FORMA Verification Report
+  ✓ PASS max_element    contracts:3  examples:500/500
 
 # 4. Integrate in CI
 $ forma verify src --report --format json --seed 42 > verify-report.json</code></pre>
@@ -1482,13 +1463,15 @@ reduce(arr, 0, |a, b| a + b)  # 15
 any(arr, |x| x > 3)         # true
 all(arr, |x| x > 0)         # true
 
-# Maps
-m = {"a": 1, "b": 2}
+# Maps - use map_new() or literal syntax
+m = map_new()
+map_insert(m, "a", 1)
+map_insert(m, "b", 2)
 
 map_get(m, "a")             # Some(1)
 map_get(m, "c")             # None
-map_insert(m, "c", 3)       # {"a": 1, "b": 2, "c": 3}
-map_remove(m, "a")          # {"b": 2, "c": 3}
+map_insert(m, "c", 3)
+map_remove(m, "a")
 map_contains(m, "b")        # true
 map_keys(m)                 # ["a", "b"]
 map_values(m)               # [1, 2]</code></pre>
@@ -1706,13 +1689,13 @@ forma build program.forma -o output</code></pre>
     "file": "main.forma",
     "line": 5,
     "column": 12,
+    "end_line": 5,
+    "end_column": 18,
     "severity": "error",
-    "code": "type_mismatch",
-    "message": "expected Int, found Str",
-    "expected": "Int",
-    "found": "Str",
-    "suggestion": "use str_to_int() to convert"
-  }]
+    "code": "TYPE",
+    "message": "type mismatch: expected Int, found Str"
+  }],
+  "items_count": 1
 }</code></pre>
         </section>
 
@@ -1725,7 +1708,7 @@ forma build program.forma -o output</code></pre>
           <pre><code class="language-forma">s RequestBuilder
     url: Str
     method: Str
-    headers: {Str: Str}
+    headers: Map[Str, Str]
     body: Str?
 
 i RequestBuilder
@@ -1869,8 +1852,6 @@ with_file("data.txt", |f|
                 <tr><td><code>T?</code></td><td><code>Option[T]</code></td><td><code>Int?</code> = <code>Option[Int]</code></td></tr>
                 <tr><td><code>T!E</code></td><td><code>Result[T, E]</code></td><td><code>Int!Str</code> = <code>Result[Int, Str]</code></td></tr>
                 <tr><td><code>[T]</code></td><td><code>Vec[T]</code></td><td><code>[Int]</code> = dynamic array</td></tr>
-                <tr><td><code>[T; N]</code></td><td><code>Array[T, N]</code></td><td><code>[Int; 3]</code> = fixed array</td></tr>
-                <tr><td><code>{K: V}</code></td><td><code>Map[K, V]</code></td><td><code>{Str: Int}</code> = hash map</td></tr>
               </tbody>
             </table>
           </div>
@@ -1888,7 +1869,6 @@ with_file("data.txt", |f|
                 <tr><td><code>result</code></td><td>Return value (in postconditions)</td></tr>
                 <tr><td><code>forall x in coll: P</code></td><td>All elements satisfy P</td></tr>
                 <tr><td><code>exists x in coll: P</code></td><td>Some element satisfies P</td></tr>
-                <tr><td><code>a ==> b</code></td><td>a implies b</td></tr>
                 <tr><td><code>x in coll</code></td><td>x is member of coll</td></tr>
               </tbody>
             </table>

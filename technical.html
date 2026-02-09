@@ -123,26 +123,27 @@
         <h3>Contract Expression Language</h3>
         <p>FORMA contracts support a rich expression language designed for specifying program behavior precisely.</p>
         <div class="code-block">
-          <pre><code>// Basic preconditions and postconditions
+          <pre><code># Basic preconditions and postconditions
 @pre(n >= 0)
 @post(result >= 1)
-fn factorial(n: Int) -> Int
+f factorial(n: Int) -> Int
 
-// Old expressions - capture values at function entry
+# Old expressions - capture values at function entry
 @post(result == old(balance) + amount)
-fn deposit(amount: Int) -> Int
+f deposit(amount: Int) -> Int
 
-// Quantifiers - express properties over collections
-@pre(forall i in 0..len(arr)-1: arr[i] <= arr[i+1])  // sorted input
-@post(exists i in 0..len(arr): arr[i] == target)     // element found
+# Quantifiers - express properties over collections
+@pre(forall i in 0..len(arr)-1: arr[i] <= arr[i+1])  # sorted input
+@post(exists i in 0..len(arr): arr[i] == target)     # element found
 
-// Implication - conditional constraints
-@pre(amount > 0 ==> balance >= amount)
-fn withdraw(amount: Int) -> Result&lt;Int, Error&gt;
+# Multiple preconditions for conditional constraints
+@pre(amount > 0)
+@pre(balance >= amount)
+f withdraw(amount: Int) -> Int!Str
 
-// Membership testing
+# Membership testing
 @pre(status in ["active", "pending", "closed"])
-fn update_status(status: Str) -> Bool</code></pre>
+f update_status(status: Str) -> Bool</code></pre>
         </div>
       </article>
 
@@ -151,21 +152,22 @@ fn update_status(status: Str) -> Bool</code></pre>
         <p>Common verification patterns are captured as reusable named contracts. This reduces specification boilerplate
            and establishes a shared vocabulary for common guarantees.</p>
         <div class="code-block">
-          <pre><code>// Built-in patterns
-@sorted       // Elements in ascending order
-@permutation  // Output is reordering of input (for sorting algorithms)
-@nonempty     // Collection has at least one element
-@bounded(min, max)  // Values within range
-@unique       // No duplicate elements
+          <pre><code># Built-in patterns (12 total)
+@sorted       # Elements in ascending order
+@permutation  # Output is reordering of input (for sorting algorithms)
+@nonempty     # Collection has at least one element
+@bounded(min, max)  # Values within range
+@unique       # No duplicate elements
+@pure         # No side effects
 
-// Usage
+# Usage
 @sorted
 @permutation(input)
-fn quicksort(input: [Int]) -> [Int]
+f quicksort(input: [Int]) -> [Int]
 
-// The @pure pattern - no side effects
+# The @pure pattern - no side effects
 @pure
-fn calculate_hash(data: Bytes) -> Int</code></pre>
+f calculate_hash(data: Str) -> Int</code></pre>
         </div>
       </article>
 
@@ -200,7 +202,7 @@ forma verify src --report --format json</code></pre>
           <li>Round-tripping through <code>forma fmt</code></li>
         </ul>
         <div class="code-block">
-          <pre><code>// Internal AST representation (simplified)
+          <pre><code># Internal AST representation (simplified)
 Contract {
     kind: Pre | Post | Invariant,
     expression: Expr,
@@ -236,8 +238,8 @@ Contract {
       <article class="decision-panel">
         <h3>MIR Structure</h3>
         <div class="code-block">
-          <pre><code>// MIR for a simple function (conceptual representation)
-fn abs(x: Int) -> Int:
+          <pre><code># MIR for a simple function (conceptual representation)
+f abs(x: Int) -> Int:
     bb0:
         _1 = x
         switchInt(_1 < 0) -> [true: bb1, false: bb2]
@@ -319,24 +321,32 @@ fn abs(x: Int) -> Int:
           <pre><code># Human-readable explanation
 $ forma explain math.forma --format human
 
-Function: factorial(n: Int) -> Int
-  Precondition: n must be greater than or equal to 0
-  Postcondition: result must be greater than or equal to 1
+┌─ factorial(n: Int) -> Int
+│  Requires:
+│    - n is at least 0
+│  Guarantees:
+│    - result is at least 1
+└─
 
-Function: binary_search(arr: [Int], target: Int) -> Option&lt;Int&gt;
-  Precondition: arr must be sorted in ascending order
-  Postcondition: if result is Some(i), then arr[i] equals target
+┌─ binary_search(arr: [Int], target: Int) -> Int?
+│  Requires:
+│    - [@sorted] for every i in 0..arr.len() - 1,
+│      arr[i] is at most arr[i + 1]
+└─
 
 # JSON output for tooling integration
 $ forma explain math.forma --format json
 {
   "functions": [{
     "name": "factorial",
-    "contracts": [{
-      "kind": "precondition",
+    "signature": "factorial(n: Int) -> Int",
+    "preconditions": [{
       "expression": "n >= 0",
-      "human_readable": "n must be greater than or equal to 0",
-      "span": {"start": 12, "end": 18}
+      "english": "n is at least 0"
+    }],
+    "postconditions": [{
+      "expression": "result >= 1",
+      "english": "result is at least 1"
     }]
   }]
 }</code></pre>
@@ -350,35 +360,37 @@ $ forma explain math.forma --format json
         <p>Runs property-based testing against contract specifications. Generates inputs satisfying preconditions,
            executes functions, and checks postconditions.</p>
         <div class="code-block">
-          <pre><code># Basic verification
-$ forma verify src/
+          <pre><code># Report-style verification with deterministic seed
+$ forma verify src/ --report --format human --seed 42
 
-Verifying: factorial
-  ✓ 100/100 examples passed
+FORMA Verification Report
 
-Verifying: binary_search
-  ✓ 100/100 examples passed
+src/math.forma
+  ✓ PASS factorial        contracts:2  examples:20/20
+  ✓ PASS binary_search    contracts:2  examples:20/20
+  ✗ FAIL quicksort        contracts:3  examples:18/20
 
-Verifying: quicksort
-  ✗ Postcondition failed: @permutation
-    Counterexample: input = [3, 1, 2]
-    Output: [1, 2] (missing element)
+Summary
+  Functions: 3
+  Verified: 2, Failures: 1
+  Examples passed: 58/60
 
-# CI-friendly report with deterministic seed
-$ forma verify src --report --format json --examples 1000 --seed 42
+# CI-friendly JSON report
+$ forma verify src --report --format json --examples 100 --seed 42
 {
+  "files": [{"path": "src/math.forma", "functions": [
+    {"name": "factorial", "status": "PASS",
+     "contract_count": 2, "examples_run": 100,
+     "examples_passed": 100, "issues": []},
+    {"name": "quicksort", "status": "FAIL",
+     "contract_count": 3, "examples_run": 100,
+     "examples_passed": 97, "issues": [...]}
+  ]}],
   "summary": {
-    "total_functions": 15,
-    "passed": 14,
-    "failed": 1,
-    "total_examples": 15000
-  },
-  "failures": [{
-    "function": "quicksort",
-    "contract": "@permutation",
-    "counterexample": {"input": [3, 1, 2]},
-    "actual_output": [1, 2]
-  }]
+    "total_functions": 3, "verified": 2,
+    "failures": 1, "total_examples": 300,
+    "examples_passed": 297
+  }
 }</code></pre>
         </div>
         <p><strong>Key features:</strong></p>
@@ -418,29 +430,25 @@ completion = llm.generate(
         <div class="code-block">
           <pre><code>$ forma check broken.forma --error-format json
 {
+  "success": false,
   "errors": [{
-    "code": "E0308",
-    "message": "mismatched types",
+    "file": "broken.forma",
+    "line": 15,
+    "column": 12,
+    "end_line": 15,
+    "end_column": 18,
     "severity": "error",
-    "span": {
-      "file": "broken.forma",
-      "start_line": 15,
-      "start_col": 12,
-      "end_line": 15,
-      "end_col": 18
-    },
-    "expected": "Int",
-    "found": "Str",
-    "suggestion": "Consider using parse_int() to convert"
+    "code": "TYPE",
+    "message": "type mismatch: expected Int, found Str"
   }]
 }</code></pre>
         </div>
         <p><strong>Fields designed for AI consumption:</strong></p>
         <ul class="evidence-list">
-          <li><code>span</code>: Exact location for targeted fixes</li>
-          <li><code>expected/found</code>: Type mismatch details</li>
-          <li><code>suggestion</code>: Actionable fix when available</li>
-          <li><code>code</code>: Stable error identifier for pattern matching</li>
+          <li><code>line/column</code>: Exact location for targeted fixes</li>
+          <li><code>message</code>: Human-readable description with expected/found types</li>
+          <li><code>code</code>: Stable error category (TYPE, PARSE, MODULE) for pattern matching</li>
+          <li><code>success</code>: Quick pass/fail check for automation</li>
         </ul>
       </article>
 
@@ -495,7 +503,7 @@ completion = llm.generate(
         <p>The foundation for formal verification is in place:</p>
         <ul class="evidence-list">
           <li><strong>Contract AST nodes:</strong> Contracts are first-class, type-checked, and preserved through compilation</li>
-          <li><strong>Rich expression language:</strong> Quantifiers (<code>forall</code>, <code>exists</code>), <code>old()</code> expressions, implication, membership</li>
+          <li><strong>Rich expression language:</strong> Quantifiers (<code>forall</code>, <code>exists</code>), <code>old()</code> expressions, membership testing</li>
           <li><strong>Named patterns:</strong> <code>@sorted</code>, <code>@permutation</code>, <code>@pure</code>—reusable specifications</li>
           <li><strong>MIR CFG:</strong> Structured intermediate representation suitable for symbolic execution</li>
           <li><strong>Property-based verification:</strong> Runtime contract checking with counterexample generation</li>
@@ -518,15 +526,15 @@ completion = llm.generate(
           <li>Path conditions encode control flow</li>
         </ul>
         <div class="code-block">
-          <pre><code>// Source
+          <pre><code># Source
 @pre(n >= 0)
 @post(result >= 1)
-fn factorial(n: Int) -> Int
+f factorial(n: Int) -> Int
 
-// Generated verification condition (simplified)
+# Generated verification condition (simplified)
 ∀n: Int.
-  (n >= 0) →  // precondition assumed
-  (factorial(n) >= 1)  // postcondition to prove</code></pre>
+  (n >= 0) →   # precondition assumed
+  (factorial(n) >= 1)  # postcondition to prove</code></pre>
         </div>
 
         <h4>2. SMT Solver Backend</h4>
@@ -541,11 +549,11 @@ fn factorial(n: Int) -> Int
         <h4>3. Refinement Types (Future)</h4>
         <p>Embed specifications in the type system itself:</p>
         <div class="code-block">
-          <pre><code>// Future syntax concept
+          <pre><code># Future syntax concept
 type PosInt = Int where self > 0
 type SortedList = [Int] where @sorted
 
-fn factorial(n: Nat) -> PosInt  // Nat = Int where self >= 0</code></pre>
+f factorial(n: Nat) -> PosInt  # Nat = Int where self >= 0</code></pre>
         </div>
       </article>
 
@@ -630,7 +638,7 @@ fn factorial(n: Nat) -> PosInt  // Nat = Int where self >= 0</code></pre>
     <section class="tech-section reveal" id="timeline">
       <div class="section-head">
         <p class="eyebrow">Development Timeline</p>
-        <h2>46 sprints from concept to verification toolchain</h2>
+        <h2>47 sprints from concept to verification toolchain</h2>
       </div>
 
       <div class="timeline-list">
@@ -750,7 +758,7 @@ fn factorial(n: Nat) -> PosInt  // Nat = Int where self >= 0</code></pre>
               <td>Memory safety without lifetime syntax</td>
               <td class="yes">✓</td>
               <td class="no">✗ (lifetimes required)</td>
-              <td class="partial">~ (GC fallback)</td>
+              <td class="partial">~ (ownership + value semantics)</td>
               <td class="yes">✓ (GC)</td>
             </tr>
             <tr>

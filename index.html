@@ -57,7 +57,7 @@
               <p class="stat-label">of AI-generated Rust failures are lifetime errors. FORMA has zero.</p>
             </article>
             <article class="stat-card">
-              <p class="stat-value">38%</p>
+              <p class="stat-value">~35%</p>
               <p class="stat-label">fewer tokens than equivalent Rust—lower inference costs at scale</p>
             </article>
             <article class="stat-card">
@@ -65,7 +65,7 @@
               <p class="stat-label">built-in functions—no external dependencies for common tasks</p>
             </article>
             <article class="stat-card">
-              <p class="stat-value">46</p>
+              <p class="stat-value">47</p>
               <p class="stat-label">development sprints of research-driven iteration</p>
             </article>
           </div>
@@ -132,17 +132,14 @@
           <p>Translates function contracts into plain English. See what the AI claims the code does—preconditions, postconditions, invariants—in human language.</p>
           <pre><code>$ forma explain sort.forma --format human
 
-┌─────────────────────────────────────────────────┐
-│ verified_sort(items: [Int]) -> [Int]            │
-├─────────────────────────────────────────────────┤
-│ Requires:                                       │
-│   • items must not be empty                     │
-│                                                 │
-│ Guarantees:                                     │
-│   • Output is sorted in ascending order         │
-│   • Output contains exactly the same elements   │
-│     as input (permutation)                      │
-└─────────────────────────────────────────────────┘</code></pre>
+┌─ verified_sort(items: [Int]) -> [Int]
+│  Requires:
+│    - items is not empty
+│  Guarantees:
+│    - [@sorted] for every i in 0..result.len() - 1,
+│      result[i] is at most result[i + 1]
+│    - [@permutation] permutation(items, result)
+└─</code></pre>
           <p class="tool-note">JSON output available for CI integration and automated review pipelines.</p>
         </article>
 
@@ -152,16 +149,17 @@
           <p>Automatically generates inputs, runs them against contracts, and produces a trust report. PASS/WARN/SKIP/FAIL status for every function. Deterministic with seed control.</p>
           <pre><code>$ forma verify src/ --report --format human
 
-═══════════════════════════════════════════════════
-              FORMA Verification Report
-═══════════════════════════════════════════════════
+FORMA Verification Report
 
 src/sort.forma
-├─ verified_sort ..................... ✓ PASS (3 contracts)
-├─ binary_search ..................... ✓ PASS (2 contracts)
-└─ merge ............................ ⚠ WARN (no contracts)
+  ✓ PASS verified_sort    contracts:3  examples:20/20
+  ✓ PASS binary_search    contracts:2  examples:20/20
+  ⚠ SKIP merge            contracts:0
 
-Summary: 2 verified, 1 warning, 0 failures</code></pre>
+Summary
+  Functions: 3
+  Verified: 2, Skipped: 1, Failures: 0
+  Examples passed: 40/40</code></pre>
           <p class="tool-note">Capabilities revoked by default—safe to run in CI without side effects.</p>
         </article>
 
@@ -178,15 +176,17 @@ Summary: 2 verified, 1 warning, 0 failures</code></pre>
           <p class="tool-tagline">Machine-readable errors for self-correction loops</p>
           <p>Compiler errors in structured JSON with location, severity, code, and suggestions. Feed them back to the AI for automatic repair without human intervention.</p>
           <pre><code>$ forma check --error-format json broken.forma
-{"errors":[{"line":5,"code":"type_mismatch",
-  "message":"expected Int, found Str",
-  "suggestion":"Convert with str_to_int()"}]}</code></pre>
+{"success":false,"errors":[{
+  "file":"broken.forma","line":5,"column":12,
+  "severity":"error","code":"TYPE",
+  "message":"type mismatch: expected Int, found Str"
+}]}</code></pre>
         </article>
 
         <article class="tool-card">
           <h3>Contract Patterns</h3>
           <p class="tool-tagline">Express invariants concisely</p>
-          <p>11 built-in contract patterns: <code>@sorted</code>, <code>@nonempty</code>, <code>@permutation</code>, <code>@bounded</code>, and more. Plus <code>forall</code>, <code>exists</code>, <code>old()</code>, and implication for custom specifications.</p>
+          <p>12 built-in contract patterns: <code>@sorted</code>, <code>@nonempty</code>, <code>@permutation</code>, <code>@bounded</code>, <code>@pure</code>, and more. Plus <code>forall</code>, <code>exists</code>, and <code>old()</code> for custom specifications.</p>
           <pre><code>@nonempty(items)
 @sorted(result)
 @permutation(items, result)
@@ -252,7 +252,7 @@ $ forma complete app.forma --position 12:8</code></pre>
         </article>
         <article class="language-card">
           <h3>Token Efficient</h3>
-          <p>Short keywords (<code>f</code>, <code>s</code>, <code>e</code>, <code>m</code>, <code>wh</code>), type shortcuts (<code>T?</code>, <code>T!E</code>), minimal punctuation. 38% fewer tokens than Rust for equivalent programs.</p>
+          <p>Short keywords (<code>f</code>, <code>s</code>, <code>e</code>, <code>m</code>, <code>wh</code>), type shortcuts (<code>T?</code>, <code>T!E</code>), minimal punctuation. ~35% fewer tokens than Rust for equivalent programs.</p>
         </article>
         <article class="language-card">
           <h3>Batteries Included</h3>
@@ -349,7 +349,7 @@ as f fetch_all(urls: [Str]) -> [Str]
       <div class="section-header">
         <p class="eyebrow">Project Status</p>
         <h2>What's Shipped, What's Next</h2>
-        <p>FORMA is production-ready for AI-assisted development workflows. Here's where we are and where we're going.</p>
+        <p>FORMA is in active development. The core language and verification toolchain are functional. Here's where we are and where we're going.</p>
       </div>
 
       <div class="roadmap-filter" id="roadmapFilter">
@@ -371,7 +371,7 @@ as f fetch_all(urls: [Str]) -> [Str]
             <ul>
               <li>Clean MIR with CFG structure ideal for analysis</li>
               <li>Contract expressions with quantifiers and old()</li>
-              <li>11 named patterns with formal semantics</li>
+              <li>12 named patterns with formal semantics</li>
               <li>Deterministic verification with seed control</li>
             </ul>
           </article>
