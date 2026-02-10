@@ -89,7 +89,8 @@
         </article>
         <article class="goal-card">
           <h3>2. The lifetime problem</h3>
-          <p>94.8% of AI-generated Rust compilation failures are lifetime-related. This isn't a minor inconvenience—it's
+          <p>In repository-level translation benchmarks, <a href="https://arxiv.org/abs/2411.13990" target="_blank" rel="noreferrer">94.8% of AI failures targeting Rust are compilation errors</a>—dominated
+             by ownership and lifetime issues. This isn't a minor inconvenience—it's
              the primary failure mode. Lifetime annotations require understanding ownership flow that AI systems frequently
              get wrong.</p>
           <p class="goal-outcome">FORMA solution: Second-class references. Memory safety without lifetime syntax.</p>
@@ -402,7 +403,7 @@ $ forma verify src --report --format json --examples 100 --seed 42
         <ul class="evidence-list">
           <li>Deterministic seeding for reproducible CI results</li>
           <li>Configurable example count for thoroughness vs. speed tradeoff</li>
-          <li>Counterexample minimization (finds smallest failing input)</li>
+          <li>Counterexample reporting with failing input details</li>
           <li>JSON output for automated failure triage</li>
         </ul>
       </article>
@@ -602,7 +603,7 @@ f factorial(n: Nat) -> PosInt  # Nat = Int where self >= 0</code></pre>
 
       <article class="decision-panel">
         <h3>Decision: Second-class references instead of explicit lifetimes</h3>
-        <p><strong>The problem:</strong> 94.8% of AI-generated Rust compilation failures are lifetime-related.
+        <p><strong>The problem:</strong> In translation benchmarks, <a href="https://arxiv.org/abs/2411.13990" target="_blank" rel="noreferrer">94.8% of AI failures targeting Rust are compilation errors</a>—dominated by ownership and lifetime issues.
            Lifetime annotations require understanding ownership flow—exactly what AI systems struggle with.</p>
         <p><strong>The solution:</strong> References can be passed and used locally, but cannot be stored in data structures
            or returned from functions. This eliminates the need for lifetime annotations while preserving memory safety.</p>
