@@ -152,22 +152,20 @@ f update_status(status: Str) -> Bool</code></pre>
         <p>Common verification patterns are captured as reusable named contracts. This reduces specification boilerplate
            and establishes a shared vocabulary for common guarantees.</p>
         <div class="code-block">
-          <pre><code># Built-in patterns (12 total)
-@sorted       # Elements in ascending order
-@permutation  # Output is reordering of input (for sorting algorithms)
-@nonempty     # Collection has at least one element
-@bounded(min, max)  # Values within range
-@unique       # No duplicate elements
-@pure         # No side effects
+          <pre><code># Built-in patterns (35 total, 6 categories)
+# Numeric: @positive @nonnegative @nonzero @even @odd @divisible @bounded @in_range
+# Collection: @nonempty @contains @all_positive @all_nonnegative @all_nonzero @valid_index @valid_range
+# Set: @subset @superset @disjoint @equals @same_length @permutation
+# Sequence: @prefix @suffix @reversed @rotated @unique
+# Ordering: @sorted @sorted_desc @strictly_sorted @strictly_sorted_desc @sorted_by @partitioned @stable
+# State: @unchanged @pure
 
 # Usage
-@sorted
-@permutation(input)
-f quicksort(input: [Int]) -> [Int]
-
-# The @pure pattern - no side effects
-@pure
-f calculate_hash(data: Str) -> Int</code></pre>
+@nonempty(items)
+@sorted(result)
+@permutation(items, result)
+f verified_sort(items: [Int]) -> [Int]
+    sort_ints(items)</code></pre>
         </div>
       </article>
 

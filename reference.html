@@ -996,64 +996,203 @@ f make_date(day: Int, month: Int, year: Int) -> Date
     # ... implementation</code></pre>
 
           <h3>Named Contract Patterns</h3>
-          <p>Reusable patterns for common specifications:</p>
-          <pre><code class="language-forma"># @sorted - array is in ascending order
-@sorted
-f is_sorted_check(arr: [Int]) -> Bool
-    # Expanded to: forall i in 0..len(arr)-1: arr[i] <= arr[i+1]
+          <p>FORMA provides <strong>35 named patterns</strong> for common specifications. Each pattern expands to a contract expression at compile time. Use them as attributes before function definitions.</p>
 
-# @permutation - output is reordering of input
-@sorted
-@permutation(input)
-f quicksort(input: [Int]) -> [Int]
-    # ... sorting implementation
+          <h4>Numeric Patterns</h4>
+          <p>Constrain numeric values. Use for input validation, range checking, and mathematical properties.</p>
+          <pre><code class="language-forma"># Validate inputs are in expected ranges
+@positive(count)
+@bounded(percent, 0, 100)
+f scale(count: Int, percent: Int) -> Int
+    count * percent / 100
 
-# @nonempty - collection has elements
-@nonempty(items)
-f first[T](items: [T]) -> T
-    items[0]
+# Parity checks for algorithms that require even/odd inputs
+@even(size)
+f allocate_pairs(size: Int) -> [Int]
+    # size must be even to form complete pairs
+    vec_new()
 
-# @bounded - value within range
-@bounded(temperature, -273, 1000)
-f celsius_to_fahrenheit(temperature: Float) -> Float
-    temperature * 9.0 / 5.0 + 32.0
+# Divisibility for batch processing
+@divisible(total, batch_size)
+f process_batches(total: Int, batch_size: Int) -> Int
+    total / batch_size
 
-# @unique - no duplicate elements
-@unique(result)
-f remove_duplicates(input: [Int]) -> [Int]
-    # ... implementation
-
-# @pure - function has no side effects
-@pure
-f calculate_hash(data: Bytes) -> Int
-    # ... pure computation
-
-# @unchanged - value not modified
-@unchanged(config)
-f read_setting(config: Config, key: Str) -> Str?
-    map_get(config.settings, key)</code></pre>
-
+# Exclusive bounds (useful for open intervals)
+@in_range(temp, -273, 1000000)
+f is_valid_temp(temp: Int) -> Bool
+    true</code></pre>
           <div class="table-wrap">
             <table class="reference-table">
               <thead>
-                <tr><th>Pattern</th><th>Expansion</th><th>Use In</th></tr>
+                <tr><th>Pattern</th><th>Meaning</th><th>Context</th></tr>
               </thead>
               <tbody>
-                <tr><td><code>@sorted</code></td><td><code>forall i in 0..len(x)-1: x[i] &lt;= x[i+1]</code></td><td>Pre/Post</td></tr>
-                <tr><td><code>@sorted_desc</code></td><td><code>forall i in 0..len(x)-1: x[i] &gt;= x[i+1]</code></td><td>Pre/Post</td></tr>
-                <tr><td><code>@permutation(a, b)</code></td><td>b is reordering of a</td><td>Post only</td></tr>
-                <tr><td><code>@nonempty(x)</code></td><td><code>len(x) &gt; 0</code></td><td>Pre only</td></tr>
-                <tr><td><code>@bounded(x, lo, hi)</code></td><td><code>x &gt;= lo &amp;&amp; x &lt;= hi</code></td><td>Pre/Post</td></tr>
-                <tr><td><code>@positive(x)</code></td><td><code>x &gt; 0</code></td><td>Pre/Post</td></tr>
-                <tr><td><code>@nonnegative(x)</code></td><td><code>x &gt;= 0</code></td><td>Pre/Post</td></tr>
-                <tr><td><code>@nonzero(x)</code></td><td><code>x != 0</code></td><td>Pre/Post</td></tr>
-                <tr><td><code>@unique(x)</code></td><td>no duplicate elements in x</td><td>Pre/Post</td></tr>
-                <tr><td><code>@same_length(a, b)</code></td><td><code>len(a) == len(b)</code></td><td>Pre/Post</td></tr>
-                <tr><td><code>@unchanged(x)</code></td><td><code>x == old(x)</code></td><td>Post only</td></tr>
+                <tr><td><code>@positive(x)</code></td><td>x &gt; 0</td><td>Pre/Post</td></tr>
+                <tr><td><code>@nonnegative(x)</code></td><td>x &gt;= 0</td><td>Pre/Post</td></tr>
+                <tr><td><code>@nonzero(x)</code></td><td>x != 0</td><td>Pre/Post</td></tr>
+                <tr><td><code>@even(x)</code></td><td>x % 2 == 0</td><td>Pre/Post</td></tr>
+                <tr><td><code>@odd(x)</code></td><td>x % 2 != 0</td><td>Pre/Post</td></tr>
+                <tr><td><code>@divisible(x, n)</code></td><td>x % n == 0</td><td>Pre/Post</td></tr>
+                <tr><td><code>@bounded(x, lo, hi)</code></td><td>lo &lt;= x &lt;= hi (inclusive)</td><td>Pre/Post</td></tr>
+                <tr><td><code>@in_range(x, lo, hi)</code></td><td>lo &lt; x &lt; hi (exclusive)</td><td>Pre/Post</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Collection Patterns</h4>
+          <p>Express properties about arrays and their elements. Use for bounds checking, bulk validation, and membership tests.</p>
+          <pre><code class="language-forma"># Ensure non-empty input and valid element ranges
+@nonempty(prices)
+@all_positive(prices)
+f average_price(prices: [Int]) -> Int
+    sum := 0
+    i := 0
+    wh i < prices.len()
+        sum := sum + prices[i]
+        i := i + 1
+    sum / prices.len()
+
+# Bounds checking before array access
+@valid_index(items, idx)
+f get_item(items: [Int], idx: Int) -> Int
+    items[idx]
+
+# Membership guarantee
+@contains(haystack, needle)
+f find_position(haystack: [Int], needle: Int) -> Int
+    # guaranteed to find it
+    i := 0
+    wh i < haystack.len()
+        m haystack[i] == needle
+            then i
+        i := i + 1
+    -1</code></pre>
+          <div class="table-wrap">
+            <table class="reference-table">
+              <thead>
+                <tr><th>Pattern</th><th>Meaning</th><th>Context</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>@nonempty(x)</code></td><td>x.len() &gt; 0</td><td>Pre only</td></tr>
+                <tr><td><code>@contains(arr, elem)</code></td><td>elem is in arr</td><td>Pre/Post</td></tr>
+                <tr><td><code>@all_positive(arr)</code></td><td>every element &gt; 0</td><td>Pre/Post</td></tr>
+                <tr><td><code>@all_nonnegative(arr)</code></td><td>every element &gt;= 0</td><td>Pre/Post</td></tr>
+                <tr><td><code>@all_nonzero(arr)</code></td><td>every element != 0</td><td>Pre/Post</td></tr>
+                <tr><td><code>@valid_index(arr, i)</code></td><td>0 &lt;= i &lt; arr.len()</td><td>Pre/Post</td></tr>
+                <tr><td><code>@valid_range(arr, lo, hi)</code></td><td>valid slice bounds</td><td>Pre/Post</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Set Relationships</h4>
+          <p>Express relationships between two collections. Use for subset checks, disjointness, and equality testing.</p>
+          <pre><code class="language-forma"># Ensure selected items come from available options
+@subset(selected, available)
+f validate_selection(selected: [Int], available: [Int]) -> Bool
+    true
+
+# Ensure two groups don't overlap
+@disjoint(team_a, team_b)
+f assign_tasks(team_a: [Int], team_b: [Int]) -> Int
+    team_a.len() + team_b.len()</code></pre>
+          <div class="table-wrap">
+            <table class="reference-table">
+              <thead>
+                <tr><th>Pattern</th><th>Meaning</th><th>Context</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>@subset(a, b)</code></td><td>all of a in b</td><td>Pre/Post</td></tr>
+                <tr><td><code>@superset(a, b)</code></td><td>all of b in a</td><td>Pre/Post</td></tr>
+                <tr><td><code>@disjoint(a, b)</code></td><td>no overlap</td><td>Pre/Post</td></tr>
+                <tr><td><code>@equals(a, b)</code></td><td>same elements (set equality)</td><td>Pre/Post</td></tr>
+                <tr><td><code>@same_length(a, b)</code></td><td>a.len() == b.len()</td><td>Pre/Post</td></tr>
+                <tr><td><code>@permutation(a, b)</code></td><td>same multiset</td><td>Pre/Post</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Sequence Relationships</h4>
+          <p>Express structural relationships between sequences. Use for prefix/suffix checks, reversal verification, and rotation.</p>
+          <pre><code class="language-forma"># Verify that prepending preserves original sequence
+@prefix(original, result)
+f prepend(val: Int, original: [Int]) -> [Int]
+    # result starts with all elements of original
+    result := vec_new()
+    vec_push(result, val)
+    # ... copy original elements
+    result</code></pre>
+          <div class="table-wrap">
+            <table class="reference-table">
+              <thead>
+                <tr><th>Pattern</th><th>Meaning</th><th>Context</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>@prefix(a, b)</code></td><td>a starts b</td><td>Pre/Post</td></tr>
+                <tr><td><code>@suffix(a, b)</code></td><td>a ends b</td><td>Pre/Post</td></tr>
+                <tr><td><code>@reversed(a, b)</code></td><td>a is reverse of b</td><td>Pre/Post</td></tr>
+                <tr><td><code>@rotated(a, b, k)</code></td><td>a is b rotated by k (k normalized via modular arithmetic; empty arrays trivially rotated)</td><td>Pre/Post</td></tr>
+                <tr><td><code>@unique(x)</code></td><td>no duplicates</td><td>Pre/Post</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Ordering Patterns</h4>
+          <p>Express sorting invariants. Use for sorting algorithms, binary search preconditions, and partitioning.</p>
+          <pre><code class="language-forma"># Sort with full specification
+@nonempty(items)
+@sorted(result)
+@permutation(items, result)
+f verified_sort(items: [Int]) -> [Int]
+    sort_ints(items)
+
+# Strictly sorted (no duplicates allowed)
+@strictly_sorted(result)
+@permutation(items, result)
+f sort_unique(items: [Int]) -> [Int]
+    sort_ints(items)</code></pre>
+          <div class="table-wrap">
+            <table class="reference-table">
+              <thead>
+                <tr><th>Pattern</th><th>Meaning</th><th>Context</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>@sorted(x)</code></td><td>ascending (allows duplicates)</td><td>Pre/Post</td></tr>
+                <tr><td><code>@sorted_desc(x)</code></td><td>descending (allows duplicates)</td><td>Pre/Post</td></tr>
+                <tr><td><code>@strictly_sorted(x)</code></td><td>ascending, no duplicates</td><td>Pre/Post</td></tr>
+                <tr><td><code>@strictly_sorted_desc(x)</code></td><td>descending, no duplicates</td><td>Pre/Post</td></tr>
+                <tr><td><code>@sorted_by(arr, field)</code></td><td>sorted by struct field</td><td>Pre/Post</td></tr>
+                <tr><td><code>@partitioned(arr, pivot)</code></td><td>partitioned at pivot index</td><td>Pre/Post</td></tr>
+                <tr><td><code>@stable(in, out, field)</code></td><td>stable sort: output is sorted by field, is a permutation of input, and equal-field elements keep original relative order (field is an identifier, e.g. <code>@stable(items, result, priority)</code>)</td><td>Post only</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>State Patterns</h4>
+          <p>Express invariants about state changes. Use in postconditions to verify what changed and what didn't.</p>
+          <pre><code class="language-forma"># Read-only operation: config must not change
+@unchanged(config)
+f read_setting(config: Config, key: Str) -> Str
+    map_get(config.settings, key)
+
+# Pure computation marker
+@pure
+f calculate_hash(data: Str) -> Int
+    # ... pure computation
+    0</code></pre>
+          <div class="table-wrap">
+            <table class="reference-table">
+              <thead>
+                <tr><th>Pattern</th><th>Meaning</th><th>Context</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>@unchanged(x)</code></td><td>x == old(x)</td><td>Post only</td></tr>
                 <tr><td><code>@pure</code></td><td>no side effects</td><td>Post only</td></tr>
               </tbody>
             </table>
           </div>
+
+          <h4>Postcondition Inference Rule</h4>
+          <p>Patterns default to preconditions. A pattern automatically becomes a postcondition when any of its arguments is the identifier <code>result</code> (the function return value). For example, <code>@sorted(result)</code> is a postcondition, while <code>@sorted(items)</code> is a precondition. Use <code>@pre(...)</code> or <code>@post(...)</code> to override this behavior explicitly.</p>
         </section>
 
         <!-- VERIFICATION WORKFLOW -->
