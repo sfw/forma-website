@@ -56,10 +56,17 @@ function initTocSpy() {
     linkById[targetId] = link;
   });
 
+  var currentActive = "";
+
   function setActive(id) {
+    if (id === currentActive) {
+      return;
+    }
+    currentActive = id;
     links.forEach(function (link) {
       if (link.getAttribute("href") === "#" + id) {
         link.classList.add("active");
+        link.scrollIntoView({ block: "nearest", behavior: "smooth" });
       } else {
         link.classList.remove("active");
       }
@@ -71,30 +78,44 @@ function initTocSpy() {
     return;
   }
 
-  var observer = new IntersectionObserver(function (entries) {
-    var visibleIds = entries
-      .filter(function (entry) { return entry.isIntersecting; })
-      .sort(function (a, b) { return a.boundingClientRect.top - b.boundingClientRect.top; })
-      .map(function (entry) { return entry.target.id; });
-
-    if (visibleIds.length > 0) {
-      setActive(visibleIds[0]);
+  function getCurrentSection() {
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var offset = window.innerHeight * 0.28;
+    var target = scrollTop + offset;
+    var currentId = sections[0].id;
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].offsetTop <= target) {
+        currentId = sections[i].id;
+      } else {
+        break;
+      }
     }
-  }, {
-    root: null,
-    threshold: 0.15,
-    rootMargin: "-28% 0px -58% 0px"
+    return currentId;
+  }
+
+  var ticking = false;
+  window.addEventListener("scroll", function () {
+    if (!ticking) {
+      window.requestAnimationFrame(function () {
+        setActive(getCurrentSection());
+        ticking = false;
+      });
+      ticking = true;
+    }
   });
 
-  sections.forEach(function (section) {
-    observer.observe(section);
+  links.forEach(function (link) {
+    link.addEventListener("click", function () {
+      var targetId = link.getAttribute("href").slice(1);
+      setTimeout(function () { setActive(targetId); }, 60);
+    });
   });
 
   var hash = window.location.hash ? window.location.hash.slice(1) : "";
   if (hash && linkById[hash]) {
     setActive(hash);
-  } else if (sections[0]) {
-    setActive(sections[0].id);
+  } else {
+    setActive(getCurrentSection());
   }
 }
 
