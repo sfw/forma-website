@@ -775,59 +775,66 @@ f factorial(n: Nat) -> PosInt  # Nat = Int where self >= 0</code></pre>
           </thead>
           <tbody>
             <tr>
-              <td>Memory safety without lifetime syntax</td>
+              <td>Memory safe</td>
               <td class="yes">✓</td>
-              <td class="no">✗ (lifetimes required)</td>
-              <td class="partial">~ (ownership + value semantics)</td>
-              <td class="yes">✓ (GC)</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+            </tr>
+            <tr>
+              <td>No lifetime annotations</td>
+              <td class="yes">✓</td>
+              <td class="no">✗</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
             </tr>
             <tr>
               <td>Contract expressions (@pre/@post)</td>
-              <td class="yes">✓ Built-in</td>
-              <td class="no">✗ (third-party)</td>
+              <td class="yes">✓</td>
               <td class="no">✗</td>
-              <td class="yes">✓ Built-in</td>
+              <td class="no">✗</td>
+              <td class="yes">✓</td>
             </tr>
             <tr>
               <td>Grammar export for constrained decoding</td>
-              <td class="yes">✓ EBNF + JSON</td>
+              <td class="yes">✓</td>
               <td class="no">✗</td>
               <td class="no">✗</td>
               <td class="no">✗</td>
             </tr>
             <tr>
-              <td>JSON error output</td>
+              <td>JSON diagnostics for self-correction</td>
               <td class="yes">✓</td>
               <td class="yes">✓</td>
-              <td class="partial">~</td>
-              <td class="partial">~</td>
+              <td class="partial">Partial</td>
+              <td class="partial">Partial</td>
             </tr>
             <tr>
-              <td>Property-based contract verification</td>
-              <td class="yes">✓ forma verify</td>
-              <td class="no">✗ (third-party)</td>
+              <td>Contract explanation (explain command)</td>
+              <td class="yes">✓</td>
               <td class="no">✗</td>
-              <td class="partial">~ (proof-focused)</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
             </tr>
             <tr>
-              <td>SMT-based formal verification</td>
-              <td class="partial">~ (roadmap)</td>
-              <td class="no">✗</td>
-              <td class="no">✗</td>
+              <td>Automated verification reports</td>
               <td class="yes">✓</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+              <td class="partial">Partial</td>
             </tr>
             <tr>
-              <td>Systems-level performance</td>
-              <td class="yes">✓ (LLVM backend)</td>
+              <td>Capability-based sandboxing</td>
               <td class="yes">✓</td>
-              <td class="yes">✓</td>
-              <td class="no">✗ (verification focus)</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
+              <td class="no">✗</td>
             </tr>
             <tr>
-              <td>AI-first design philosophy</td>
-              <td class="yes">✓ Core goal</td>
-              <td class="no">✗</td>
-              <td class="partial">~ (ML focus)</td>
+              <td>Native compilation</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
+              <td class="yes">✓</td>
               <td class="no">✗</td>
             </tr>
           </tbody>
