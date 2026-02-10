@@ -39,7 +39,7 @@
         verification workflow, standard library, and tooling. Each section includes working examples.
       </p>
       <div class="reference-chips">
-        <span>298+ builtins</span>
+        <span>316+ builtins</span>
         <span>Contract verification</span>
         <span>Memory safe</span>
         <span>AI-optimized tooling</span>
@@ -891,13 +891,17 @@ unwrap_or(None, 0)       # 0
 expect(Some(42), "expected a value")  # 42
 expect(None, "expected a value")      # PANIC: "expected a value"
 
-# Map over Option/Result
-map_opt(Some(5), |x| x * 2)   # Some(10)
-map_opt(None, |x| x * 2)      # None
+# Map over Option
+map_opt(Some(5), |x: Int| x * 2)   # Some(10)
+map_opt(None, |x: Int| x * 2)      # None
 
 # Flatten nested Options
 flatten(Some(Some(42)))  # Some(42)
-flatten(Some(None))      # None</code></pre>
+flatten(Some(None))      # None
+
+# Chain Option-returning functions
+and_then(Some(5), |x: Int| if x > 0 then Some(x * 10) else None)  # Some(50)
+and_then(None, |x: Int| Some(x * 10))                              # None</code></pre>
         </section>
 
         <!-- CONTRACTS -->
@@ -1537,7 +1541,7 @@ as f increment_counter(counter: Mutex[Int])
         <!-- STANDARD LIBRARY -->
         <section class="reference-block reveal" id="stdlib">
           <h2>Standard Library</h2>
-          <p>FORMA includes 298+ built-in functions across multiple categories.</p>
+          <p>FORMA includes 316+ built-in functions across multiple categories.</p>
 
           <h3>I/O and Printing</h3>
           <pre><code class="language-forma"># Console output
@@ -1595,12 +1599,12 @@ vec_index_of(arr, 3)        # Some(2)
 vec_slice(arr, 1, 4)        # [2, 3, 4]
 vec_concat([1, 2], [3, 4])  # [1, 2, 3, 4]
 
-# Higher-order functions
-map(arr, |x| x * 2)         # [2, 4, 6, 8, 10]
-filter(arr, |x| x > 2)      # [3, 4, 5]
-reduce(arr, 0, |a, b| a + b)  # 15
-any(arr, |x| x > 3)         # true
-all(arr, |x| x > 0)         # true
+# Higher-order functions (closures require type annotations)
+map(arr, |x: Int| x * 2)              # [2, 4, 6, 8, 10]
+filter(arr, |x: Int| x > 2)           # [3, 4, 5]
+reduce(arr, 0, |a: Int, b: Int| a + b)  # 15
+any(arr, |x: Int| x > 3)              # true
+all(arr, |x: Int| x > 0)              # true
 
 # Maps - use map_new() or literal syntax
 m = map_new()
@@ -1620,7 +1624,8 @@ map_values(m)               # [1, 2]</code></pre>
 abs(-5)                     # 5
 min(3, 7)                   # 3
 max(3, 7)                   # 7
-clamp(15, 0, 10)            # 10
+clamp(15, 0, 10)            # 10 (stdlib: us std.core)
+clamp_float(3.5, 0.0, 1.0) # 1.0 (stdlib: us std.core)
 
 # Floating point
 sqrt(16.0)                  # 4.0
@@ -1647,15 +1652,17 @@ exp(1.0)                    # ~2.718</code></pre>
           <h3>File I/O</h3>
           <pre><code class="language-forma"># Requires --allow-read and/or --allow-write
 
-# Reading
+# Reading (builtins)
 content = file_read("data.txt")?
-lines = file_read_lines("data.txt")?
 bytes = file_read_bytes("image.png")?
 
-# Writing
+# Writing (builtins)
 file_write("output.txt", "Hello!")?
-file_write_lines("output.txt", ["line1", "line2"])?
 file_write_bytes("output.bin", bytes)?
+
+# Line-based I/O (stdlib — requires: us std.io)
+lines = file_read_lines("data.txt")?
+file_write_lines("output.txt", ["line1", "line2"])?
 
 # Appending
 file_append("log.txt", "New entry\n")?
@@ -1741,6 +1748,15 @@ regex_split("a1b2c3", "\\d")        # ["a", "b", "c"]</code></pre>
 env_get("MISSING")          # None
 env_set("MY_VAR", "value")
 env_vars()                  # Map of all env vars</code></pre>
+
+          <h3>Standard Library Modules</h3>
+          <p>FORMA includes stdlib modules written in FORMA that compose builtins. Import with <code>us</code>:</p>
+          <pre><code class="language-forma">us std.core    # clamp, clamp_float, gcd, lcm
+us std.io      # file_read_lines, file_write_lines
+us std.string  # str_join, str_replace_first, str_index_of
+us std.vec     # int_vec_index_of, int_vec_sum, int_vec_max
+us std.iter    # range, enumerate
+us std.map     # map_get_or, map_update</code></pre>
         </section>
 
         <!-- CLI AND TOOLING -->
@@ -1886,12 +1902,13 @@ request = RequestBuilder.new("https://api.example.com")
     validated = validate(parsed)?
     Ok(transform(validated))
 
-# Alternative with map/and_then
+# Alternative with and_then/map_opt (function-call form)
 f process_file_v2(path: Str) -> Data!Str
-    file_read(path)
-        .and_then(|c| json_parse(c))
-        .and_then(|p| validate(p))
-        .map(|v| transform(v))</code></pre>
+    and_then(file_read(path), |c: Str|
+        and_then(json_parse(c), |p: Json|
+            m validate(p)
+                Ok(v) -> Ok(transform(v))
+                Err(e) -> Err(e)))</code></pre>
 
           <h3>State Machine</h3>
           <pre><code class="language-forma">e State

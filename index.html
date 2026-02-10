@@ -66,11 +66,11 @@
               <p class="stat-label">fewer tokens than equivalent Rust—lower inference costs at scale</p>
             </article>
             <article class="stat-card">
-              <p class="stat-value">298+</p>
+              <p class="stat-value">316+</p>
               <p class="stat-label">built-in functions—no external dependencies for common tasks</p>
             </article>
             <article class="stat-card">
-              <p class="stat-value">50</p>
+              <p class="stat-value">51</p>
               <p class="stat-label">development sprints of research-driven iteration</p>
             </article>
           </div>
@@ -261,7 +261,7 @@ $ forma complete app.forma --position 12:8</code></pre>
         </article>
         <article class="language-card">
           <h3>Batteries Included</h3>
-          <p>298+ built-in functions: HTTP, TCP/TLS, SQLite, compression, JSON, regex, async/await. No package ecosystem to navigate—AI can use the stdlib directly.</p>
+          <p>316+ built-in functions: HTTP, TCP/TLS, SQLite, compression, JSON, regex, async/await, higher-order collections. No package ecosystem to navigate—AI can use the stdlib directly.</p>
         </article>
         <article class="language-card">
           <h3>Capability Security</h3>
@@ -284,8 +284,8 @@ f verified_factorial(n: Int) -> Int
 
 # Async with 'as', spawn with 'sp', await with 'aw'
 as f fetch_all(urls: [Str]) -> [Str]
-    tasks := urls | map(|url| sp http_get(url))
-    tasks | map(|t| aw t)</code></pre>
+    tasks := map(urls, |url: Str| sp http_get(url))
+    map(tasks, |t: Future| aw t)</code></pre>
       </div>
     </section>
 

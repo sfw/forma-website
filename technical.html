@@ -644,7 +644,7 @@ f factorial(n: Nat) -> PosInt  # Nat = Int where self >= 0</code></pre>
     <section class="tech-section reveal" id="timeline">
       <div class="section-head">
         <p class="eyebrow">Development Timeline</p>
-        <h2>50 sprints from concept to optimizing compiler</h2>
+        <h2>51 sprints from concept to optimizing compiler</h2>
       </div>
 
       <div class="timeline-list">
@@ -691,11 +691,13 @@ f factorial(n: Nat) -> PosInt  # Nat = Int where self >= 0</code></pre>
             <p class="timeline-phase">Phase 9-10</p>
             <p class="status-chip complete">Complete</p>
           </div>
-          <h3>Contract Patterns + MIR Optimization</h3>
+          <h3>Contract Patterns + MIR Optimization + Stdlib</h3>
           <p>35 named contract patterns across 6 categories, runtime contract helpers,
              pattern correctness fixes (<code>@rotated</code>, <code>@stable</code>),
              MIR optimization pass (constant folding, copy propagation, dead block elimination, peephole),
-             public repo hardening (CI supply-chain, action pinning, security docs).</p>
+             public repo hardening (CI supply-chain, action pinning, security docs),
+             stdlib completeness (higher-order builtins: <code>map</code>/<code>filter</code>/<code>reduce</code>/<code>any</code>/<code>all</code>,
+             <code>vec_sort</code>, <code>str_to_float</code>, math functions, stdlib modules).</p>
         </article>
 
         <article class="timeline-item">
