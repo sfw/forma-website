@@ -140,6 +140,10 @@ body.reference-page {
   gap: 0.9rem;
 }
 
+.reference-content section[id] {
+  scroll-margin-top: 5rem;
+}
+
 .reference-block {
   border: 1px solid var(--outline);
   border-radius: var(--radius-l);
