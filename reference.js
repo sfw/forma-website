@@ -49,6 +49,7 @@ function initTocSpy() {
   if (links.length === 0) {
     return;
   }
+  var tocNav = document.querySelector(".reference-toc nav");
 
   var linkById = {};
   links.forEach(function (link) {
@@ -66,7 +67,9 @@ function initTocSpy() {
     links.forEach(function (link) {
       if (link.getAttribute("href") === "#" + id) {
         link.classList.add("active");
-        link.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        if (tocNav && tocNav.scrollHeight - tocNav.clientHeight > 2) {
+          link.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "auto" });
+        }
       } else {
         link.classList.remove("active");
       }
