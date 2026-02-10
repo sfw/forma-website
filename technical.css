@@ -264,6 +264,31 @@ main {
   font-size: 1.06rem;
 }
 
+.hero-provenance {
+  margin-top: 1rem;
+  max-width: 78ch;
+  border: 1px solid var(--tech-line);
+  border-radius: var(--tech-radius-md);
+  background: linear-gradient(145deg, #fff8eb, #fffef8);
+  box-shadow: var(--tech-shadow);
+  padding: 0.82rem 0.9rem;
+}
+
+.hero-provenance-label {
+  margin: 0;
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #154774;
+}
+
+.hero-provenance p:not(.hero-provenance-label) {
+  margin: 0.42rem 0 0;
+  color: var(--tech-ink-soft);
+  font-size: 0.9rem;
+}
+
 .hero-actions {
   margin-top: 1.2rem;
   display: flex;
