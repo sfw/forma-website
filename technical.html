@@ -88,12 +88,12 @@
           <p class="goal-outcome">FORMA solution: Contract expressions that capture intent, verification tools that check behavior.</p>
         </article>
         <article class="goal-card">
-          <h3>2. The lifetime problem</h3>
-          <p>In repository-level translation benchmarks, <a href="https://arxiv.org/abs/2411.13990" target="_blank" rel="noreferrer">94.8% of AI failures targeting Rust are compilation errors</a>—dominated
-             by ownership and lifetime issues. This isn't a minor inconvenience—it's
-             the primary failure mode. Lifetime annotations require understanding ownership flow that AI systems frequently
-             get wrong.</p>
-          <p class="goal-outcome">FORMA solution: Second-class references. Memory safety without lifetime syntax.</p>
+          <h3>2. The compilation wall</h3>
+          <p>In repository-level translation benchmarks, <a href="https://arxiv.org/abs/2411.13990" target="_blank" rel="noreferrer">94.8% of AI failures targeting Rust are compilation errors</a>—with
+             dependency resolution (unresolved imports, missing methods) accounting for 61.9% of failures.
+             Rust's strict compiler catches errors early, but its complexity—lifetimes, trait bounds, module paths—creates
+             a high barrier for AI-generated code.</p>
+          <p class="goal-outcome">FORMA solution: Second-class references (no lifetime syntax), batteries-included stdlib (no dependency maze), JSON error output for AI self-repair.</p>
         </article>
         <article class="goal-card">
           <h3>3. The feedback loop</h3>
@@ -603,8 +603,8 @@ f factorial(n: Nat) -> PosInt  # Nat = Int where self >= 0</code></pre>
 
       <article class="decision-panel">
         <h3>Decision: Second-class references instead of explicit lifetimes</h3>
-        <p><strong>The problem:</strong> In translation benchmarks, <a href="https://arxiv.org/abs/2411.13990" target="_blank" rel="noreferrer">94.8% of AI failures targeting Rust are compilation errors</a>—dominated by ownership and lifetime issues.
-           Lifetime annotations require understanding ownership flow—exactly what AI systems struggle with.</p>
+        <p><strong>The problem:</strong> In translation benchmarks, <a href="https://arxiv.org/abs/2411.13990" target="_blank" rel="noreferrer">94.8% of AI failures targeting Rust are compilation errors</a>. While dependency resolution dominates (61.9%),
+           lifetime and ownership errors add a second layer of complexity that AI systems struggle with.</p>
         <p><strong>The solution:</strong> References can be passed and used locally, but cannot be stored in data structures
            or returned from functions. This eliminates the need for lifetime annotations while preserving memory safety.</p>
         <p><strong>The tradeoff:</strong> Some patterns (self-referential structs, arena allocators) require different idioms.
