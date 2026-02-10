@@ -213,6 +213,33 @@ body {
   line-height: 1.52;
 }
 
+.hero-thesis {
+  margin-top: 1rem;
+  max-width: 72ch;
+  border: 1px solid rgba(14, 66, 110, 0.22);
+  border-left: 4px solid #0b8e83;
+  border-radius: 12px;
+  background: linear-gradient(150deg, #f4fbff, #eef8f7);
+  padding: 0.78rem 0.86rem;
+  box-shadow: 0 10px 24px rgba(15, 34, 63, 0.08);
+}
+
+.hero-thesis-label {
+  margin: 0;
+  color: #0b8e83;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-thesis p {
+  margin: 0.34rem 0 0;
+  color: #1f446d;
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
 .hero-actions {
   margin-top: 1.2rem;
   display: flex;
