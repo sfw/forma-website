@@ -1763,6 +1763,9 @@ forma run program.forma --allow-all          # All capabilities
 # Contract control
 forma run program.forma --no-check-contracts # Disable contract checks
 
+# Optimization control
+forma run program.forma --no-optimize        # Disable MIR optimization
+
 # Debugging
 forma run program.forma --dump-mir           # Show MIR output</code></pre>
 
@@ -1819,7 +1822,8 @@ forma init                          # Initialize in current dir
 
 # Build native binary (requires LLVM)
 forma build program.forma
-forma build program.forma -o output</code></pre>
+forma build program.forma -o output
+forma build program.forma --no-optimize      # Build without MIR optimization</code></pre>
 
           <h3>JSON Error Format</h3>
           <pre><code class="language-json">{

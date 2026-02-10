@@ -278,6 +278,12 @@ f abs(x: Int) -> Int:
 ┌─────────────────────────────────────────────────────────────────────┐
 │                          MIR (CFG)                                  │
 │         (explicit control flow, ownership tracking)                 │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                │ Optimize
+                                ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      Optimized MIR                                  │
+│   (constant fold, copy propagation, dead blocks, peephole)         │
 └──────────────┬────────────────────────────────────┬─────────────────┘
                │                                    │
                ▼                                    ▼
@@ -287,6 +293,7 @@ f abs(x: Int) -> Int:
     └──────────────────────┘             └──────────────────────┘</code></pre>
         </div>
         <p><strong>Key insight:</strong> The same MIR serves runtime execution today and formal verification tomorrow.
+           An optimization pass runs between lowering and execution, eliminating redundant temporaries and simplifying control flow.
            No new IR needed—just a new backend that generates SMT queries instead of executing code.</p>
       </article>
 
@@ -636,7 +643,7 @@ f factorial(n: Nat) -> PosInt  # Nat = Int where self >= 0</code></pre>
     <section class="tech-section reveal" id="timeline">
       <div class="section-head">
         <p class="eyebrow">Development Timeline</p>
-        <h2>47 sprints from concept to verification toolchain</h2>
+        <h2>50 sprints from concept to optimizing compiler</h2>
       </div>
 
       <div class="timeline-list">
@@ -676,6 +683,18 @@ f factorial(n: Nat) -> PosInt  # Nat = Int where self >= 0</code></pre>
           <p>Full LSP features (formatting, symbols, signature help, references), JSON error contracts,
              contract language expansion (<code>old()</code>, quantifiers, named patterns),
              <code>forma explain</code> and <code>forma verify --report</code>.</p>
+        </article>
+
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <p class="timeline-phase">Phase 9-10</p>
+            <p class="status-chip complete">Complete</p>
+          </div>
+          <h3>Contract Patterns + MIR Optimization</h3>
+          <p>35 named contract patterns across 6 categories, runtime contract helpers,
+             pattern correctness fixes (<code>@rotated</code>, <code>@stable</code>),
+             MIR optimization pass (constant folding, copy propagation, dead block elimination, peephole),
+             public repo hardening (CI supply-chain, action pinning, security docs).</p>
         </article>
 
         <article class="timeline-item">

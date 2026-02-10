@@ -128,7 +128,7 @@ f main()
 const ROADMAP_ITEMS = [
   { label: "Lexer, parser, type checker", state: "shipped" },
   { label: "Borrow checker (second-class references)", state: "shipped" },
-  { label: "MIR interpreter", state: "shipped" },
+  { label: "MIR interpreter with optimization pass", state: "shipped" },
   { label: "Generics with monomorphization", state: "shipped" },
   { label: "Linear types and capability system", state: "shipped" },
   { label: "Module system", state: "shipped" },
@@ -142,6 +142,7 @@ const ROADMAP_ITEMS = [
   { label: "SQLite support", state: "shipped" },
   { label: "Compression (gzip, zlib)", state: "shipped" },
   { label: "LSP (diagnostics/completion/hover/goto/symbols/signature/format/references [single-file])", state: "shipped" },
+  { label: "35 named contract patterns with runtime helpers", state: "shipped" },
   { label: "Verification UX (explain, verify --report)", state: "shipped" },
   { label: "Formatter and REPL", state: "shipped" },
   { label: "21 showcase examples passing", state: "shipped" },
