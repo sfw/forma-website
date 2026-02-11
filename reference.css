@@ -459,21 +459,4 @@ body.reference-page {
     padding: 0.2rem 0.45rem;
   }
 
-  .reference-page .site-header {
-    padding: 0.6rem 0.8rem;
-  }
-
-  .reference-page .site-view-switcher {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    gap: 0.3rem;
-  }
-
-  .reference-page .site-view-switcher a {
-    flex: 0 0 auto;
-    font-size: 0.72rem;
-    padding: 0.3rem 0.5rem;
-  }
 }
