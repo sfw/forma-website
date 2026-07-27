@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">FORMA 0.2</title>
+  <desc id="description">A programming language for code you need to trust.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff8e7"/>
+      <stop offset="0.55" stop-color="#f6f1e6"/>
+      <stop offset="1" stop-color="#efd9c7"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff5f2e"/>
+      <stop offset="1" stop-color="#f0b848"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#0f223f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <circle cx="1100" cy="46" r="260" fill="#ffb36f" opacity="0.2"/>
+  <circle cx="112" cy="618" r="240" fill="#2cd0b5" opacity="0.14"/>
+
+  <g transform="translate(78 72)">
+    <rect width="66" height="66" rx="18" fill="url(#mark)"/>
+    <text x="33" y="48" text-anchor="middle" fill="#ffffff" font-family="Avenir Next, Trebuchet MS, sans-serif" font-size="42" font-weight="800">F</text>
+    <text x="88" y="45" fill="#182f4f" font-family="Avenir Next, Trebuchet MS, sans-serif" font-size="32" font-weight="800" letter-spacing="7">FORMA</text>
+    <rect x="296" y="11" width="92" height="40" rx="20" fill="#e7f4f1" stroke="#9ccfc7"/>
+    <text x="342" y="38" text-anchor="middle" fill="#08756c" font-family="Avenir Next, Trebuchet MS, sans-serif" font-size="18" font-weight="800">0.2</text>
+  </g>
+
+  <text x="78" y="235" fill="#10243f" font-family="Avenir Next, Trebuchet MS, sans-serif" font-size="64" font-weight="800">A language for code</text>
+  <text x="78" y="310" fill="#10243f" font-family="Avenir Next, Trebuchet MS, sans-serif" font-size="64" font-weight="800">you need to trust.</text>
+  <text x="82" y="370" fill="#3f5572" font-family="Avenir Next, Trebuchet MS, sans-serif" font-size="25">Affine ownership · explicit authority · tiered verification</text>
+
+  <g transform="translate(80 440)" filter="url(#shadow)">
+    <rect width="1040" height="112" rx="26" fill="#0f223f"/>
+    <g font-family="Avenir Next, Trebuchet MS, sans-serif">
+      <g transform="translate(28 24)"><text fill="#4fd0b0" font-size="15" font-weight="800">01</text><text y="28" fill="#eef4ff" font-size="20" font-weight="700">Resolve</text><text y="52" fill="#9bb6d6" font-size="14">types + effects</text></g>
+      <path d="M190 56h46" stroke="#527293" stroke-width="2"/><path d="m230 49 8 7-8 7" fill="none" stroke="#527293" stroke-width="2"/>
+      <g transform="translate(264 24)"><text fill="#4fd0b0" font-size="15" font-weight="800">02</text><text y="28" fill="#eef4ff" font-size="20" font-weight="700">Lower</text><text y="52" fill="#9bb6d6" font-size="14">typed MIR</text></g>
+      <path d="M414 56h46" stroke="#527293" stroke-width="2"/><path d="m454 49 8 7-8 7" fill="none" stroke="#527293" stroke-width="2"/>
+      <g transform="translate(488 24)"><text fill="#4fd0b0" font-size="15" font-weight="800">03</text><text y="28" fill="#eef4ff" font-size="20" font-weight="700">Check</text><text y="52" fill="#9bb6d6" font-size="14">loans + drops</text></g>
+      <path d="M650 56h46" stroke="#527293" stroke-width="2"/><path d="m690 49 8 7-8 7" fill="none" stroke="#527293" stroke-width="2"/>
+      <g transform="translate(724 24)"><text fill="#4fd0b0" font-size="15" font-weight="800">04</text><text y="28" fill="#eef4ff" font-size="20" font-weight="700">Establish</text><text y="52" fill="#9bb6d6" font-size="14">evidence level</text></g>
+      <g transform="translate(922 23)"><rect width="88" height="60" rx="14" fill="#183a5f"/><text x="44" y="26" text-anchor="middle" fill="#4fd0b0" font-size="13" font-weight="800">TESTED</text><text x="44" y="46" text-anchor="middle" fill="#eef4ff" font-size="13" font-weight="800">PROVED</text></g>
+    </g>
+  </g>
+  <text x="1118" y="602" text-anchor="end" fill="#53647a" font-family="Avenir Next, Trebuchet MS, sans-serif" font-size="17" font-weight="700">forma-lang.dev</text>
+</svg>

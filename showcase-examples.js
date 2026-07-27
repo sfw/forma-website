@@ -208,8 +208,8 @@ window.FORMA_SHOWCASE_EXAMPLES = [
     "title": "Verification UX Demo",
     "tier": "Tier 6 - Verification UX",
     "description": "Showcase program.",
-    "concepts": "PASS + WARN categories in verify reports",
+    "concepts": "TESTED + UNTESTED categories in verify reports",
     "githubUrl": "https://github.com/sfw/forma/blob/main/examples/showcase/20_verification_demo.forma",
-    "code": "# Verification UX Demo\n# Demonstrates: PASS + WARN categories in verify reports\n\n@pre(x >= 0, \"x must be non-negative\")\n@post(result >= x)\nf grows(x: Int) -> Int\n    x + 1\n\n# No contracts on purpose. verify --report should show WARN for this function.\nf helper_without_contracts(x: Int) -> Int\n    x * 2\n\nf main()\n    print(\"Verification UX demo\")\n    print(f\"  grows(4) = {grows(4)}\")\n    print(f\"  helper_without_contracts(4) = {helper_without_contracts(4)}\")\n    print(\"\")\n    print(\"Try:\")\n    print(\"  forma explain --examples examples/showcase/20_verification_demo.forma\")\n    print(\"  forma verify --report examples/showcase/20_verification_demo.forma\")\n"
+    "code": "# Verification UX Demo\n# Demonstrates: TESTED + UNTESTED categories in verify reports\n\n@pre(x >= 0, \"x must be non-negative\")\n@post(result >= x)\nf grows(x: Int) -> Int\n    x + 1\n\n# No contracts on purpose. verify --report marks this function UNTESTED.\nf helper_without_contracts(x: Int) -> Int\n    x * 2\n\nf main()\n    print(\"Verification UX demo\")\n    print(f\"  grows(4) = {grows(4)}\")\n    print(f\"  helper_without_contracts(4) = {helper_without_contracts(4)}\")\n    print(\"\")\n    print(\"Try:\")\n    print(\"  forma explain --examples examples/showcase/20_verification_demo.forma\")\n    print(\"  forma verify --report examples/showcase/20_verification_demo.forma\")\n"
   }
 ];

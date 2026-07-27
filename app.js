@@ -1,237 +1,122 @@
-const SHOWCASE_EXAMPLES = Array.isArray(window.FORMA_SHOWCASE_EXAMPLES) ? window.FORMA_SHOWCASE_EXAMPLES : [];
-const SHOWCASE_BY_FILE = new Map(SHOWCASE_EXAMPLES.map((item) => [item.file, item]));
+document.documentElement.classList.add("js");
 
-function showcaseCode(file, fallbackCode) {
-  const source = SHOWCASE_BY_FILE.get(file);
-  if (source && typeof source.code === "string") {
-    return source.code.trimEnd();
-  }
-  return fallbackCode.trim();
+const SHOWCASE = Array.isArray(window.FORMA_SHOWCASE_EXAMPLES) ? window.FORMA_SHOWCASE_EXAMPLES : [];
+const SHOWCASE_BY_FILE = new Map(SHOWCASE.map((item) => [item.file, item]));
+
+function sourceFor(file, fallback) {
+  const example = SHOWCASE_BY_FILE.get(file);
+  return example && typeof example.code === "string" ? example.code.trimEnd() : fallback.trim();
 }
 
 const EXAMPLES = [
   {
     id: "hello",
     name: "Hello World",
-    category: "basic",
-    description: "Canonical hello program from the showcase suite.",
-    tags: ["output", "strings", "entrypoint"],
-    command: "forma run examples/showcase/01_hello_world.forma",
     output: "Hello, World!",
-    code: showcaseCode("01_hello_world.forma", `
-# Hello World - The canonical first program
-f main()
-    print("Hello, World!")
-`)
+    code: sourceFor("01_hello_world.forma", `f main()\n    print("Hello, World!")`)
+  },
+  {
+    id: "fizzbuzz",
+    name: "FizzBuzz",
+    output: "1\n2\nFizz\n4\nBuzz\n…",
+    code: sourceFor("02_fizzbuzz.forma", `f main()\n    print("FizzBuzz")`)
   },
   {
     id: "factorial",
     name: "Factorial",
-    category: "math",
-    description: "Recursive, tail-recursive, and iterative implementations.",
-    tags: ["recursion", "math", "functions"],
-    command: "forma run examples/showcase/04_factorial.forma",
-    output: `Factorial examples:
-5! = 120
-10! = 3628800`,
-    code: showcaseCode("04_factorial.forma", `
-# Recursive factorial function
-f factorial(n: Int) -> Int
-    if n <= 1 then 1 else n * factorial(n - 1)
-
-f main()
-    print(factorial(10))
-`)
+    output: "Factorial examples:\n5! = 120\n10! = 3628800\n…",
+    code: sourceFor("04_factorial.forma", `f factorial(n: Int) -> Int\n    if n <= 1 then 1 else n * factorial(n - 1)`)
   },
   {
     id: "fibonacci",
     name: "Fibonacci",
-    category: "math",
-    description: "Classic sequence with recursive and iterative forms.",
-    tags: ["recursion", "algorithm"],
-    command: "forma run examples/showcase/05_fibonacci.forma",
-    output: `First 20 Fibonacci numbers:
-F(0) = 0
-F(1) = 1`,
-    code: showcaseCode("05_fibonacci.forma", `
-# Recursive Fibonacci function
-f fib(n: Int) -> Int
-    if n <= 1 then n else fib(n - 1) + fib(n - 2)
-
-f main()
-    print(fib(10))
-`)
+    output: "First 20 Fibonacci numbers:\nF(0) = 0\nF(1) = 1\n…",
+    code: sourceFor("05_fibonacci.forma", `f fib(n: Int) -> Int\n    if n <= 1 then n else fib(n - 1) + fib(n - 2)`)
+  },
+  {
+    id: "primes",
+    name: "Prime Numbers",
+    output: "Primes up to 50:\n2\n3\n5\n…",
+    code: sourceFor("06_primes.forma", `f main()\n    print(17)`)
   },
   {
     id: "gcd",
-    name: "GCD (Euclid)",
-    category: "math",
-    description: "Greatest common divisor and LCM algorithms.",
-    tags: ["math", "modulo", "algorithm"],
-    command: "forma run examples/showcase/07_gcd_lcm.forma",
-    output: `GCD examples:
-gcd(48, 18) = 6
-LCM examples:`,
-    code: showcaseCode("07_gcd_lcm.forma", `
-# Greatest Common Divisor using Euclidean algorithm
-f gcd(a: Int, b: Int) -> Int
-    if b == 0 then a else gcd(b, a % b)
-
-f main()
-    print(gcd(48, 18))
-`)
-  },
-  {
-    id: "sum-loop",
-    name: "FizzBuzz",
-    category: "control-flow",
-    description: "Loop-heavy control-flow example from the showcase suite.",
-    tags: ["loops", "state", "iteration"],
-    command: "forma run examples/showcase/02_fizzbuzz.forma",
-    output: `1
-2
-Fizz
-4
-Buzz`,
-    code: showcaseCode("02_fizzbuzz.forma", `
-f fizzbuzz(n: Int) -> Unit
-    i := 1
-    wh i <= n
-        if i % 15 == 0 then print("FizzBuzz")
-        i := i + 1
-
-f main()
-    fizzbuzz(100)
-`)
-  },
-  {
-    id: "is-prime",
-    name: "Prime Numbers",
-    category: "logic",
-    description: "Prime checks and counting from the mathematical showcase tier.",
-    tags: ["bool", "conditions", "number-theory"],
-    command: "forma run examples/showcase/06_primes.forma",
-    output: `Primes up to 50:
-2
-3
-5`,
-    code: showcaseCode("06_primes.forma", `
-f is_prime(n: Int) -> Bool
-    if n < 2 then false else true
-
-f main()
-    print(is_prime(17))
-`)
+    name: "GCD and LCM",
+    output: "GCD examples:\ngcd(48, 18) = 6\n…",
+    code: sourceFor("07_gcd_lcm.forma", `f gcd(a: Int, b: Int) -> Int\n    if b == 0 then a else gcd(b, a % b)`)
   }
 ];
 
-const ROADMAP_ITEMS = [
-  { label: "Lexer, parser, type checker", state: "shipped" },
-  { label: "Borrow checker (second-class references)", state: "shipped" },
-  { label: "MIR interpreter with optimization pass", state: "shipped" },
-  { label: "Generics with monomorphization", state: "shipped" },
-  { label: "Linear types and capability system", state: "shipped" },
-  { label: "Module system", state: "shipped" },
-  { label: "Standard library (298+ builtins)", state: "shipped" },
-  { label: "Grammar export (EBNF, JSON)", state: "shipped" },
-  { label: "LLVM native compilation", state: "shipped" },
-  { label: "Package manager (path-based dependencies)", state: "shipped" },
-  { label: "Async/await with spawn", state: "shipped" },
-  { label: "HTTP client and server", state: "shipped" },
-  { label: "TCP/UDP sockets and TLS", state: "shipped" },
-  { label: "SQLite support", state: "shipped" },
-  { label: "Compression (gzip, zlib)", state: "shipped" },
-  { label: "LSP (diagnostics/completion/hover/goto/symbols/signature/format/references [single-file])", state: "shipped" },
-  { label: "35 named contract patterns with runtime helpers", state: "shipped" },
-  { label: "Verification UX (explain, verify --report)", state: "shipped" },
-  { label: "Formatter and REPL", state: "shipped" },
-  { label: "21 showcase examples passing", state: "shipped" },
-  { label: "Full LSP (rename/refactor and cross-file references)", state: "building" },
-  { label: "Package registry", state: "building" }
+const STATUS_ITEMS = [
+  { label: "Shared CompilerSession and typed, ownership-explicit MIR", state: "implemented" },
+  { label: "Affine moves, non-lexical loans, partial moves, and deterministic drop glue", state: "implemented" },
+  { label: "Generated grammar artifacts and lossless formatter round trips", state: "implemented" },
+  { label: "Central builtin effects and runtime capability gates", state: "implemented" },
+  { label: "Structured tasks with affine handles and Send/Sync checks", state: "implemented" },
+  { label: "Deterministic modules, pub visibility, local path manifests, and lockfiles", state: "implemented" },
+  { label: "Tiered verification with distinct confidence statuses", state: "implemented" },
+  { label: "Semantic diagnostics, hover, completion, navigation, references, and formatting", state: "implemented" },
+  { label: "LLVM backend for the documented Core subset", state: "experimental" },
+  { label: "SMT-backed formal verification for a pure supported subset", state: "experimental" },
+  { label: "User-defined observable destructor bodies", state: "experimental" },
+  { label: "Registry and Git package sources", state: "next" },
+  { label: "Namespace-preserving hierarchical module scopes", state: "next" },
+  { label: "Richer LSP member ranking and refactoring", state: "next" },
+  { label: "Bytecode VM if measurements justify another backend", state: "next" }
 ];
 
-const GOALS = [
+const HERO_SCENARIOS = [
   {
-    id: "run",
-    label: "Run a program",
-    build: ({ file }) => `forma run ${file}`
+    command: "forma verify rules.forma --level exhaustive --report",
+    output: [
+      "✓ EXHAUSTIVE identity contracts:1 examples:2/2",
+      "Finite Bool domain checked completely.",
+      "The report says exactly what was established."
+    ]
   },
   {
-    id: "check",
-    label: "Check source file",
-    build: ({ file, errorFormat }) => `forma check ${file}${errorFormat === "json" ? " --error-format json" : ""}`
+    command: "forma check app.forma --error-format json",
+    output: [
+      "The shared compiler pipeline completed.",
+      "Ownership, effects, and types use one source map.",
+      "Diagnostics are machine-readable for repair loops."
+    ]
   },
   {
-    id: "check-partial",
-    label: "Check incomplete source",
-    build: ({ file, errorFormat }) => `forma check --partial ${file}${errorFormat === "json" ? " --error-format json" : ""}`
+    command: "forma verify core.forma --level formal --report",
+    output: [
+      "✓ PROVED supported_obligation contracts:2",
+      "? UNKNOWN hosted_wrapper contracts:1",
+      "Unsupported work is never promoted to a proof."
+    ]
   },
   {
-    id: "build",
-    label: "Build executable",
-    build: ({ file, errorFormat }) => `forma build ${file}${errorFormat === "json" ? " --error-format json" : ""}`
+    command: "forma grammar --format json > forma-grammar.json",
+    output: [
+      "Grammar exported from the structured source model.",
+      "Aliases and precedence stay aligned with tooling.",
+      "Ready for constrained generation pipelines."
+    ]
   },
   {
-    id: "typeof",
-    label: "Query type at location",
-    build: ({ file }) => `forma typeof ${file} --position 12:8`
-  },
-  {
-    id: "grammar-json",
-    label: "Export grammar JSON",
-    build: () => "forma grammar --format json > forma-grammar.json"
-  },
-  {
-    id: "grammar-ebnf",
-    label: "Export grammar EBNF",
-    build: () => "forma grammar --format ebnf > forma.ebnf"
-  },
-  {
-    id: "explain-human",
-    label: "Explain contracts (human)",
-    build: ({ file }) => `forma explain ${file} --format human`
-  },
-  {
-    id: "explain-json",
-    label: "Explain contracts (json + examples)",
-    build: ({ file }) => `forma explain ${file} --format json --examples=3 --seed 42`
-  },
-  {
-    id: "verify-report",
-    label: "Verify contracts (report json)",
-    build: ({ file }) => `forma verify ${file} --report --format json --examples 20 --seed 42`
-  },
-  {
-    id: "fmt",
-    label: "Format source file",
-    build: ({ file }) => `forma fmt ${file}`
-  },
-  {
-    id: "repl",
-    label: "Open REPL",
-    build: () => "forma repl"
-  },
-  {
-    id: "new-project",
-    label: "Create a new project",
-    build: () => "forma new my-forma-app"
-  },
-  {
-    id: "lsp",
-    label: "Start LSP server",
-    build: () => "forma lsp"
+    command: "forma run app.forma --allow-read",
+    output: [
+      "Read authority granted to this execution.",
+      "Network, process, environment, and unsafe remain denied.",
+      "Effects describe authority; flags grant it."
+    ]
   }
 ];
 
-const SHORTHAND_KEYWORDS = ["f", "s", "e", "t", "i", "m", "us", "wh", "lp", "br", "ct", "ret", "as", "sp", "aw"];
-const LONGFORM_KEYWORDS = ["fn", "struct", "enum", "trait", "impl", "match", "use", "while", "loop", "break", "continue", "return", "async", "spawn", "await"];
+const SHORT_KEYWORDS = ["f", "s", "e", "t", "i", "m", "us", "md", "wh", "lp", "br", "ct", "ret", "as", "sp", "aw"];
+const LONG_KEYWORDS = ["fn", "struct", "enum", "trait", "impl", "match", "use", "mod", "while", "loop", "break", "continue", "return", "async", "spawn", "await"];
 
-function $(id) {
+function byId(id) {
   return document.getElementById(id);
 }
 
-function escapeHtml(text) {
-  return text
+function escapeHtml(value) {
+  return String(value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -240,601 +125,268 @@ function escapeHtml(text) {
 }
 
 function initMenu() {
-  const menuToggle = $("menuToggle");
-  const siteNav = $("siteNav");
-  if (!menuToggle || !siteNav) {
-    return;
+  const toggle = byId("menuToggle");
+  const nav = byId("siteNav");
+  if (!toggle || !nav) return;
+
+  function closeMenu() {
+    nav.classList.remove("open");
+    toggle.setAttribute("aria-expanded", "false");
   }
 
-  menuToggle.addEventListener("click", () => {
-    const isOpen = siteNav.classList.toggle("open");
-    menuToggle.setAttribute("aria-expanded", String(isOpen));
+  toggle.addEventListener("click", () => {
+    const open = nav.classList.toggle("open");
+    toggle.setAttribute("aria-expanded", String(open));
   });
-
-  siteNav.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => {
-      siteNav.classList.remove("open");
-      menuToggle.setAttribute("aria-expanded", "false");
-    });
+  nav.querySelectorAll("a").forEach((link) => link.addEventListener("click", closeMenu));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeMenu();
+      toggle.focus();
+    }
+  });
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 1080) closeMenu();
   });
 }
 
 function initHeroCommands() {
-  const commandTarget = $("heroCommand");
-  const outputLine1 = $("heroOutputLine1");
-  const outputLine2 = $("heroOutputLine2");
-  const outputLine3 = $("heroOutputLine3");
-  if (!commandTarget || !outputLine1 || !outputLine2 || !outputLine3) {
-    return;
+  const command = byId("heroCommand");
+  const lines = [byId("heroOutputLine1"), byId("heroOutputLine2"), byId("heroOutputLine3")];
+  if (!command || lines.some((line) => !line)) return;
+
+  function render(scenario) {
+    command.textContent = scenario.command;
+    lines.forEach((line, index) => { line.textContent = scenario.output[index]; });
   }
 
-  const scenarios = [
-    {
-      command: "forma grammar --format json > forma.json",
-      output: [
-        "Grammar exported successfully.",
-        "Output ready for constrained decoding pipelines.",
-        "Grammar export written to ./forma.json"
-      ]
-    },
-    {
-      command: "forma check --error-format json app.forma",
-      output: [
-        "Validation complete: no syntax errors.",
-        "warning[W120]: unused binding `debugFlag`",
-        "Diagnostics available as machine-readable JSON."
-      ]
-    },
-    {
-      command: "forma explain app.forma --format human",
-      output: [
-        "┌─ verified_sort(items: [Int]) -> [Int]",
-        "│  Requires: items is not empty",
-        "└─ Guarantees: sorted + permutation"
-      ]
-    },
-    {
-      command: "forma explain app.forma --format json --examples=3 --seed 42",
-      output: [
-        "Explain report generated (json).",
-        "Includes valid + invalid contract examples.",
-        "Deterministic output using seed=42."
-      ]
-    },
-    {
-      command: "forma verify src --report --format json --examples 20 --seed 42",
-      output: [
-        "Trust report complete: PASS/WARN/SKIP/FAIL.",
-        "Capabilities revoked by default for CI-safe runs.",
-        "Use --allow-side-effects to opt in."
-      ]
-    }
-  ];
+  render(HERO_SCENARIOS[0]);
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  function renderScenario(scenario) {
-    commandTarget.textContent = scenario.command;
-    outputLine1.textContent = scenario.output[0];
-    outputLine2.textContent = scenario.output[1];
-    outputLine3.textContent = scenario.output[2];
-  }
-
-  renderScenario(scenarios[0]);
-
-  let idx = 0;
-  setInterval(() => {
-    idx = (idx + 1) % scenarios.length;
-    renderScenario(scenarios[idx]);
+  let index = 0;
+  window.setInterval(() => {
+    if (document.hidden) return;
+    index = (index + 1) % HERO_SCENARIOS.length;
+    render(HERO_SCENARIOS[index]);
   }, 7000);
 }
 
 function populateExamples() {
-  const select = $("exampleSelect");
-  if (!select) {
-    return;
-  }
-
-  const optionsHtml = EXAMPLES.map((example) => `<option value="${example.id}">${escapeHtml(example.name)}</option>`).join("");
-  select.innerHTML = optionsHtml;
+  const select = byId("exampleSelect");
+  if (!select) return;
+  select.innerHTML = EXAMPLES.map((example) => `<option value="${escapeHtml(example.id)}">${escapeHtml(example.name)}</option>`).join("");
 }
 
-function findExampleById(id) {
-  return EXAMPLES.find((example) => example.id === id);
+function selectedExample() {
+  const select = byId("exampleSelect");
+  return select ? EXAMPLES.find((example) => example.id === select.value) : undefined;
 }
 
-function loadSelectedExample() {
-  const select = $("exampleSelect");
-  const editor = $("codeEditor");
-  if (!select || !editor) {
-    return;
-  }
-
-  const example = findExampleById(select.value);
-  if (!example) {
-    return;
-  }
-
-  editor.value = example.code;
-  analyzeCurrentCode();
-}
-
-function makeDiagnosticItemHtml(issue) {
-  const severityClass = issue.severity === "error" ? "error" : issue.severity === "warn" ? "warn" : "";
-  const lineText = issue.line ? ` (line ${issue.line})` : "";
-  const suggestion = issue.suggestion ? `<br><strong>Suggestion:</strong> ${escapeHtml(issue.suggestion)}` : "";
-  return `<li class="diagnostic-item ${severityClass}">
-    <strong>${escapeHtml(issue.severity.toUpperCase())}</strong>${lineText}: ${escapeHtml(issue.message)}${suggestion}
-  </li>`;
-}
-
-function balancedDelimiters(code) {
-  const openers = new Set(["(", "{", "["]);
-  const pairs = { ")": "(", "}": "{", "]": "[" };
-  const stack = [];
-  let line = 1;
-  let col = 0;
-
-  for (let i = 0; i < code.length; i += 1) {
-    const ch = code[i];
-    if (ch === "\n") {
-      line += 1;
-      col = 0;
-      continue;
-    }
-    col += 1;
-
-    if (openers.has(ch)) {
-      stack.push({ ch, line, col });
-      continue;
-    }
-    if (pairs[ch]) {
-      const last = stack.pop();
-      if (!last || last.ch !== pairs[ch]) {
-        return {
-          ok: false,
-          issue: {
-            severity: "error",
-            message: `Unmatched delimiter "${ch}"`,
-            line,
-            suggestion: "Check parentheses, brackets, and braces."
-          }
-        };
-      }
-    }
-  }
-
-  if (stack.length > 0) {
-    const dangling = stack[stack.length - 1];
-    return {
-      ok: false,
-      issue: {
-        severity: "error",
-        message: `Missing closing delimiter for "${dangling.ch}"`,
-        line: dangling.line,
-        suggestion: "Close all opened delimiters before running."
-      }
-    };
-  }
-
-  return { ok: true };
-}
-
-function analyzeCode(code) {
+function inspectCode(code) {
   const lines = code.split(/\r?\n/);
-  const nonEmptyLineCount = lines.filter((line) => line.trim().length > 0).length;
-  const estimatedTokens = Math.ceil(code.length / 4);
-  const rustEquivalent = Math.round(estimatedTokens / 0.62);
+  const notices = [];
+  let inString = false;
+  let quote = "";
+  const stack = [];
+  const pairs = { ")": "(", "]": "[", "}": "{" };
 
-  const shorthandRegex = new RegExp(`\\b(${SHORTHAND_KEYWORDS.join("|")})\\b`, "g");
-  const longformRegex = new RegExp(`\\b(${LONGFORM_KEYWORDS.join("|")})\\b`, "g");
-
-  const shorthandHits = (code.match(shorthandRegex) || []).length;
-  const longformHits = (code.match(longformRegex) || []).length;
-
-  const issues = [];
-
-  lines.forEach((line, index) => {
+  lines.forEach((line, lineIndex) => {
     if (line.includes("\t")) {
-      issues.push({
-        severity: "error",
-        message: "Tab characters detected; FORMA uses spaces for indentation.",
-        line: index + 1,
-        suggestion: "Replace tab characters with spaces."
-      });
+      notices.push({ severity: "error", line: lineIndex + 1, message: "Tab indentation detected.", suggestion: "Use spaces so indentation is unambiguous." });
+    }
+    if (line.trim() && line.match(/^ */)[0].length % 4 !== 0) {
+      notices.push({ severity: "warn", line: lineIndex + 1, message: "Indentation is not a multiple of four spaces.", suggestion: "Run `forma fmt` for canonical formatting." });
     }
 
-    if (line.trim() !== "") {
-      const leadingSpaces = line.match(/^ */)[0].length;
-      if (leadingSpaces % 4 !== 0) {
-        issues.push({
-          severity: "warn",
-          message: "Indentation is not a multiple of 4 spaces.",
-          line: index + 1,
-          suggestion: "Normalize indentation to consistent 4-space levels."
-        });
+    for (let column = 0; column < line.length; column += 1) {
+      const character = line[column];
+      const previous = line[column - 1];
+      if (!inString && character === "#") break;
+      if ((character === '"' || character === "'") && previous !== "\\") {
+        if (!inString) { inString = true; quote = character; }
+        else if (quote === character) { inString = false; quote = ""; }
+        continue;
       }
-    }
-
-    if (line.length > 120) {
-      issues.push({
-        severity: "warn",
-        message: "Very long line; readability and diff quality may degrade.",
-        line: index + 1,
-        suggestion: "Break expressions across multiple lines."
-      });
+      if (inString) continue;
+      if ("([{".includes(character)) stack.push({ character, line: lineIndex + 1 });
+      if (pairs[character]) {
+        const opener = stack.pop();
+        if (!opener || opener.character !== pairs[character]) {
+          notices.push({ severity: "error", line: lineIndex + 1, message: `Unmatched delimiter ${character}.`, suggestion: "Balance parentheses, brackets, and braces." });
+          break;
+        }
+      }
     }
   });
 
+  if (stack.length) {
+    const opener = stack[stack.length - 1];
+    notices.push({ severity: "error", line: opener.line, message: `Missing closer for ${opener.character}.`, suggestion: "Balance parentheses, brackets, and braces." });
+  }
   if (!/\bf\s+main\s*\(/.test(code)) {
-    issues.push({
-      severity: "warn",
-      message: "No main entrypoint found.",
-      suggestion: "Add `f main()` as the program entrypoint."
-    });
+    notices.push({ severity: "info", message: "This snippet has no main entrypoint.", suggestion: "That is valid for a module; add `f main()` for an executable." });
   }
 
-  if (longformHits > 0) {
-    issues.push({
-      severity: "info",
-      message: "Detected long-form keywords. FORMA shorthand can reduce token usage.",
-      suggestion: "Prefer `f`, `s`, `e`, `m`, `wh`, `ret`, `as`, `sp`, `aw` where appropriate."
-    });
-  }
-
-  const balance = balancedDelimiters(code);
-  if (!balance.ok && balance.issue) {
-    issues.push(balance.issue);
+  const shortPattern = new RegExp(`\\b(${SHORT_KEYWORDS.join("|")})\\b`, "g");
+  const longPattern = new RegExp(`\\b(${LONG_KEYWORDS.join("|")})\\b`, "g");
+  const shortCount = (code.match(shortPattern) || []).length;
+  if ((code.match(longPattern) || []).length) {
+    notices.push({ severity: "info", message: "Readable long aliases detected.", suggestion: "Short canonical forms can reduce generation tokens; both forms are intentional." });
   }
 
   return {
-    nonEmptyLineCount,
-    estimatedTokens,
-    rustEquivalent,
-    shorthandHits,
-    issues
+    lineCount: lines.filter((line) => line.trim()).length,
+    estimatedTokens: Math.ceil(code.length / 4),
+    shortCount,
+    notices
   };
 }
 
-function buildDiagnosticJson(analysis) {
-  const firstError = analysis.issues.find((issue) => issue.severity === "error");
-  const firstWarn = analysis.issues.find((issue) => issue.severity === "warn");
-  const topIssue = firstError || firstWarn || null;
-
-  if (!topIssue) {
-    return {
-      status: "ok",
-      message: "No heuristic issues detected.",
-      metrics: {
-        estimated_tokens: analysis.estimatedTokens,
-        rust_equivalent_tokens: analysis.rustEquivalent,
-        shorthand_hits: analysis.shorthandHits,
-        lines: analysis.nonEmptyLineCount
-      },
-      next_command: "forma check --partial playground.forma"
-    };
-  }
-
-  return {
-    status: "needs_attention",
-    error: topIssue.severity === "error" ? "heuristic_parse_error" : "heuristic_warning",
-    message: topIssue.message,
-    location: {
-      line: topIssue.line || 1,
-      column: 1
-    },
-    suggestion: topIssue.suggestion || "Run `forma check --error-format json` for compiler-verified diagnostics."
-  };
-}
-
-function setText(id, value) {
-  const element = $(id);
-  if (element) {
-    element.textContent = value;
-  }
+function diagnosticMarkup(notice) {
+  const severityClass = notice.severity === "error" ? "error" : notice.severity === "warn" ? "warn" : "";
+  const line = notice.line ? ` · line ${notice.line}` : "";
+  const suggestion = notice.suggestion ? `<br><strong>Next:</strong> ${escapeHtml(notice.suggestion)}` : "";
+  return `<li class="diagnostic-item ${severityClass}"><strong>${escapeHtml(notice.severity.toUpperCase())}${line}</strong>: ${escapeHtml(notice.message)}${suggestion}</li>`;
 }
 
 function analyzeCurrentCode() {
-  const editor = $("codeEditor");
-  const list = $("diagnosticList");
-  const jsonOutput = $("jsonDiagnostic");
-  if (!editor || !list || !jsonOutput) {
-    return;
-  }
+  const editor = byId("codeEditor");
+  const list = byId("diagnosticList");
+  const json = byId("jsonDiagnostic");
+  if (!editor || !list || !json) return;
 
-  const analysis = analyzeCode(editor.value);
+  const result = inspectCode(editor.value);
+  byId("metricTokens").textContent = String(result.estimatedTokens);
+  byId("metricShorthand").textContent = String(result.shortCount);
+  byId("metricWarnings").textContent = String(result.notices.length);
+  byId("metricLines").textContent = String(result.lineCount);
 
-  setText("metricTokens", String(analysis.estimatedTokens));
-  setText("metricShorthand", String(analysis.shorthandHits));
-  setText("metricWarnings", String(analysis.issues.length));
-  setText("metricRust", String(analysis.rustEquivalent));
+  list.innerHTML = result.notices.length
+    ? result.notices.map(diagnosticMarkup).join("")
+    : '<li class="diagnostic-item"><strong>NO LOCAL NOTICES</strong>: Run <code>forma check</code> for compiler-authoritative diagnostics.</li>';
 
-  if (analysis.issues.length === 0) {
-    list.innerHTML = `<li class="diagnostic-item"><strong>PASS</strong>: No obvious issues detected by the browser heuristic checker.</li>`;
+  const first = result.notices.find((notice) => notice.severity === "error") || result.notices[0];
+  json.textContent = JSON.stringify(first ? {
+    status: "local_notice",
+    severity: first.severity,
+    message: first.message,
+    line: first.line || null,
+    next_command: "forma check playground.forma --error-format json"
+  } : {
+    status: "no_local_notices",
+    metrics: { estimated_tokens: result.estimatedTokens, shorthand_hits: result.shortCount, non_empty_lines: result.lineCount },
+    next_command: "forma check playground.forma --error-format json"
+  }, null, 2);
+}
+
+function loadSelectedExample() {
+  const editor = byId("codeEditor");
+  const example = selectedExample();
+  if (!editor || !example) return;
+  editor.value = example.code;
+  byId("simulatedOutput").textContent = "Choose “Show expected output” to preview this checked example.";
+  analyzeCurrentCode();
+}
+
+function showExpectedOutput() {
+  const editor = byId("codeEditor");
+  const output = byId("simulatedOutput");
+  const example = selectedExample();
+  if (!editor || !output) return;
+  if (example && editor.value.trim() === example.code.trim()) {
+    output.textContent = `${example.output}\n\nAuthoritative run: forma run examples/showcase/${SHOWCASE.find((item) => item.code.trim() === example.code.trim())?.file || "<file>.forma"}`;
   } else {
-    list.innerHTML = analysis.issues.map((issue) => makeDiagnosticItemHtml(issue)).join("");
+    output.textContent = "Expected output is only available for an unchanged checked example.\nRun locally: forma run playground.forma";
   }
-
-  const diagnosticJson = buildDiagnosticJson(analysis);
-  jsonOutput.textContent = JSON.stringify(diagnosticJson, null, 2);
 }
 
-function guessOutputFromPrints(code) {
-  const lines = [];
-  const printStringRegex = /print\("([^"]*)"\)/g;
-  let match = printStringRegex.exec(code);
-  while (match) {
-    lines.push(`"${match[1]}"`);
-    match = printStringRegex.exec(code);
-  }
-  return lines;
-}
-
-function simulateOutput() {
-  const editor = $("codeEditor");
-  const output = $("simulatedOutput");
-  const select = $("exampleSelect");
-  if (!editor || !output || !select) {
-    return;
-  }
-
-  const currentCode = editor.value.trim();
-  const selectedExample = findExampleById(select.value);
-
-  if (selectedExample && currentCode === selectedExample.code.trim()) {
-    output.textContent = selectedExample.output;
-    return;
-  }
-
-  const exactMatch = EXAMPLES.find((example) => currentCode === example.code.trim());
-  if (exactMatch) {
-    output.textContent = exactMatch.output;
-    return;
-  }
-
-  const guessed = guessOutputFromPrints(currentCode);
-  if (guessed.length > 0) {
-    output.textContent = `${guessed.join("\n")}\n[simulated from print() calls]`;
-    return;
-  }
-
-  output.textContent = "Simulation is unavailable for this snippet.\nRun locally:\nforma run playground.forma";
-}
-
-function renderExampleGrid(filterText = "") {
-  const grid = $("exampleGrid");
-  if (!grid) {
-    return;
-  }
-
-  const query = filterText.trim().toLowerCase();
-  const filtered = EXAMPLES.filter((example) => {
-    if (!query) {
-      return true;
-    }
-    const combined = `${example.name} ${example.category} ${example.description} ${example.tags.join(" ")}`.toLowerCase();
-    return combined.includes(query);
-  });
-
-  if (filtered.length === 0) {
-    grid.innerHTML = "<p>No examples matched your search.</p>";
-    return;
-  }
-
-  grid.innerHTML = filtered.map((example) => `
-    <article class="example-card">
-      <div class="example-head">
-        <h3>${escapeHtml(example.name)}</h3>
-        <p class="example-tag">${escapeHtml(example.category)}</p>
-      </div>
-      <p class="example-desc">${escapeHtml(example.description)}</p>
-      <p class="example-meta"><strong>Command:</strong> <code>${escapeHtml(example.command)}</code></p>
-      <button class="button tiny example-load-btn" data-example-id="${escapeHtml(example.id)}">Load in Playground</button>
-    </article>
-  `).join("");
-
-  grid.querySelectorAll(".example-load-btn").forEach((button) => {
-    button.addEventListener("click", () => {
-      const select = $("exampleSelect");
-      if (!select) {
-        return;
-      }
-
-      const exampleId = button.getAttribute("data-example-id");
-      const target = findExampleById(exampleId);
-      if (!target) {
-        return;
-      }
-
-      select.value = target.id;
-      loadSelectedExample();
-      const playground = document.getElementById("playground");
-      if (playground) {
-        playground.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    });
-  });
-}
-
-function renderRoadmap(filter = "all") {
-  const list = $("roadmapList");
-  if (!list) {
-    return;
-  }
-
-  const visible = ROADMAP_ITEMS.filter((item) => filter === "all" || item.state === filter);
-  list.innerHTML = visible.map((item) => `
-    <article class="roadmap-item ${item.state}">
-      <p>${escapeHtml(item.label)}</p>
-      <p class="roadmap-state">${escapeHtml(item.state)}</p>
-    </article>
-  `).join("");
-}
-
-function populateGoals() {
-  const goalSelect = $("goalSelect");
-  if (!goalSelect) {
-    return;
-  }
-
-  goalSelect.innerHTML = GOALS.map((goal) => `<option value="${goal.id}">${escapeHtml(goal.label)}</option>`).join("");
-}
-
-function buildCommand() {
-  const goalSelect = $("goalSelect");
-  const errorFormatSelect = $("errorFormatSelect");
-  const fileInput = $("fileInput");
-  const preview = $("commandPreview");
-  if (!goalSelect || !errorFormatSelect || !fileInput || !preview) {
-    return;
-  }
-
-  const goal = GOALS.find((item) => item.id === goalSelect.value);
-  if (!goal) {
-    preview.textContent = "";
-    return;
-  }
-
-  const file = fileInput.value.trim() || "main.forma";
-  const errorFormat = errorFormatSelect.value;
-  const command = goal.build({ file, errorFormat });
-  preview.textContent = command;
-}
-
-async function copyText(text) {
+async function copyText(value) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(value);
     return true;
   }
-
-  const temp = document.createElement("textarea");
-  temp.value = text;
-  document.body.appendChild(temp);
-  temp.focus();
-  temp.select();
-  const ok = document.execCommand("copy");
-  document.body.removeChild(temp);
-  return ok;
+  const temporary = document.createElement("textarea");
+  temporary.value = value;
+  document.body.appendChild(temporary);
+  temporary.select();
+  const copied = document.execCommand("copy");
+  temporary.remove();
+  return copied;
 }
 
-function flashButton(button, doneLabel = "Copied") {
-  if (!button) {
-    return;
-  }
-  const previous = button.textContent;
-  button.textContent = doneLabel;
-  window.setTimeout(() => {
-    button.textContent = previous;
-  }, 1100);
+function flashButton(button, label) {
+  const original = button.textContent;
+  button.textContent = label;
+  window.setTimeout(() => { button.textContent = original; }, 1200);
 }
 
-function initCopyButtons() {
-  const copyCodeBtn = $("copyCodeBtn");
-  const copyCommandBtn = $("copyCommandBtn");
-
-  if (copyCodeBtn) {
-    copyCodeBtn.addEventListener("click", async () => {
-      const editor = $("codeEditor");
-      if (!editor) {
-        return;
-      }
-      await copyText(editor.value);
-      flashButton(copyCodeBtn);
-    });
-  }
-
-  if (copyCommandBtn) {
-    copyCommandBtn.addEventListener("click", async () => {
-      const preview = $("commandPreview");
-      if (!preview) {
-        return;
-      }
-      await copyText(preview.textContent || "");
-      flashButton(copyCommandBtn);
-    });
-  }
+function renderStatus(filter = "all") {
+  const list = byId("roadmapList");
+  if (!list) return;
+  const items = STATUS_ITEMS.filter((item) => filter === "all" || item.state === filter);
+  list.innerHTML = items.map((item) => `<article class="roadmap-item ${escapeHtml(item.state)}"><p>${escapeHtml(item.label)}</p><p class="roadmap-state">${escapeHtml(item.state)}</p></article>`).join("");
 }
 
-function initRoadmapFilter() {
-  const filterBar = $("roadmapFilter");
-  if (!filterBar) {
-    return;
-  }
-
-  filterBar.querySelectorAll(".filter-btn").forEach((button) => {
+function initStatusFilter() {
+  const bar = byId("roadmapFilter");
+  if (!bar) return;
+  const buttons = bar.querySelectorAll(".filter-btn");
+  buttons.forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.classList.contains("active")));
     button.addEventListener("click", () => {
-      filterBar.querySelectorAll(".filter-btn").forEach((candidate) => candidate.classList.remove("active"));
+      buttons.forEach((candidate) => {
+        candidate.classList.remove("active");
+        candidate.setAttribute("aria-pressed", "false");
+      });
       button.classList.add("active");
-      const filter = button.getAttribute("data-filter") || "all";
-      renderRoadmap(filter);
+      button.setAttribute("aria-pressed", "true");
+      renderStatus(button.dataset.filter || "all");
     });
   });
 }
 
-function initRevealAnimations() {
-  const items = document.querySelectorAll(".reveal");
-  if (items.length === 0) {
+function initReveal() {
+  const nodes = document.querySelectorAll(".reveal");
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+    nodes.forEach((node) => node.classList.add("is-visible"));
     return;
   }
-
-  const observer = new IntersectionObserver((entries, obs) => {
+  const observer = new IntersectionObserver((entries, activeObserver) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         entry.target.classList.add("is-visible");
-        obs.unobserve(entry.target);
+        activeObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.12 });
-
-  items.forEach((item, index) => {
-    item.style.transitionDelay = `${Math.min(index * 80, 340)}ms`;
-    observer.observe(item);
+  }, { threshold: 0.1 });
+  nodes.forEach((node, index) => {
+    node.style.transitionDelay = `${Math.min(index * 55, 260)}ms`;
+    observer.observe(node);
   });
-}
-
-function bindEvents() {
-  const loadExampleBtn = $("loadExampleBtn");
-  const analyzeBtn = $("analyzeBtn");
-  const simulateBtn = $("simulateBtn");
-  const exampleSearch = $("exampleSearch");
-  const goalSelect = $("goalSelect");
-  const errorFormatSelect = $("errorFormatSelect");
-  const fileInput = $("fileInput");
-
-  if (loadExampleBtn) {
-    loadExampleBtn.addEventListener("click", loadSelectedExample);
-  }
-  if (analyzeBtn) {
-    analyzeBtn.addEventListener("click", analyzeCurrentCode);
-  }
-  if (simulateBtn) {
-    simulateBtn.addEventListener("click", simulateOutput);
-  }
-  if (exampleSearch) {
-    exampleSearch.addEventListener("input", (event) => renderExampleGrid(event.target.value));
-  }
-  if (goalSelect) {
-    goalSelect.addEventListener("change", buildCommand);
-  }
-  if (errorFormatSelect) {
-    errorFormatSelect.addEventListener("change", buildCommand);
-  }
-  if (fileInput) {
-    fileInput.addEventListener("input", buildCommand);
-  }
 }
 
 function init() {
   initMenu();
   initHeroCommands();
   populateExamples();
-  populateGoals();
-  renderExampleGrid("");
-  renderRoadmap("all");
-  initRoadmapFilter();
-  bindEvents();
-  initCopyButtons();
+  renderStatus();
+  initStatusFilter();
+  initReveal();
+
+  byId("loadExampleBtn")?.addEventListener("click", loadSelectedExample);
+  byId("exampleSelect")?.addEventListener("change", loadSelectedExample);
+  byId("analyzeBtn")?.addEventListener("click", analyzeCurrentCode);
+  byId("simulateBtn")?.addEventListener("click", showExpectedOutput);
+  byId("copyCodeBtn")?.addEventListener("click", async (event) => {
+    try {
+      const copied = await copyText(byId("codeEditor").value);
+      flashButton(event.currentTarget, copied ? "Copied" : "Copy failed");
+    } catch (_) {
+      flashButton(event.currentTarget, "Copy failed");
+    }
+  });
+
   loadSelectedExample();
-  buildCommand();
-  initRevealAnimations();
 }
 
 document.addEventListener("DOMContentLoaded", init);
