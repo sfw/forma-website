@@ -316,8 +316,12 @@ as f main()
 
         <section class="reference-block reveal" id="contracts">
           <h2>Contracts</h2>
-          <p>Contracts are parsed language nodes, not comments. The same contract language feeds runtime checks, generated testing, finite exhaustion, formal attempts, and explanations.</p>
-          <pre><code class="language-forma">@pre(n >= 0, "n must be non-negative")
+          <p>Contracts are parsed language nodes, not comments. Function contracts describe transitions; struct invariants describe every valid externally observable value.</p>
+          <pre><code class="language-forma">@inv(balance >= 0, "balance cannot be negative")
+s Account
+    balance: Int
+
+@pre(n >= 0, "n must be non-negative")
 @post(result >= 1)
 f factorial(n: Int) -> Int
     if n &lt;= 1 then 1 else n * factorial(n - 1)
@@ -327,7 +331,9 @@ f factorial(n: Int) -> Int
 @permutation(items, result)
 f verified_sort(items: [Int]) -> [Int]
     sort_ints(items)</code></pre>
-          <p>Contracts support <code>@pre</code>, <code>@post</code>, named patterns, quantifiers such as <code>forall</code>/<code>exists</code>, and entry-state expressions with <code>old(...)</code>. Pattern availability and solver support are not the same: a runtime pattern may still be outside the formal subset.</p>
+          <p><code>@inv</code> fields are in scope by name. Forma checks invariants after construction, at function entry and return, and when a <code>ref mut</code> borrow returns. Exclusive mutation may be temporarily inconsistent, but must restore validity before return. <code>old(...)</code> and <code>result</code> remain function-contract concepts.</p>
+          <p>Runtime enforcement is not formal proof. Verification reports invariant obligations as <code>UNKNOWN</code> until the SMT subset can prove struct preservation. Untrusted JSON, TOML, network, and database data should be validated by a fallible decoder before constructing an invariant-bearing value.</p>
+          <p class="callout warning"><strong>0.2 profile boundary:</strong> the Hosted interpreter enforces function contracts and struct invariants. The LLVM path type-checks their declarations but does not yet inject native runtime checks.</p>
         </section>
 
         <section class="reference-block reveal" id="verification">
@@ -504,7 +510,7 @@ Experimental</code></pre></article>
 
         <section class="reference-block reveal" id="complete-reference">
           <h2>Complete Searchable Reference</h2>
-          <p>This index is generated from Forma 0.2’s grammar, builtin registry, parser, and standard library. It includes every canonical keyword and alias, literal form, grammar production and operator, type and language form, named contract pattern, standard-library export, CLI/evidence term, and compiler-registered builtin.</p>
+          <p>This index is generated from Forma 0.2’s grammar, builtin registry, parser, and standard library. It includes every canonical keyword and alias, literal form, grammar production and operator, type and language form (including <code>@inv</code>), named contract pattern, standard-library export, CLI/evidence term, and compiler-registered builtin.</p>
           <div class="reference-source-note">
             <strong>Generated source</strong>
             <span><code>docs/grammar.json</code> + <code>docs/builtins.json</code> + parser + <code>std/</code></span>

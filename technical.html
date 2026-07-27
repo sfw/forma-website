@@ -77,7 +77,7 @@
         <h2>The rules that constrain every implementation choice</h2>
       </div>
       <div class="goal-grid">
-        <article class="goal-card"><h3>Semantic consistency</h3><p>An optimized program cannot acquire different move, loan, drop, or contract behavior.</p><p class="goal-outcome">Consequence: ownership checks and drop elaboration precede optimization and backend selection.</p></article>
+        <article class="goal-card"><h3>Semantic consistency</h3><p>An optimized program cannot acquire different move, loan, drop, contract, or invariant behavior.</p><p class="goal-outcome">Consequence: ownership checks and drop elaboration precede optimization and backend selection; invariant boundaries are semantic, not backend conventions.</p></article>
         <article class="goal-card"><h3>Explicit confidence</h3><p>Generated examples provide evidence, not proof. Unsupported obligations remain visible.</p><p class="goal-outcome">Consequence: TESTED, EXHAUSTIVE, PROVED, COUNTEREXAMPLE, UNKNOWN, and SKIPPED are separate states.</p></article>
         <article class="goal-card"><h3>Authority is not ambient</h3><p>An effect describes what code may attempt; a capability grants it to one execution.</p><p class="goal-outcome">Consequence: every effectful builtin declares requirements in one central registry.</p></article>
         <article class="goal-card"><h3>Profiles are transitive</h3><p>A wrapper around a Hosted operation does not become Core because its own syntax looks portable.</p><p class="goal-outcome">Consequence: backend support propagates through direct calls and appears per function.</p></article>
@@ -145,6 +145,7 @@ f update(ref mut items: Vec[Item])</code></pre>
         </article>
       </div>
       <div class="decision-panel"><h3>Why this changes the rest of the design</h3><p>Affine task handles must be consumed; channel sends move values; package and backend checks must preserve ownership; verification models cannot silently duplicate an affine input. Ownership is not a standalone feature—it constrains concurrency, effects, optimization, and proof semantics.</p></div>
+      <div class="decision-panel"><h3>Observable validity boundaries</h3><p>Named structs may declare <code>@inv</code> clauses. In the Hosted interpreter, construction, function entry/return, and <code>ref mut</code> return are checked boundaries. Exclusive mutation can update coupled fields in stages, but cannot return an invalid value. Native check injection remains future work, and the verifier exposes these obligations as <code>UNKNOWN</code> until formal struct preservation is supported.</p></div>
     </section>
 
     <section class="tech-section reveal" id="effects">

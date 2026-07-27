@@ -84,7 +84,7 @@
 
       <div class="evidence-grid" aria-label="FORMA 0.2 highlights">
         <article><strong>Affine by default</strong><span>Non-Copy values move or drop exactly once.</span></article>
-        <article><strong>Three verification levels</strong><span>Generated tests, finite exhaustion, and SMT-backed proof attempts.</span></article>
+        <article><strong>Type-wide invariants</strong><span>State validity is checked wherever owned or exclusively borrowed values become observable.</span></article>
         <article><strong>Four support profiles</strong><span>Core, Hosted, Native, and Experimental make boundaries visible.</span></article>
         <article><strong>One compiler session</strong><span>CLI and semantic tooling reuse the same resolved program.</span></article>
       </div>
@@ -129,8 +129,8 @@
 
       <ol class="agent-loop" aria-label="Agentic engineering workflow">
         <li><span>01</span><strong>State intent</strong><p>A person supplies behavior, constraints, acceptable authority, and the evidence required.</p></li>
-        <li><span>02</span><strong>Generate</strong><p>The agent writes contracts and code using compiler-known grammar and APIs.</p></li>
-        <li><span>03</span><strong>Repair</strong><p>Structured diagnostics expose syntax, type, ownership, effect, and profile failures.</p></li>
+        <li><span>02</span><strong>Generate</strong><p>The agent writes invariants, contracts, and code using compiler-known grammar and APIs.</p></li>
+        <li><span>03</span><strong>Repair</strong><p>Structured diagnostics expose syntax, type, ownership, invariant, effect, and profile failures.</p></li>
         <li><span>04</span><strong>Grant authority</strong><p>Capabilities are chosen for one execution; generated code receives no ambient trust.</p></li>
         <li><span>05</span><strong>Produce evidence</strong><p>Tests, exhaustive checks, proofs, counterexamples, and unknowns remain distinct.</p></li>
         <li><span>06</span><strong>Review and decide</strong><p>People review intent, authority, compatibility, evidence, and the highest-risk code.</p></li>
@@ -140,6 +140,7 @@
         <div><p class="card-kicker">Questions, not conclusions</p><h3>What should we measure?</h3></div>
         <ul>
           <li>Can agents specify contracts more reliably than implementations?</li>
+          <li>Do type-wide invariants make multi-step agent repairs safer and easier to review?</li>
           <li>Do structured semantic repair loops outperform compiler prose?</li>
           <li>Does affine ownership improve generation without making applications awkward?</li>
           <li>Can review packets improve human accuracy and reduce review time?</li>
