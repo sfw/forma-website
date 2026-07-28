@@ -332,7 +332,7 @@ f factorial(n: Int) -> Int
 f verified_sort(items: [Int]) -> [Int]
     sort_ints(items)</code></pre>
           <p><code>@inv</code> fields are in scope by name. Forma checks invariants after construction, at function entry and return, and when a <code>ref mut</code> borrow returns. Exclusive mutation may be temporarily inconsistent, but must restore validity before return. <code>old(...)</code> and <code>result</code> remain function-contract concepts.</p>
-          <p>Runtime enforcement is not formal proof. Verification reports invariant obligations as <code>UNKNOWN</code> until the SMT subset can prove struct preservation. Untrusted JSON, TOML, network, and database data should be validated by a fallible decoder before constructing an invariant-bearing value.</p>
+          <p>Runtime enforcement is not formal proof. Formal verification treats invariant-bearing parameters as entry assumptions, symbolically tracks projected mutation, and generates obligations at struct construction, direct pure-call, and return boundaries. For named structs and tuples whose leaves are supported <code>Bool</code> or signed 64-bit <code>Int</code> values, Z3 can report invariant establishment and preservation as <code>PROVED</code> or produce a reproducible <code>COUNTEREXAMPLE</code>. Untrusted JSON, TOML, network, and database data should be validated by a fallible decoder before constructing an invariant-bearing value.</p>
           <p class="callout warning"><strong>0.2 profile boundary:</strong> the Hosted interpreter enforces function contracts and struct invariants. The LLVM path type-checks their declarations but does not yet inject native runtime checks.</p>
         </section>
 
@@ -364,6 +364,7 @@ forma verify src/ --level test --report --format json</code></pre>
           </div>
           <p>Verification runs with capabilities restricted by default. <code>--allow-side-effects</code> opts generated examples into full capabilities; effectful or unsafe code without a formal model remains non-proof work.</p>
           <p>Formal mode invokes <code>z3</code> by default. <code>FORMA_SMT_SOLVER</code> can select another solver command that accepts the same stdin flags. A missing, failed, or timed-out solver produces UNKNOWN.</p>
+          <p>The current formal subset follows acyclic control flow path by path and supports checked signed 64-bit arithmetic, <code>Bool</code>, tuples, named structs, field and tuple projection, structural equality, projected field updates, direct pure-call inlining, and struct-invariant establishment and return preservation. Unsatisfiable preconditions or invariant assumptions are rejected as vacuous. Loops, recursive or indirect calls, effects, arrays and vectors, indexing, enums, and reference/dereference reasoning remain explicit <code>UNKNOWN</code> boundaries.</p>
           <h3>Explain before you verify</h3>
           <pre><code class="language-bash">forma explain rules.forma --format human
 forma explain rules.forma --format json --examples=3 --seed 42</code></pre>

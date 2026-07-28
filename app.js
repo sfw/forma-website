@@ -57,7 +57,7 @@ const STATUS_ITEMS = [
   { label: "Tiered verification with distinct confidence statuses", state: "implemented" },
   { label: "Semantic diagnostics, hover, completion, navigation, references, and formatting", state: "implemented" },
   { label: "LLVM backend for the documented Core subset", state: "experimental" },
-  { label: "SMT-backed formal verification for a pure supported subset", state: "experimental" },
+  { label: "SMT-backed scalar, tuple, struct, and invariant verification for a pure supported subset", state: "experimental" },
   { label: "User-defined observable destructor bodies", state: "experimental" },
   { label: "Registry and Git package sources", state: "next" },
   { label: "Namespace-preserving hierarchical module scopes", state: "next" },
@@ -69,7 +69,7 @@ const HERO_SCENARIOS = [
   {
     command: "forma verify rules.forma --level exhaustive --report",
     output: [
-      "✓ EXHAUSTIVE identity contracts:1 examples:2/2",
+      "✓ EXHAUSTIVE identity obligations:1 examples:2/2",
       "Finite Bool domain checked completely.",
       "The report says exactly what was established."
     ]
@@ -83,11 +83,11 @@ const HERO_SCENARIOS = [
     ]
   },
   {
-    command: "forma verify core.forma --level formal --report",
+    command: "forma verify invariants.forma --level formal --report",
     output: [
-      "✓ PROVED supported_obligation contracts:2",
-      "? UNKNOWN hosted_wrapper contracts:1",
-      "Unsupported work is never promoted to a proof."
+      "✓ PROVED establish_account obligations:2",
+      "✓ PROVED preserve_account obligations:2",
+      "Struct invariant status: PROVED by Z3."
     ]
   },
   {

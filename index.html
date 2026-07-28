@@ -76,7 +76,7 @@
             <span></span><span></span><span></span><p>FORMA CLI</p>
           </div>
           <pre class="terminal-content"><code><span class="prompt">$</span> <span id="heroCommand">forma verify rules.forma --level exhaustive --report</span>
-<span class="terminal-line" id="heroOutputLine1">✓ EXHAUSTIVE identity contracts:1 examples:2/2</span>
+<span class="terminal-line" id="heroOutputLine1">✓ EXHAUSTIVE identity obligations:1 examples:2/2</span>
 <span class="terminal-line" id="heroOutputLine2">Finite Bool domain checked completely.</span>
 <span class="terminal-line" id="heroOutputLine3">The report says exactly what was established.</span></code></pre>
         </aside>
@@ -224,11 +224,11 @@ math = { path = "../math" }</code></pre>
         <article>
           <span class="level-badge">formal · experimental</span>
           <h3>SMT-backed proof attempt</h3>
-          <p>The pure supported subset can be proved; unsupported obligations stay visible.</p>
+          <p>Acyclic scalar logic, tuples, named structs, projected updates, and struct invariants can be proved. Unsupported obligations stay visible.</p>
           <strong class="status proved">PROVED</strong> <strong class="status unknown">UNKNOWN</strong>
         </article>
       </div>
-      <p class="section-note">Counterexamples, uncontracted functions, and skipped work are reported separately. Generated examples never produce a proof claim.</p>
+      <p class="section-note">Forma has exercised this path against real Z3: valid structural and invariant obligations prove, while invalid invariant construction produces a solver counterexample. Generated examples never produce a proof claim.</p>
     </section>
 
     <section class="section reveal" id="profiles">

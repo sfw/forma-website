@@ -145,7 +145,7 @@ f update(ref mut items: Vec[Item])</code></pre>
         </article>
       </div>
       <div class="decision-panel"><h3>Why this changes the rest of the design</h3><p>Affine task handles must be consumed; channel sends move values; package and backend checks must preserve ownership; verification models cannot silently duplicate an affine input. Ownership is not a standalone feature—it constrains concurrency, effects, optimization, and proof semantics.</p></div>
-      <div class="decision-panel"><h3>Observable validity boundaries</h3><p>Named structs may declare <code>@inv</code> clauses. In the Hosted interpreter, construction, function entry/return, and <code>ref mut</code> return are checked boundaries. Exclusive mutation can update coupled fields in stages, but cannot return an invalid value. Native check injection remains future work, and the verifier exposes these obligations as <code>UNKNOWN</code> until formal struct preservation is supported.</p></div>
+      <div class="decision-panel"><h3>Observable validity boundaries</h3><p>Named structs may declare <code>@inv</code> clauses. In the Hosted interpreter, construction, function entry/return, and <code>ref mut</code> return are checked boundaries. Exclusive mutation can update coupled fields in stages, but cannot return an invalid value. The SMT verifier now models supported named structs and tuples structurally: valid entry values become assumptions, projected updates are tracked symbolically, and construction, direct pure-call, and return boundaries generate establishment or preservation obligations. Native check injection and formal reference reasoning remain future work.</p></div>
     </section>
 
     <section class="tech-section reveal" id="effects">
@@ -210,7 +210,7 @@ f update(ref mut items: Vec[Item])</code></pre>
           <h3>Formal attempt · Experimental</h3>
           <pre><code>forma verify rules.forma \
   --level formal --report</code></pre>
-          <p>The SMT backend starts with a pure supported subset. It returns PROVED only when obligations are discharged, COUNTEREXAMPLE for a model, and UNKNOWN for unsupported or timed-out work.</p>
+          <p>The SMT backend covers acyclic signed-64-bit <code>Int</code>/<code>Bool</code> logic plus structural tuples and named structs made from those leaves. It proves construction, projection, equality, projected updates, and struct-invariant establishment/preservation; unsupported or timed-out work remains UNKNOWN.</p>
         </article>
         <article class="feature-card">
           <h3>Human and machine explanations</h3>
@@ -219,7 +219,7 @@ forma explain rules.forma --format json</code></pre>
           <p>Contracts can be explained for reviewers or automation without creating a second interpretation of their meaning.</p>
         </article>
       </div>
-      <div class="decision-panel"><h3>The proof boundary is part of the product</h3><p>Unsafe operations without models, Hosted effects, unsupported recursion, and backend gaps must produce UNKNOWN or SKIPPED—not optimistic success. This is the difference between a verification feature and a verification claim.</p></div>
+      <div class="decision-panel"><h3>The proof boundary is part of the product</h3><p>The structural verifier has been exercised with real Z3: supported Switchyard obligations are discharged, while an invalid invariant-bearing construction yields a solver counterexample. Arrays and vectors, indexing, enums, loops, recursive or indirect calls, references, unsafe operations without models, Hosted effects, and backend gaps must still produce UNKNOWN or SKIPPED—not optimistic success.</p></div>
     </section>
 
     <section class="tech-section reveal" id="backends">
